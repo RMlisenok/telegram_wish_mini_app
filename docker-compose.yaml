@@ -9,19 +9,19 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - database
+      - postgres
 
-  database:
+  postgres:
     image: postgres:15
-    container_name: database
+    container_name: postgres_container
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1111
-      POSTGRES_DB: telegram_app_db  
+      POSTGRES_DB: telegram_app_db
     ports:
       - "5437:5432"
     volumes:
-      - database-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
 volumes:
-  database-data:
+  postgres-data:
