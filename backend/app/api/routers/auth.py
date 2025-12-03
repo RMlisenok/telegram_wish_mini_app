@@ -9,7 +9,7 @@ from app.core.security import (
     create_jwt_token
 )
 from app.schemas.user import UserCreate, UserResponse
-from telegram_wish_mini_app.backend.app.services.user_service import UserService
+from app.services.user_service import UserService
 # from app.models.user import User
 
 
