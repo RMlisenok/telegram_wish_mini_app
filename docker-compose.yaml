@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - ENV/.env 
+    # volumes:
+    # - ./backend/:/app
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
+
+  database:
+    image: postgres:15
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: telegram_app_db  
+    ports:
+      - "5437:5432"
+    volumes:
+      - database-data:/var/lib/postgresql/data
+
+volumes:
+  database-data:
