@@ -1,0 +1,26 @@
+{
+  "name": "telegram_wish_mini_app",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "build:icons": "node tools/generate-icons.js",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "3.3.1",
+    "@sveltejs/kit": "2.15.3",
+    "@sveltejs/vite-plugin-svelte": "3.1.2",
+    "@types/node": "22.7.5",
+    "sharp": "0.33.4",
+    "svelte": "5.1.9",
+    "svelte-check": "4.0.0",
+    "typescript": "5.6.3",
+    "vite": "5.4.10"
+  }
+}
