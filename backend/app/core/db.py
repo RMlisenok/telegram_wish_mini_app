@@ -68,3 +68,12 @@ async def drop_tables():
     except Exception as e:
         print(f'Error for deleted all tables: {e}')
         raise
+
+
+async def init_database():
+    if not await check_connection():
+        return False
+
+    print('START CREATED TABLES')
+    await create_tables()
+    return True
