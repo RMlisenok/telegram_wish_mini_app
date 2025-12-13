@@ -19,6 +19,21 @@ AsyncSessionLocal = sessionmaker(
     autocommit=False,
 )
 
+
+async def get_db() -> AsyncGenerator:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f'Error database: {str(e)}'
+            )
+        finally:
+            await session.close()
+
+
 async def check_connection():
     try:
         async with async_engine.begin() as conn:
