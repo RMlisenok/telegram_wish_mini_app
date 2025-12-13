@@ -4,6 +4,7 @@ from sqlalchemy import text
 from typing import AsyncGenerator
 from fastapi import HTTPException, status
 
+from app.core.base import Base
 from app.core.config import settings
 
 async_engine = create_async_engine(
@@ -56,4 +57,14 @@ async def create_tables():
 
     except Exception as e:
         print(f'Error create: {e}')
+        raise
+
+
+async def drop_tables():
+    try:
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            print('All tables deleted')
+    except Exception as e:
+        print(f'Error for deleted all tables: {e}')
         raise
