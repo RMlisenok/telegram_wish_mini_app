@@ -18,3 +18,13 @@ AsyncSessionLocal = sessionmaker(
     autoflush=False,
     autocommit=False,
 )
+
+async def check_connection():
+    try:
+        async with async_engine.begin() as conn:
+            result = await conn.execute(text('SELECT 1'))
+            print(f'Data Base connect: {result.scalar()}')
+            return True
+    except Exception as e:
+        print(f'Data Base not connect: {e}')
+        return False
