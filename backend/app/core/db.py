@@ -43,3 +43,17 @@ async def check_connection():
     except Exception as e:
         print(f'Data Base not connect: {e}')
         return False
+
+
+async def create_tables():
+    try:
+        async with async_engine.begin() as conn:
+
+            table_count = len(Base.metadata.tables)
+            print(f"Found: {table_count} tables in metadata")
+            await conn.run_sync(Base.metadata.create_all)
+            print('All tables created')
+
+    except Exception as e:
+        print(f'Error create: {e}')
+        raise
