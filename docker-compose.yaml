@@ -1,0 +1,36 @@
+version: '3.5'
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: backend-app
+    env_file:
+      - backend/.env 
+    expose:
+      - "80"
+    depends_on:
+      - database
+    networks:
+      - app-network
+
+  database:
+    image: postgres:15
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: telegram_app_db  
+    ports:
+      - "5432:5432"
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  database-data:
+
+networks:
+  app-network:
+    driver: bridge
