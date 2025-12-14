@@ -82,3 +82,17 @@ def create_jwt_token(data: dict) -> str:
         algorithm=settings.ALGORITHM
     )
     return encoded_jwt
+
+
+def verify_jwt_token(token: str) -> Optional[dict]:
+    try:
+        logger.error(f'START verify TOKEN: {token}')
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+        logger.error(f'START verify PAYLOAD: {payload}')
+        return payload
+    except InvalidTokenError:
+        return None
