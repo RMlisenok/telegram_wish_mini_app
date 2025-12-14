@@ -22,7 +22,6 @@ def verify_tg_init_data(init_data: str) -> bool:
             return False
 
         decoded_data = urllib.parse.unquote(init_data)
-
         pars = decoded_data.split('&')
         data_dict = {}
         hash_value = None
@@ -50,15 +49,12 @@ def verify_tg_init_data(init_data: str) -> bool:
             data_check_parts.append(f'{key}={value}')
 
         data_check_string = '\n'.join(data_check_parts)
-        logger.error(f'Data check string:\n{data_check_string}')
 
         secret_key = hmac.new(
             key=b"WebAppData",
             msg=settings.TELEGRAM_BOT_TOKEN.encode('utf-8'),
             digestmod=hashlib.sha256
         ).digest()
-
-        logger.error(f'Secret key (hex): {secret_key.hex()}')
 
         computed_hash = hmac.new(
             key=secret_key,
@@ -67,8 +63,22 @@ def verify_tg_init_data(init_data: str) -> bool:
         ).hexdigest()
 
         result = hmac.compare_digest(computed_hash, hash_value)
-
         return result
+
     except Exception as e:
         logger.error(f'Error verifying init_data: {e}', exc_info=True)
         return False
+
+
+def create_jwt_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    to_encode.update({'exp': expire})
+    encoded_jwt = jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM
+    )
+    return encoded_jwt
