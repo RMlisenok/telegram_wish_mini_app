@@ -2,6 +2,8 @@
     import Avatar from '$lib/components/ui/Avatar.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import { createEventDispatcher } from 'svelte';
+    import { wishlistsStore, wishesStore } from '$lib/stores/data.js';
+
 
 
 
@@ -14,15 +16,23 @@
     const openWishes = () => dispatch('openWishes');
     const openShareProfile = () => dispatch('openShareProfile');
 
+    const ICON_GIFT = '/icons/maingift.svg';
+
+    const getWishlistCount = (wishlistId) =>
+        $wishesStore.filter((w) => (w.wishlistIds || []).includes(wishlistId)).length;
 
     const getInitials = (name) => {
         if (!name) return '??';
         const parts = name.trim().split(' ');
         return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+
     };
 
+    $: n_wishes = $wishesStore.length;
+    $: n_wishlist = $wishlistsStore.length;
+    const openWishlists = () => dispatch('openWishlists');
 
-    $: n_wishes = 0;
+
 
 
 
@@ -40,7 +50,7 @@
 
 <section class="section-card">
     <div class="profile-row">
-        <Avatar size={72} src={user.avatarUrl} initials={getInitials(user.fullName)} />
+        <Avatar size={152} src={user.avatarUrl} initials={getInitials(user.fullName)} />
         <div class="profile-main">
             <div class="profile-name">{user.fullName}</div>
             <div class="profile-birth">{user.birthDate}</div>
@@ -63,6 +73,66 @@
 </section>
 
 </div>
+
+
+<!-- Вишлисты -->
+<section class="section-card">
+    <div class="section-header">
+        <div class="h2">Ваши вишлисты · {n_wishlist}</div>
+        <button class="tiny-link" type="button" on:click={openWishlists}>
+            Показать все
+        </button>
+    </div>
+
+    {#if $wishlistsStore.length === 0}
+        <div class="empty-note">
+            Здесь появятся ваши вишлисты. Создайте первый, чтобы друзья знали, что вам подарить.
+        </div>
+    {:else}
+        <div class="wishlist-list">
+            {#each $wishlistsStore.slice(0, 2) as wl}
+                <button class="wishlist-row" type="button" on:click={openWishlists}>
+                    <div class="wishlist-cover-small">
+                        {#if wl.coverUrl}
+                            <img src={wl.coverUrl} alt={wl.title} />
+                        {:else}
+                            <img src={ICON_GIFT} alt="Подарок"/>
+                        {/if}
+                    </div>
+
+                    <div class="wishlist-main-small">
+                        <div class="wishlist-title-small" title={wl.title}>{wl.title}</div>
+                        <div class="wishlist-meta-small">
+              <span class="privacy-chip">
+                <img
+                        class="privacy-icon"
+                        src={wl.privacy === 'public'
+                    ? '/icons/view.png'
+                    : '/icons/unview.png'}
+                        alt=""
+                />
+                <span>
+                  {wl.privacy === 'public'
+                      ? 'Виден всем'
+                      : wl.privacy === 'restricted'
+                          ? 'Для определённых пользователей'
+                          : 'Виден только вам'}
+                </span>
+              </span>
+                            <span> · {getWishlistCount(wl.id)} жел.</span>
+                        </div>
+                    </div>
+                </button>
+            {/each}
+        </div>
+    {/if}
+
+    <Button full kind="ghost" on:click={openWishlists}>+ Создать вишлист</Button>
+</section>
+
+
+
+
 
 
 <style>
@@ -126,11 +196,66 @@
     cursor: pointer;
 }
 
-    .wishlist-cover-small img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+
+.wishlist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.wishlist-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    width: 100%;
+    border-radius: 12px;
+    background: var(--tg-theme-secondary-bg-color, #f9fafb);
+    border: 1px solid var(--tg-theme-secondary-bg-color, #e5e7eb);
+    cursor: pointer;
+    text-align: left;
+}
+
+
+.wishlist-cover-small {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.wishlist-cover-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wishlist-main-small {
+    flex: 1;
+}
+
+.wishlist-title-small {
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wishlist-meta-small {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
 
 
