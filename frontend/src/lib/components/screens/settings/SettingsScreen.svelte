@@ -1,0 +1,198 @@
+<!-- 2002_Dass_16.12.2025 -->
+<script>
+    export let onGoBack;
+    function goBack() {
+        if (onGoBack) {
+            onGoBack();
+        } else {
+            console.error('onGoBack function is not provided');
+        }
+    }
+    
+    // Навигация по разделам
+    function navigateToEditProfile() {
+        alert('Переход к разделу "Редактировать профиль" (FS-3.1)');
+    }
+    
+    function navigateToPrivacySettings() {
+        alert('Переход к разделу "Настройки приватности" (FS-3.2)');
+    }
+    
+    function navigateToInterfaceSettings() {
+        alert('Переход к разделу "Настройки интерфейса" (FS-3.3)');
+    }
+    
+    function navigateToNotificationSettings() {
+        alert('Переход к разделу "Настройки уведомлений" (FS-3.4)');
+    }
+</script>
+
+<div class="screen">
+    <header class="app-header">
+        <button class="back-btn" type="button" on:click={goBack}>
+            ←
+        </button>
+        <div class="h1">Настройки</div>
+        <div class="header-placeholder"></div>
+    </header>
+
+    <div class="settings-content">
+        <section class="section-card">
+            <button class="settings-item" type="button" on:click={navigateToEditProfile}>
+                <div class="item-info">
+                    <span class="item-title">Редактировать профиль</span>
+                    <span class="item-subtitle">Изменить личную информацию</span>
+                </div>
+                <div class="item-arrow">›</div>
+            </button>
+
+            <button class="settings-item" type="button" on:click={navigateToPrivacySettings}>
+                <div class="item-info">
+                    <span class="item-title">Настройки приватности</span>
+                    <span class="item-subtitle">Управление видимостью профиля и вишлистов</span>
+                </div>
+                <div class="item-arrow">›</div>
+            </button>
+
+            <button class="settings-item" type="button" on:click={navigateToInterfaceSettings}>
+                <div class="item-info">
+                    <span class="item-title">Настройки интерфейса</span>
+                    <span class="item-subtitle">Тема, язык и внешний вид приложения</span>
+                </div>
+                <div class="item-arrow">›</div>
+            </button>
+
+            <button class="settings-item" type="button" on:click={navigateToNotificationSettings}>
+                <div class="item-info">
+                    <span class="item-title">Настройки уведомлений</span>
+                    <span class="item-subtitle">Управление push-уведомлениями и email-рассылкой</span>
+                </div>
+                <div class="item-arrow">›</div>
+            </button>
+        </section>
+    </div>
+</div>
+
+<style>
+    * {
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        margin-bottom: 16px;
+        position: sticky;
+        top: 0;
+        background: var(--tg-theme-bg-color, white);
+        z-index: 10;
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--tg-theme-link-color, #007AFF);
+        cursor: pointer;
+        padding: 8px;
+        margin: -8px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .back-btn:hover {
+        opacity: 0.8;
+    }
+
+    .h1 {
+        font-size: 20px;
+        font-weight: 600;
+        text-align: center;
+        flex: 1;
+        color: var(--tg-theme-text-color, #1d1d1f);
+    }
+
+    .header-placeholder {
+        width: 44px;
+    }
+
+    .settings-content {
+        padding: 0;
+    }
+
+    .section-card {
+        background: var(--tg-theme-secondary-bg-color, #f8f8f8);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        border-radius: 12px;
+        margin-bottom: 4px;
+    }
+
+    .settings-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .settings-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+    }
+
+    .item-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--tg-theme-text-color, #1d1d1f);
+    }
+
+    .item-subtitle {
+        font-size: 14px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        line-height: 1.4;
+    }
+
+    .item-arrow {
+        font-size: 20px;
+        color: var(--tg-theme-hint-color, #c7c7cc);
+        margin-left: 12px;
+    }
+
+
+    /* Адаптивность */
+    /* @media (max-width: 480px) {
+        .screen {
+            padding: 0 12px;
+        }
+        
+        .settings-item {
+            padding: 14px;
+        }
+    } */
+</style>
