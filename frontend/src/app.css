@@ -1,0 +1,137 @@
+:root {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    --tg-theme-bg-color: #f3f4f6;              /* fond global légèrement gris */
+    --tg-theme-secondary-bg-color: #f9fafb;
+    --tg-theme-text-color: #111827;
+    --tg-theme-hint-color: #6b7280;
+    --tg-theme-link-color: #2563eb;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--tg-theme-bg-color, #f3f4f6);
+    overflow-x: hidden;
+}
+
+body {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Racine de l’app */
+.app-root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--tg-theme-bg-color, #f3f4f6);
+    padding-bottom: env(safe-area-inset-bottom); /* pour la barre noire iOS */
+    box-sizing: border-box;
+}
+
+/* Zone qui scrolle */
+.app-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 16px 88px;   /* 16px de marge + place pour tab-bar */
+}
+
+/* Header dans chaque écran */
+.app-header {
+    padding: 4px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Titres un peu plus gros */
+.h1 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Cartes de section avec coins visibles */
+.section-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 12px 16px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.06); /* trait très léger */
+}
+
+/* Texte normal un peu plus grand */
+body,
+.section-card,
+.section-card * {
+    font-size: 14px;
+}
+
+/* Tab-bar FIXE */
+.tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
+    background: #ffffff;
+    border-top: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.tab-item.active {
+    color: var(--tg-theme-link-color, #2563eb);
+}
+
+.tab-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.tab-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: transparent;
+}
+
+.tab-item.active .tab-dot {
+    background: var(--tg-theme-link-color, #2563eb);
+}
+
+
+.big-blue-btn {
+    background: #EEF4FF !important; /* bleu pale */
+    color: #1D4ED8 !important; /* bleu vif */
+    width: 100%;
+    border-radius: 16px;
+    padding: 12px 0;
+    font-weight: 600;
+    text-align: center;
+    justify-content: center;
+}
