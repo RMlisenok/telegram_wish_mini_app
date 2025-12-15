@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import {writable} from 'svelte/store';
 
 // UsersSrore
 
@@ -14,8 +14,6 @@ export const userStore = writable({
     },
 
 });
-
-
 
 
 // ВИШЛИСТЫ
@@ -56,5 +54,68 @@ export const wishlistsStore = writable([
 
 
     },
+
+]);
+
+
+// Подписки (на кого я подписан)
+export const subscriptionsStore = writable([
+    // structure пример, потом подменишь реальными данными
+    {
+        id: 'user-2',
+        fullName: 'Иван Иванов',
+        birthDate: '05.04.1995',
+        avatarUrl: '',
+        wishlistTitle: 'Новый год'
+    },
+
+    {
+        id: 'u-ivan',
+        fullName: 'Иван Иванов',
+        birthDate: '05.04.1995',
+        mainWishlistTitle: 'Новый год'
+    },
+
+
+    {
+        id: 'sub-1',
+        fullName: 'Ива нов',
+        birthDate: '05.04.2005',
+        mainOccasion: 'Новый год'
+    },
+    {
+        id: 'sub-2',
+        fullName: 'Катя Петрова',
+        birthDate: '11.01.1998',
+        mainOccasion: 'День рождения'
+    },
+
+    {
+        id: 'f-1',
+        fullName: 'Мари Марква',
+        birthDate: '10.09.1990',
+        mainOccasion: 'День рождения'
+    },
+    {
+        id: 'f-2',
+        fullName: 'Кирилл',
+        birthDate: '10.10.2000',
+        mainOccasion: 'Новый год'
+    },
+
+    {
+        id: 'sub-4',
+        fullName: 'Кат Перва',
+        birthDate: '11.04.1998',
+        mainOccasion: 'День рождения'
+    },
+
+    {
+        id: 'u-maria',
+        fullName: 'Мария Маркова',
+        birthDate: '10.09.1990',
+        mainWishlistTitle: 'День рождения'
+    },
+
 
 ]);
