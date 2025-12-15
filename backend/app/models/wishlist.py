@@ -53,3 +53,7 @@ class Wishlist(Base):
     owner: Mapped['User'] = relationship(
         back_populates='wishlists'
     )
+    wishes: Mapped[List['WishWishlist']] = relationship(
+        back_populates='wishlists',
+        cascade='all, delete-orphan'
+    )

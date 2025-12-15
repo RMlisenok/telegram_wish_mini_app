@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import String, Date, Boolean, Enum, Text, TIMESTAMP, BigInteger
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
@@ -64,4 +64,16 @@ class User(Base):
         TIMESTAMP,
         server_default=func.now(),
         onupdate=func.now()
+    )
+
+    wishes: Mapped[List['Wish']] = relationship(
+        back_populates='owner',
+        cascade='all, delete-orphan'
+    )
+    wishlists: Mapped[List['Wishlist']] = relationship(
+        back_populates=owner,
+        cascade="all, delete-orphan"
+    )
+    reserved_wishes: Mapped[List["WishReservation"]] = relationship(
+        back_populates="reserved_by"
     )
