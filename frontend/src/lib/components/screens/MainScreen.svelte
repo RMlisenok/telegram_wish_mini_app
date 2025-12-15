@@ -2,7 +2,7 @@
     import Avatar from '$lib/components/ui/Avatar.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import { createEventDispatcher } from 'svelte';
-    import { wishlistsStore, wishesStore, subscriptionsStore } from '$lib/stores/data.js';
+    import { wishlistsStore, wishesStore, subscriptionsStore,subscribersStore } from '$lib/stores/data.js';
 
 
 
@@ -13,9 +13,11 @@
 
     const openSettings = () => dispatch('openSettings');
     const openQuestionnaire = () => dispatch('openQuestionnaire');
+    const openWishlists = () => dispatch('openWishlists');
     const openWishes = () => dispatch('openWishes');
     const openShareProfile = () => dispatch('openShareProfile');
     const openSubscriptions = () => dispatch('openSubscriptions');
+    const openSubscribers = () => dispatch('openSubscribers');
 
 
     const ICON_GIFT = '/icons/maingift.svg';
@@ -33,14 +35,11 @@
     $: n_wishes = $wishesStore.length;
     $: n_wishlist = $wishlistsStore.length;
     $: n_sub = $subscriptionsStore.length;
-    const openWishlists = () => dispatch('openWishlists');
-
-
+    $: n_subi = $subscribersStore.length;
 
 
 
 </script>
-
 
 <div class="screen">
 <header class="app-header">
@@ -75,7 +74,6 @@
     </button>
 </section>
 
-</div>
 
 
 <!-- Вишлисты -->
@@ -134,7 +132,6 @@
 </section>
 
 
-
 <!-- Подписки -->
 {#if user.showSubscriptions}
     <section class="section-card">
@@ -176,6 +173,46 @@
     </section>
 {/if}
 
+
+<!-- Подписчики -->
+<section class="section-card">
+    <div class="section-header">
+        <div class="h2">Подписчики · {n_subi}</div>
+        <button class="tiny-link" type="button" on:click={openSubscribers}>
+            Показать всех
+        </button>
+    </div>
+
+    {#if $subscribersStore.length === 0}
+        <div class="empty-note">У вас пока нет подписчиков.</div>
+    {:else}
+        <div class="subs-list">
+            {#each $subscribersStore.slice(0, 2) as sub}
+                <button
+                        type="button"
+                        class="subs-row"
+                        on:click={openSubscribers}
+                >
+                    <Avatar
+                            size={52}
+                            src={sub.avatarUrl}
+                            initials={getInitials(sub.fullName)}
+                    />
+                    <div class="subs-main">
+                        <div class="subs-name" title={sub.fullName}>{sub.fullName}</div>
+                        <div class="subs-meta">
+                            <span>{sub.birthDate}</span>
+                            {#if sub.wishlistTitle}
+                                <span> · {sub.wishlistTitle}</span>
+                            {/if}
+                        </div>
+                    </div>
+                </button>
+            {/each}
+        </div>
+    {/if}
+</section>
+</div>
 
 
 <style>
@@ -300,7 +337,6 @@
     align-items: center;
     gap: 4px;
 }
-
 
 
 </style>

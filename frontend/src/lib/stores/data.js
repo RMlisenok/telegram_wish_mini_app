@@ -119,3 +119,98 @@ export const subscriptionsStore = writable([
 
 
 ]);
+
+
+// Подписчики (кто подписан на меня)
+export const subscribersStore = writable([
+    {
+        id: 'user-3',
+        fullName: 'Мария Маркова',
+        birthDate: '10.09.1990',
+        avatarUrl: '',
+        wishlistTitle: 'День рождения'
+    },
+    {
+        id: 'sub-4',
+        fullName: 'Кат Перва',
+        birthDate: '11.01.1999',
+        mainOccasion: 'День рождения'
+    },
+    {
+        id: 'sub-8',
+        fullName: 'Ив нов',
+        birthDate: '05.04.1999',
+        mainOccasion: 'Новый год'
+    },
+
+    {
+        id: 'f-1',
+        fullName: 'Мари Марка',
+        birthDate: '10.09.2009',
+        mainOccasion: 'День рождения'
+    },
+
+    {
+        id: 'u-maria',
+        fullName: 'Мария Маркова',
+        birthDate: '10.09.1990',
+        avatarUrl: '',
+        isSubscribed: false,
+        publicWishlists: [
+            {
+                id: 'wl-birthday',
+                title: 'День рождения',
+                visibility: 'public',
+                wishesCount: 4,
+                iconUrl: '/icons/wishlist-card.png'
+            }
+        ],
+        subscriptions: [
+            {
+                id: 'sub-ivan',
+                fullName: 'Иван Иванов',
+                birthDate: '05.04.1995',
+                wishlistTitle: 'Новый год',
+                avatarUrl: ''
+            }
+        ],
+        questionnaire: {
+            interests: ['книги', 'фотография', 'путешествия'],
+            noGifts: ['мягкие игрушки', 'алкоголь']
+        }
+    },
+
+    {
+        id: 'u-maria',
+        fullName: 'Мария Маркова',
+        birthDate: '10.09.1990',
+        avatarUrl: '',
+        isSubscribed: false,
+        publicWishlists: [
+            {
+                id: 'wl-birthday',
+                title: 'День рождения',
+                visibility: 'public',
+                wishesCount: 4,
+                iconUrl: '/icons/wishlist-card.png'
+            }
+        ],
+        subscriptions: [
+            {
+                id: 'sub-ivan',
+                fullName: 'Иван Иванов',
+                birthDate: '05.04.1995',
+                wishlistTitle: 'Новый год',
+                avatarUrl: ''
+            }
+        ],
+        questionnaire: {
+            interests: ['книги', 'фотография', 'путешествия'],
+            noGifts: ['мягкие игрушки', 'алкоголь']
+        },
+
+
+    }
+
+
+]);
