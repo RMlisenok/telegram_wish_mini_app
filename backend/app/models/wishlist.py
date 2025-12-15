@@ -13,7 +13,7 @@ class TypePrivacyEnum(enum.Enum):
     protected = 'protected'
 
 
-class User(Base):
+class Wishlist(Base):
     __tablename__ = 'wishlists'
 
     id: Mapped[int] = mapped_column(
