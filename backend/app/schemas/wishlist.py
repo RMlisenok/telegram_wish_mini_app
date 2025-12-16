@@ -20,12 +20,8 @@ class WishlistBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class WishlistCreate(BaseModel):
-    user_id: int
-    name: str
-    description: str
-    photo: Optional[str] = None
-    typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
+class WishlistCreate(WishlistBase):
+    pass
 
 
 class WishlistUpdate(BaseModel):
@@ -42,8 +38,7 @@ class WishlistResponse(WishlistBase):
     wishes: List["WishShort"] = []
     wishes_count: int = 0
 
-    class Config():
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WishlistShort(BaseModel):
@@ -52,5 +47,4 @@ class WishlistShort(BaseModel):
     photo: Optional[str] = None
     privacy: TypePrivacyEnum
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
