@@ -17,6 +17,7 @@ class TextSizeEnum(str, Enum):
 
 
 class UserBase(BaseModel):
+    telegram_id: int
     name: str
     birth_date: Optional[date] = None
     photo: Optional[str] = None
@@ -27,14 +28,8 @@ class UserBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserCreate(BaseModel):
-    telegram_id: int
-    name: str
-    birth_date: Optional[date] = None
-    photo: Optional[str] = None
-    theme: ThemeEnum = ThemeEnum.light
-    text_size: TextSizeEnum = TextSizeEnum.medium
-    show_sub: bool = False
+class UserCreate(UserBase):
+    pass
 
 
 class UserUpdate(BaseModel):
@@ -48,15 +43,10 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
-    telegram_id: int
-    name: str
-    birth_date: Optional[date] = None
-    photo: Optional[str] = None
-    theme: ThemeEnum
-    text_size: TextSizeEnum
-    show_sub: bool
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TelegramAuthReques(BaseModel):
@@ -68,3 +58,12 @@ class AuthRespones(BaseModel):
     success: bool
     token: str
     user: UserResponse
+
+
+class Usershort(BaseModel):
+    id: int
+    telegram_id: int
+    name: str
+    photo: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
