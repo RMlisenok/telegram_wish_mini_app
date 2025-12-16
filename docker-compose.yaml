@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: 1111
       POSTGRES_DB: telegram_app_db  
     ports:
-      - "5432:5432"
+      - "5437:5432"
     volumes:
       - database-data:/var/lib/postgresql/data
     networks:
