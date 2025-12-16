@@ -7,8 +7,8 @@ from app.core.base import Base
 
 
 class WishReservation(Base):
-    __tablename__ = "wish_reservations"
-    
+    __tablename__ = 'wish_reservations'
+
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
@@ -29,9 +29,8 @@ class WishReservation(Base):
         server_default=func.now()
     )
 
-
-    wish_wishlist: Mapped['WishWishlist'] = relationship(
-        back_populates='reservations'
+    wish_wishlist: Mapped["WishWishlist"] = relationship(
+        back_populates="reservations"
     )
     reserved_by: Mapped["User"] = relationship(
         back_populates="reserved_wishes"
