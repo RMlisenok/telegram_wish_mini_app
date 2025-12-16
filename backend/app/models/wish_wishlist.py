@@ -14,12 +14,12 @@ class WishWishlist(Base):
     )
     wish_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey('wishes.id', ondelete='CASCADE'),
+        ForeignKey("wishes.id", ondelete="CASCADE"),
         nullable=False
     )
     wishlist_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey()
+        ForeignKey("wishes.id")
     )
     is_pinned: Mapped[bool] = mapped_column(
         Boolean,
@@ -29,11 +29,11 @@ class WishWishlist(Base):
         default=0
     )
 
-    wish: Mapped['Wish'] = relationship(
+    wish: Mapped["Wish"] = relationship(
         back_populates='wishlists'
     )
-    wishlist: Mapped['Wishlist'] = relationship(
-        back_populates='wishes'
+    wishlist: Mapped["Wishlist"] = relationship(
+        back_populates="wishes"
     )
     reservations: Mapped[List["WishReservation"]] = relationship(
         back_populates="wish_wishlist",

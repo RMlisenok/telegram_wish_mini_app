@@ -22,9 +22,9 @@ class Wish(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
-    user_id = Mapped[int] = mapped_column(
+    user_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey('users.id'),
+        ForeignKey("users.id"),
         nullable=False
     )
     name: Mapped[str] = mapped_column(
@@ -69,8 +69,8 @@ class Wish(Base):
         onupdate=func.now()
     )
 
-    owner: Mapped['User'] = relationship(
-        back_populates='wishes'
+    owner: Mapped["User"] = relationship(
+        back_populates="wishes"
     )
     wishlists: Mapped[List["WishWishlist"]] = relationship(
         back_populates="wish",

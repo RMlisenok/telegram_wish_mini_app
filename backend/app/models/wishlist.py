@@ -19,9 +19,9 @@ class Wishlist(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
-    user_id = Mapped[int] = mapped_column(
+    user_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey('users.id'),
+        ForeignKey("users.id"),
         nullable=False
     )
     name: Mapped[str] = mapped_column(
@@ -50,10 +50,10 @@ class Wishlist(Base):
         onupdate=func.now()
     )
 
-    owner: Mapped['User'] = relationship(
-        back_populates='wishlists'
+    owner: Mapped["User"] = relationship(
+        back_populates="wishlists"
     )
-    wishes: Mapped[List['WishWishlist']] = relationship(
-        back_populates='wishlists',
-        cascade='all, delete-orphan'
+    wishes: Mapped[List["WishWishlist"]] = relationship(
+        back_populates="wishlists",
+        cascade="all, delete-orphan"
     )
