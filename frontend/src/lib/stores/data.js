@@ -16,6 +16,41 @@ export const userStore = writable({
 });
 
 
+// ЖЕЛАНИЯ
+export const wishesStore = writable([
+    {
+        id: 1,
+        title: 'Наушники с шумоподавлением',
+        price: 15000,
+        currency: '₽',
+        // imageUrl: 'static/icons/gitf1.svg',
+        pinned: true,
+        wishlistIds: [1]
+        // массив id вишлистов, где лежит желание
+    },
+    {
+        id: 2,
+        title: 'Книга по продуктовому дизайну',
+        price: 2500,
+        currency: '₽',
+        // imageUrl: 'https://www.ozon.ru/product/dizayn-myshlenie-kanvasy-i-uprazhneniya-polnyy-nabor-instrumentov-levrik-mihael-link-patrik-408869625/?at=K8tZpNMkWtVKlv39TERBRQZURXNE2zSG9p4mCyjNwWn',
+        pinned: false,
+        wishlistIds: [3]
+    },
+    {
+        id: 101,
+        title: 'Новые наушники',
+        wishlistIds: [4]
+    },
+    {
+        id: 102,
+        title: 'Книга по фотографии',
+        // wishlistIds: [6]
+    },
+
+]);
+
+
 // ВИШЛИСТЫ
 export const wishlistsStore = writable([
     {
@@ -31,7 +66,7 @@ export const wishlistsStore = writable([
         id: 3,
         title: '8-ого марта ',
         description: 'Идеи подарков на 8-ого ммарта',
-        privacy: 'public',
+        privacy: 'private',
         count: 3
         // rUrl: '/icons/gift2.svg'
     },
