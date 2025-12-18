@@ -45,8 +45,8 @@
             <StartScreen on:start={() => navigate('main')} />
         </div>
     {:else}
-           <div class="app-root {user.ui.theme} {user.ui.textSize}">
-
+           <!--<div class="app-root {user.ui.theme} {user.ui.textSize}"> -->
+            <div class="app-root {$userStore.ui.theme} {$userStore.ui.textSize}">
           <!--  Mainscreen -->
 
             <div class="app-scroll">
@@ -147,5 +147,33 @@
 {/if}
 
 <style>
+
+    .app-root.small,
+    .app-root.small * {
+        font-size: 14px !important;
+    }
+    
+    .app-root.medium,
+    .app-root.medium * {
+        font-size: 16px !important;
+    }
+    
+    .app-root.large,
+    .app-root.large * {
+        font-size: 18px !important;
+    }
+    
+    /* элементы, которые не должны масштабироваться */
+    .app-root.small img,
+    .app-root.medium img,
+    .app-root.large img {
+        font-size: initial !important;
+    }
+    
+    /* Для иконок и других фиксированных элементов */
+    .tab-icon {
+        width: 24px !important;
+        height: 24px !important;
+    }
 
 </style>
