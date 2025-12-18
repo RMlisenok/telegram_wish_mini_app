@@ -4,8 +4,11 @@
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
     
-    import SettingsScreen from '$lib/components/screens/settings/SettingsScreen.svelte'; //Dass_18.12.2025
+    //Dass_18.12.2025 -->
+    import SettingsScreen from '$lib/components/screens/settings/SettingsScreen.svelte'; 
     import SettingsScreenEditProfile from '$lib/components/screens/settings/SettingsScreen_EditProfile.svelte';
+    import SettingsScreenPrivacySettings from '$lib/components/screens/settings/SettingsScreen_PrivacySettings.svelte';
+    //Dass_18.12.2025 <--
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -62,10 +65,16 @@
                     <SettingsScreen
                         onGoBack={() => navigate('main')}
                         onNavigateToEditProfile={() => navigate('editProfile')}
+                        onNavigateToPrivacySettings={() => navigate('privacySettings')}
                     />
                 <!-- Dass_18.12.2025 add EditProfile-->
                     {:else if currentScreen === 'editProfile'}
                     <SettingsScreenEditProfile
+                        onGoBack={() => navigate('settings')}
+                    />
+                <!-- 2002_2_Dass_18.12.2025 add PrivacySettings-->
+                    {:else if currentScreen === 'privacySettings'}
+                    <SettingsScreenPrivacySettings 
                         onGoBack={() => navigate('settings')}
                     />
                 {/if}

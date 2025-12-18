@@ -116,7 +116,7 @@
         <button class="back-btn" type="button" on:click={goBack}>
             ←
         </button>
-        <div class="h1">Настройки профиля</div>
+        <div class="h1">Редактировать профиль</div>
         <div class="header-placeholder"></div>
     </header>
 

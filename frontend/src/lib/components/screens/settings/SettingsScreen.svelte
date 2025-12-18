@@ -17,9 +17,14 @@
     }
     // 2002_1_Dass_16.12.2025 <--
     
+    // 2002_2_Dass_18.12.2025 -->
+    export let onNavigateToPrivacySettings;
     function navigateToPrivacySettings() {
-        alert('Переход к разделу "Настройки приватности" (FS-3.2)');
+        if (onNavigateToPrivacySettings) {
+            onNavigateToPrivacySettings();
+        }
     }
+    // 2002_2_Dass_18.12.2025 <--
     
     function navigateToInterfaceSettings() {
         alert('Переход к разделу "Настройки интерфейса" (FS-3.3)');
