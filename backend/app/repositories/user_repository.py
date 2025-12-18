@@ -6,7 +6,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 
 
-class UserRepositories:
+class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 

@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories.wish_repository import WishRepositories
+from app.repositories.wish_repository import WishRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
 from app.models.wish import Wish
 from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort
@@ -12,7 +12,7 @@ class WishService:
         self,
         session: AsyncSession
     ):
-        self.rep_wish = WishRepositories(session)
+        self.rep_wish = WishRepository(session)
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def get_wish(

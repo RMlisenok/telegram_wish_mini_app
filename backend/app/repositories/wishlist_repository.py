@@ -7,7 +7,7 @@ from app.models.wishlist import Wishlist
 from app.schemas.wishlist import WishlistCreate, WishlistUpdate
 
 
-class WishlistRepositories:
+class WishlistRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
