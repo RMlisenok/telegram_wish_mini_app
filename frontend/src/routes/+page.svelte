@@ -3,6 +3,9 @@
 
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
+    
+    import SettingsScreen from '$lib/components/screens/settings/SettingsScreen.svelte'; //Dass_18.12.2025
+    import SettingsScreenEditProfile from '$lib/components/screens/settings/SettingsScreen_EditProfile.svelte';
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -54,9 +57,21 @@
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
                     />
+                <!-- Dass_18.12.2025 add SettingsScreen-->
+                    {:else if currentScreen === 'settings'}
+                    <SettingsScreen
+                        onGoBack={() => navigate('main')}
+                        onNavigateToEditProfile={() => navigate('editProfile')}
+                    />
+                <!-- Dass_18.12.2025 add EditProfile-->
+                    {:else if currentScreen === 'editProfile'}
+                    <SettingsScreenEditProfile
+                        onGoBack={() => navigate('settings')}
+                    />
+                {/if}
 
-                    {/if}
-                </div>
+            </div>
+            
 
 
             <!-- TAB BAR -->

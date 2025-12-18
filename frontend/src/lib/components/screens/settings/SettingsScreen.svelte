@@ -4,15 +4,18 @@
     function goBack() {
         if (onGoBack) {
             onGoBack();
-        } else {
-            console.error('onGoBack function is not provided');
         }
     }
     
     // Навигация по разделам
+    // 2002_1_Dass_16.12.2025 -->
+    export let onNavigateToEditProfile;
     function navigateToEditProfile() {
-        alert('Переход к разделу "Редактировать профиль" (FS-3.1)');
+        if (onNavigateToEditProfile) {
+            onNavigateToEditProfile();
+        }
     }
+    // 2002_1_Dass_16.12.2025 <--
     
     function navigateToPrivacySettings() {
         alert('Переход к разделу "Настройки приватности" (FS-3.2)');
