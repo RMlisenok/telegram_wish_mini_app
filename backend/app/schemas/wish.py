@@ -22,7 +22,6 @@ class WishBase(BaseModel):
     currency: CurrencyEnum = CurrencyEnum.RUB
     description: str
 
-
     model_config = ConfigDict(from_attributes=True)
 
 
