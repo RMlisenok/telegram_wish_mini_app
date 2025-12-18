@@ -65,8 +65,7 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now()
     )
-    
-    # Relationships - используем строки для forward references
+
     wishes: Mapped[List["Wish"]] = relationship(
         "Wish",
         back_populates="owner",
