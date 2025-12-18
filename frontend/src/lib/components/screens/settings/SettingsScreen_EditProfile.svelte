@@ -249,6 +249,7 @@
         gap: 12px;
         flex-wrap: wrap;
         justify-content: center;
+        margin-top: 24px;
     }
 
     .btn-icon {
@@ -257,5 +258,10 @@
         margin-right: 6px;
     }
 
-    
+    .form-fields {
+        margin-bottom: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
 </style>
