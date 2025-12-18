@@ -28,6 +28,15 @@ class WishWishlist(Base):
     order_position: Mapped[int] = mapped_column(
         default=0
     )
+    created_at: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now()
+    )
+    updated_at: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
 
     wish: Mapped["Wish"] = relationship(
         back_populates='wishlists'
