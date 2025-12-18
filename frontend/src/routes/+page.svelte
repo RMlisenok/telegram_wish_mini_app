@@ -4,6 +4,7 @@
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
+    import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -60,6 +61,11 @@
 
                 {:else if currentScreen === 'questionnaire'}
                     <QuestionnaireScreen />
+
+                       <!--   ShareProfileScreen    -->
+
+                {:else if currentScreen === 'shareProfile'}
+                    <ShareProfileScreen {user} on:back={() => navigate('main')} />
 
 
 
