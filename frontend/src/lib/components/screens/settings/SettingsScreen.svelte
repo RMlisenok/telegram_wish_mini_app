@@ -26,9 +26,14 @@
     }
     // 2002_2_Dass_18.12.2025 <--
     
+    // 2002_3_Dass_18.12.2025 -->
+    export let onNavigateToInterfaceSettings;
     function navigateToInterfaceSettings() {
-        alert('Переход к разделу "Настройки интерфейса" (FS-3.3)');
+        if (onNavigateToInterfaceSettings) {
+            onNavigateToInterfaceSettings();
+        }
     }
+    // 2002_3_Dass_18.12.2025 <--
     
     function navigateToNotificationSettings() {
         alert('Переход к разделу "Настройки уведомлений" (FS-3.4)');
