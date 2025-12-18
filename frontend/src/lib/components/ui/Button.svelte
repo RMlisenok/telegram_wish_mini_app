@@ -4,6 +4,7 @@
     export let kind = 'primary'; // primary | ghost
     export let full = false;
     export let disabled = false;
+    export let inactive = false;
 
     const dispatch = createEventDispatcher();
 
@@ -62,5 +63,13 @@
         opacity: 0.6;
         cursor: default;
         box-shadow: none;
+
     }
+
+    .ui-button.inactive {
+        opacity: 0.6;
+        cursor: pointer; /* important: garder le click */
+        box-shadow: none;
+    }
+
 </style>

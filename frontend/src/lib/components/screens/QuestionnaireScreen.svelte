@@ -1,23 +1,23 @@
 <script>
-    import { onMount } from 'svelte';
+    import {onMount} from 'svelte';
     import Tag from '$lib/components/ui/Tag.svelte';
     import TextField from '$lib/components/ui/TextField.svelte';
     import Button from '$lib/components/ui/Button.svelte';
-    import { questionnaireStore } from '$lib/stores/data.js';
+    import {questionnaireStore} from '$lib/stores/data.js';
 
     const predefinedInterests = [
-        'кино','театр','аниме','мультфильмы','фэнтези','музыка','музыкальные инструменты',
-        'коллекционирование','лего','фотография','книги','научпоп','саморазвитие',
-        'иностранные языки','компьютерные игры','настольные игры','рукоделие',
-        'сад и огород','домашний декор','спорт','танцы','технологии и наука',
-        '3Д-моделирование и графика','робототехника','программирование','активный образ жизни',
-        'путешествия','кулинария и выпечка','сладости','сувениры','цветы','подарочные сертификаты',
-        'алкоголь','украшения','косметика и парфюмерия','-'
+        'кино', 'театр', 'аниме', 'мультфильмы', 'фэнтези', 'музыка', 'музыкальные инструменты',
+        'коллекционирование', 'лего', 'фотография', 'книги', 'научпоп', 'саморазвитие',
+        'иностранные языки', 'компьютерные игры', 'настольные игры', 'рукоделие',
+        'сад и огород', 'домашний декор', 'спорт', 'танцы', 'технологии и наука',
+        '3Д-моделирование и графика', 'робототехника', 'программирование', 'активный образ жизни',
+        'путешествия', 'кулинария и выпечка', 'сладости', 'сувениры', 'цветы', 'подарочные сертификаты',
+        'алкоголь', 'украшения', 'косметика и парфюмерия', '-'
     ];
 
     const predefinedNoGifts = [
-        'сладости','косметика и парфюмерия','сувениры','цветы','алкоголь',
-        'мягкие игрушки','домашний декор','книги','подарочные сертификаты','-'
+        'сладости', 'косметика и парфюмерия', 'сувениры', 'цветы', 'алкоголь',
+        'мягкие игрушки', 'домашний декор', 'книги', 'подарочные сертификаты', '-'
     ];
 
     let interests = [];
@@ -89,18 +89,28 @@
         noGifts = noGifts.filter((t) => t !== tag);
     };
 
+
+    $: isValidInterests = interests.includes('-') || interests.length >= 3;
+    $: isValidNoGifts = noGifts.includes('-') || noGifts.length >= 1;
+
+
     const save = () => {
-        // plus de minimum obligatoire : on peut tout laisser vide
-        errors.interests = '';
-        errors.noGifts = '';
+        errors = {interests: '', noGifts: ''};
 
-        questionnaireStore.set({
-            interests,
-            noGifts
-        });
+        if (!isValidInterests) {
+            errors = {...errors, interests: 'Для сохранения анкеты необходимо выбрать минимум 3 интереса.'};
+        }
+        if (!isValidNoGifts) {
+            errors = {...errors, noGifts: 'Для сохранения анкеты необходимо выбрать минимум 1 тег'};
+        }
+        if (errors.interests || errors.noGifts) return;
 
-        alert('Анкета сохранена!');
+        questionnaireStore.set({interests, noGifts});
+
+        alert('Анкета успешно сохранена!');
     };
+
+
 </script>
 
 <header class="app-header">
@@ -124,6 +134,7 @@
             </button>
         {/each}
     </div>
+
 
     <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
         {#if interests.length === 0}
@@ -208,10 +219,16 @@
 </section>
 
 <div style="padding:0 16px 12px;">
-    <Button full on:click={save}>
+    <Button
+            full
+            kind="primary"
+            inactive={!isValidInterests || !isValidNoGifts}
+            on:click={save}
+    >
         Сохранить анкету
     </Button>
 </div>
+
 
 <style>
     .hint {
@@ -249,7 +266,9 @@
 
     .chips-selected.error {
         border-color: #ef4444;
+        background: #fff7f7;
     }
+
 
     .placeholder {
         font-size: 12px;

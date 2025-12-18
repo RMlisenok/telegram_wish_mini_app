@@ -1,39 +1,3 @@
-<!--<script>-->
-<!--  export let text;-->
-<!--  export let removable = false;-->
-
-<!--  const remove = () => {-->
-<!--    const evt = new CustomEvent('remove');-->
-<!--    dispatchEvent(evt);-->
-<!--  };-->
-<!--</script>-->
-
-<!--<div class="tag">-->
-<!--  <span>{text}</span>-->
-<!--  {#if removable}-->
-<!--    <button class="x" type="button" on:click|stopPropagation={remove}>✕</button>-->
-<!--  {/if}-->
-<!--</div>-->
-
-<!--<style>-->
-<!--  .tag {-->
-<!--    display: inline-flex;-->
-<!--    align-items: center;-->
-<!--    gap: 4px;-->
-<!--    padding: 4px 10px;-->
-<!--    border-radius: 999px;-->
-<!--    font-size: 12px;-->
-<!--    background: #eff6ff;-->
-<!--    color: #1d4ed8;-->
-<!--  }-->
-<!--  .x {-->
-<!--    border: none;-->
-<!--    background: transparent;-->
-<!--    font-size: 12px;-->
-<!--    cursor: pointer;-->
-<!--  }-->
-<!--</style>-->
-
 <script>
     import { createEventDispatcher } from 'svelte';
 
