@@ -50,7 +50,9 @@
     }
 
     function saveProfile() {
-        
+        if (!validateForm()) {
+            return;
+        }
         
         $userStore = {
             ...$userStore,
@@ -61,6 +63,42 @@
         
         alert('Изменения успешно сохранены');
         goBack();
+    }
+
+    function handleFullNameChange(event) {
+        fullName = event.detail;
+        errors.fullName = '';
+    }
+    
+    function handleBirthDateChange(event) {
+        birthDate = event.detail;
+        errors.birthDate = '';
+    }
+    
+    let errors = {
+        fullName: '',
+        birthDate: ''
+    };
+
+    function validateForm() {
+        errors = { fullName: '', birthDate: '' };
+        let isValid = true;
+        
+        if (!fullName || fullName.trim().length > 40) {
+            errors.fullName = 'Поле Имя и фамилия должно содержать от 1 до 40 символов';
+            isValid = false;
+        }
+        
+        const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/;
+        if (!birthDate) {
+            errors.birthDate = 'Дата рождения обязательна';
+            isValid = false;
+        } else if (!dateRegex.test(birthDate)) {
+            errors.birthDate = 'Используйте формат ДД.ММ.ГГГГ';
+            isValid = false;
+        }
+        
+        return isValid;
     }
 
 </script>
@@ -100,6 +138,28 @@
                     {/if}
                     
                 </div>
+            </div>
+
+            <!-- Фамилия и имя-->
+             <div class="form-fields">
+                <TextField
+                    label="Имя и фамилия"
+                    placeholder="Введите ваше имя и фамилию"
+                    bind:value={fullName}
+                    on:change={handleFullNameChange}
+                    error={errors.fullName}
+                    required={true}
+                />
+                
+                <TextField
+                    label="Дата рождения"
+                    placeholder="ДД.ММ.ГГГГ"
+                    bind:value={birthDate}
+                    on:change={handleBirthDateChange}
+                    error={errors.birthDate}
+                    maxlength="10"
+                    required={true}
+                />
             </div>
             
             
