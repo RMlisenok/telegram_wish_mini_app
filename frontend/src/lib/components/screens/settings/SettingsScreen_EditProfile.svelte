@@ -96,6 +96,14 @@
         } else if (!dateRegex.test(birthDate)) {
             errors.birthDate = 'Используйте формат ДД.ММ.ГГГГ';
             isValid = false;
+        } else {
+            const [day, month, year] = birthDate.split('.').map(Number);
+            const inputDate = new Date(year, month - 1, day);
+            const minDate = new Date(1900, 0, 1); // 01.01.1900
+            if (inputDate < minDate) {
+                errors.birthDate = 'Дата рождения не может быть раньше 01.01.1900';
+                isValid = false;
+            }
         }
         
         return isValid;
