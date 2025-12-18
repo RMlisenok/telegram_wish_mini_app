@@ -3,6 +3,7 @@
 
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
+    import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -54,6 +55,13 @@
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
                     />
+
+                       <!--   QuestionnaireScreen    -->
+
+                {:else if currentScreen === 'questionnaire'}
+                    <QuestionnaireScreen />
+
+
 
                     {/if}
                 </div>

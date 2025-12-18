@@ -249,3 +249,9 @@ export const subscribersStore = writable([
 
 
 ]);
+
+// Анкета: интересы / что не дарить, по пользователю
+export const questionnaireStore = writable({
+    interests: [],
+    noGifts: []
+});
