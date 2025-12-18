@@ -38,6 +38,15 @@
     function navigateToNotificationSettings() {
         alert('Переход к разделу "Настройки уведомлений" (FS-3.4)');
     }
+
+    // 2002_5_Dass_18.12.2025 -->
+    export let onNavigateToLegalInformation;
+    function navigateToLegalInformation() {
+        if (onNavigateToLegalInformation) {
+            onNavigateToLegalInformation();
+        }
+    }
+    // 2002_5_Dass_18.12.2025 <--
 </script>
 
 <div class="screen">
@@ -79,6 +88,13 @@
                 <div class="item-info">
                     <span class="item-title">Настройки уведомлений</span>
                     <span class="item-subtitle">Управление push-уведомлениями и email-рассылкой</span>
+                </div>
+                <div class="item-arrow">›</div>
+            </button>
+
+            <button class="settings-item" type="button" on:click={navigateToLegalInformation}>
+                <div class="item-info">
+                    <span class="item-title">Юридическая информация</span>
                 </div>
                 <div class="item-arrow">›</div>
             </button>
