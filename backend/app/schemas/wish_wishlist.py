@@ -16,6 +16,13 @@ class WishWishlistResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class WishWishlistCreate(BaseModel):
+    wish_id: int
+    wishlist_id: int
+    is_pinned: Optional[bool]
+    order_position: Optional[int]
+
+
 class WishWishlistUpdate(BaseModel):
     is_pinned: Optional[bool]
     order_position: Optional[int]

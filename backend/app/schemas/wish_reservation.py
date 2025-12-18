@@ -10,3 +10,7 @@ class ReservationResponse(BaseModel):
     reserved_by: "UserShort"
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ReservationCreate(BaseModel):
+    wish_wishlist_id: int
