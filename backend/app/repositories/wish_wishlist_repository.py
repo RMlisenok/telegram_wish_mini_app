@@ -136,6 +136,24 @@ class WishWishlistRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
+    async def get_wishlist_from_all_wishes(
+        self,
+        wishlist_id: int,
+        limit: int = 10
+    ) -> List[WishWishlist]:
+        query = (
+            select(WishWishlist)
+            .where(WishWishlist.wishlist_id == wishlist_id)
+            .order_by(WishWishlist.order_position)
+            .limit(limit)
+            .options(
+                selectinload(WishWishlist.wish),
+                selectinload(WishWishlist.wishlist)
+            )
+        )
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+
     async def count_wishes_in_wishlist(
         self,
         wishlist_id
