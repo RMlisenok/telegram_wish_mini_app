@@ -14,3 +14,4 @@ class ReservationResponse(BaseModel):
 
 class ReservationCreate(BaseModel):
     wish_wishlist_id: int
+    reserved_by_id: int
