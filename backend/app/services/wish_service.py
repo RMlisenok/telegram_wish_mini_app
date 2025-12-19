@@ -33,8 +33,11 @@ class WishService:
 
     async def create_wish(
         self,
+        user_id: int,
         wish_data: WishCreate
     ) -> WishResponse:
+        data = wish_data.model_dump()
+        data["user_id"] = user_id
         wish = self.rep_wish.create(wish_data)
         return wish_data.model_validate(wish)
 
