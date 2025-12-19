@@ -14,7 +14,6 @@ class CurrencyEnum(str, Enum):
 
 
 class WishBase(BaseModel):
-    user_id: int
     name: str
     photo: Optional[str] = None
     usrl_gift: str
