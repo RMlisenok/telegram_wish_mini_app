@@ -111,49 +111,51 @@
     </header>
 
     <section class="settings-section">
-            <h2 class="section-title">Размер текста</h2>
-            <div class="dropdown {activeDropdown === 'textSize' ? 'active' : ''}">
-                <button 
-                    class="dropdown-toggle" 
-                    type="button"
-                    on:click={(e) => toggleDropdown('textSize', e)}
-                    on:keydown={(e) => handleDropdownKeydown('textSize', e)}
-                    aria-expanded={activeDropdown === 'textSize'}
-                    aria-haspopup="listbox"
-                    aria-controls="text-size-dropdown"
-                >
-                    <span class="dropdown-selected">
-                        <span class="selected-icon">{getCurrentTextSizeLabel().charAt(0)}</span>
-                        <span class="selected-label">{getCurrentTextSizeLabel()}</span>
-                    </span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-                
-                <div 
-                    class="dropdown-menu" 
-                    id="text-size-dropdown"
-                    role="listbox"
-                    aria-label="Выберите размер текста"
-                >
-                    {#each textSizeOptions as option (option.value)}
-                        <button
-                            type="button"
-                            class="dropdown-item {option.value === $userStore.ui.textSize ? 'selected' : ''}"
-                            on:click={() => setTextSize(option.value)}
-                            on:keydown={(e) => handleOptionKeydown(() => setTextSize(option.value), e)}
-                            role="option"
-                            aria-selected={option.value === $userStore.ui.textSize}
-                        >
-                            <span class="item-icon" style="{option.style || ''}">{option.icon}</span>
-                            <span class="item-label">{option.label}</span>
-                            {#if option.value === $userStore.ui.textSize}
-                                <span class="item-check" aria-hidden="true">✓</span>
-                            {/if}
-                        </button>
-                    {/each}
-                </div>
+        <h2 class="section-title">Размер текста</h2>
+        <div class="dropdown {activeDropdown === 'textSize' ? 'active' : ''}">
+            <button 
+                class="dropdown-toggle" 
+                type="button"
+                on:click={(e) => toggleDropdown('textSize', e)}
+                on:keydown={(e) => handleDropdownKeydown('textSize', e)}
+                aria-expanded={activeDropdown === 'textSize'}
+                aria-haspopup="listbox"
+                aria-controls="text-size-dropdown"
+            >
+                <span class="dropdown-selected">
+                    <span class="selected-icon">{getCurrentTextSizeLabel().charAt(0)}</span>
+                    <span class="selected-label">{getCurrentTextSizeLabel()}</span>
+                </span>
+                <span class="dropdown-arrow">▼</span>
+            </button>
+            
+            <div 
+                class="dropdown-menu" 
+                id="text-size-dropdown"
+                role="listbox"
+                aria-label="Выберите размер текста"
+            >
+                {#each textSizeOptions as option (option.value)}
+                    <button
+                        type="button"
+                        class="dropdown-item {option.value === $userStore.ui.textSize ? 'selected' : ''}"
+                        on:click={() => setTextSize(option.value)}
+                        on:keydown={(e) => handleOptionKeydown(() => setTextSize(option.value), e)}
+                        role="option"
+                        aria-selected={option.value === $userStore.ui.textSize}
+                    >
+                        <span class="item-icon" style="{option.style || ''}">{option.icon}</span>
+                        <span class="item-label">{option.label}</span>
+                        {#if option.value === $userStore.ui.textSize}
+                            <span class="item-check" aria-hidden="true">✓</span>
+                        {/if}
+                    </button>
+                {/each}
             </div>
-        </section>
+        </div>
+    </section>
+
+    
         
 </div>
 
