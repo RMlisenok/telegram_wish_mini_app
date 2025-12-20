@@ -1,13 +1,12 @@
 from aiogram import Router, types
+from aiogram import F
 from app.recommendations.service import recommend_by_tag
 
 router = Router()
 
-@router.message(lambda m: m.text == "Что подарить")
+@router.message(F.text == "Что подарить")
 async def recommend_handler(message: types.Message):
     user_id = message.from_user.id
-
-    # временно, потом возьмём из user_forms
     tag = "гарри поттер"
 
     await message.answer("📨 Отправили вам подборку в личные сообщения")

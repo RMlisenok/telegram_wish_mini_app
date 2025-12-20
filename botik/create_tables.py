@@ -1,11 +1,20 @@
 import asyncio
-from app.db.database import engine, Base
-from app.db import models  # noqa
+from dotenv import load_dotenv
 
-async def run():
+load_dotenv()
+
+from app.db.database import engine
+# from app.db.base import Base
+
+# ВАЖНО: импортируем ВСЕ модели
+from app.users.models import User
+from app.recommendations.models import RecommendationCache
+
+
+async def main():
     async with engine.begin() as conn:
-        print("TABLES:", Base.metadata.tables.keys())
         await conn.run_sync(Base.metadata.create_all)
 
+
 if __name__ == "__main__":
-    asyncio.run(run())
+    asyncio.run(main())
