@@ -62,11 +62,6 @@
                 {:else if currentScreen === 'questionnaire'}
                     <QuestionnaireScreen {user} on:back={() => navigate('main')} />
 
-                       <!--   ShareProfileScreen    -->
-
-                {:else if currentScreen === 'shareProfile'}
-                    <ShareProfileScreen {user} on:back={() => navigate('main')} />
-
 
 
                     {/if}
