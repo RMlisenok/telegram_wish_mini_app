@@ -59,7 +59,7 @@
                        <!--   QuestionnaireScreen    -->
 
                 {:else if currentScreen === 'questionnaire'}
-                    <QuestionnaireScreen />
+                    <QuestionnaireScreen {user} on:back={() => navigate('main')} />
 
 
 
