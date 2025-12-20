@@ -4,7 +4,11 @@
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
+<<<<<<< HEAD
+    import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
+=======
     import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
+>>>>>>> origin/front
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -60,7 +64,13 @@
                        <!--   QuestionnaireScreen    -->
 
                 {:else if currentScreen === 'questionnaire'}
+<<<<<<< HEAD
+                    <QuestionnaireScreen />
+                {:else if currentScreen === 'wishes'}
+                    <WishesScreen />
+=======
                     <QuestionnaireScreen {user} on:back={() => navigate('main')} />
+>>>>>>> origin/front
 
 
 

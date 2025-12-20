@@ -22,29 +22,36 @@ export const wishesStore = writable([
         id: 1,
         title: 'Наушники с шумоподавлением',
         price: 15000,
-        currency: '₽',
-        // imageUrl: 'static/icons/gitf1.svg',
+        currency: 'RUB',
+        // imageUrl: '/icons/gitf1.jpg',
+        link: 'https://www.wildberries.ru/catalog/239484963/detail.aspx?size=376607842',
+        description: 'McLaren Who',
         pinned: true,
         wishlistIds: [1]
         // массив id вишлистов, где лежит желание
     },
     {
         id: 2,
-        title: 'Книга по продуктовому дизайну',
-        price: 2500,
-        currency: '₽',
-        // imageUrl: 'https://www.ozon.ru/product/dizayn-myshlenie-kanvasy-i-uprazhneniya-polnyy-nabor-instrumentov-levrik-mihael-link-patrik-408869625/?at=K8tZpNMkWtVKlv39TERBRQZURXNE2zSG9p4mCyjNwWn',
+        title: 'Человек-Паук McLaren 720S',
+        price: 999999999,
+        currency: 'EUR',
+        // imageUrl: '/icons/spider_man.jpg',
+        description: 'Let be super cool @MARVEL',
         pinned: false,
         wishlistIds: [3]
     },
     {
         id: 101,
-        title: 'Новые наушники',
+        title: 'Marussia В1',
+        price: 38999119,
+        currency: 'KZT',
+        // imageUrl: '/icons/Marussia_В1.jpg',
         wishlistIds: [4]
     },
     {
         id: 102,
         title: 'Книга по фотографии',
+        description: 'Повышенное артериальное давление, известное как гипертония или артериальная гипертензия представляет собой серьезное заболевание, поскольку оно может привести к таким смертельно опасным осложнениям, как инсульт и инфаркт миокарда.',
         // wishlistIds: [6]
     },
 
