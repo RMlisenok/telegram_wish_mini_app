@@ -13,38 +13,16 @@ class UserRepository:
     async def get_user_by_id(
         self,
         user_id: int,
-        # load_relationships: bool = False,
     ) -> Optional[User]:
         query = select(User).where(User.id == user_id)
-
-        # if load_relationships:
-        #     query = query.options(
-        #         selectinload(User.wishlists),
-        #         selectinload(User.wishes),
-        #         selectinload(User.subscriptions),
-        #         selectinload(User.questionnaire),
-        #         selectinload(User.notification_settings)
-        #     )
-
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def get_user_by_tg_id(
         self,
         telegram_id: int,
-        # load_relationships: bool = False,
     ) -> Optional[User]:
         query = select(User).where(User.telegram_id == telegram_id)
-
-        # if load_relationships:
-        #     query = query.options(
-        #         selectinload(User.wishlists),
-        #         selectinload(User.wishes),
-        #         selectinload(User.subscriptions),
-        #         selectinload(User.questionnaire),
-        #         selectinload(User.notification_settings)
-        #     )
-
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
@@ -55,8 +33,6 @@ class UserRepository:
         query = select(User).limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
-
-        pass
 
     async def create(
         self,
@@ -87,9 +63,7 @@ class UserRepository:
 
         result = await self.session.execute(stmt)
         await self.session.commit()
-
         user = result.scalar_one_or_none()
-
         if user:
             await self.session.refresh(user)
         return user
