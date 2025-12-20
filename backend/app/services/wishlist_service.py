@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.wishlist_repository import WishlistRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
 from app.models.wishlist import Wishlist
-from app.schemas.wishlist import WishlistCreate, WishlistResponse, WishlistUpdate
-from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate
+from app.models.wish_wishlist import WishWishlist
+from app.schemas.wishlist import WishlistCreate, WishlistCreateDb, WishlistResponse, WishlistUpdate
+from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate, WishWishlistResponse
 
 
 class WishlistService:
@@ -13,6 +14,7 @@ class WishlistService:
         self,
         session: AsyncSession
     ):
+        self.session = session
         self.rep_wishlist = WishlistRepository(session)
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
@@ -21,26 +23,22 @@ class WishlistService:
         wishlist_id: int
     ) -> Optional[Wishlist]:
         wishlist = await self.rep_wishlist.get(wishlist_id)
-        if not wishlist:
-            return None
-
-        connections = await self.rep_wish_wishlist.get_wishlist_from_all_wishes(
-            wishlist_id=wishlist_id,
-            limit=10
-        )
-        response = WishlistResponse.model_validate(wishlist)
-        response.wishes = [connection.wish for connection in connections]
-        response.wishes_count = len(response.wishes)
-        return response
+        if wishlist:
+            response = WishlistResponse.model_validate(wishlist)
+            response.wishes_count = await self.rep_wish_wishlist.count_wishes_in_wishlist(wishlist_id)
+            return response
+        return None
 
     async def create_wishlist(
         self,
         user_id: int,
         wishlist_data: WishlistCreate
     ) -> WishlistResponse:
-        data = wishlist_data.model_dump()
-        data["user"] = user_id
-        wishlist = self.rep_wishlist.create(data)
+        wishlist_with_user = WishlistCreateDb(
+            user_id=user_id,
+            **wishlist_data.model_dump()
+        )
+        wishlist = await self.rep_wishlist.create(wishlist_with_user)
         response = WishlistResponse.model_validate(wishlist)
         response.wishes_count = 0
         return response
@@ -52,7 +50,7 @@ class WishlistService:
     ) -> Optional[WishlistResponse]:
 
         update_data = wishlist_data.model_dump(exclude_unset=True)
-        wishlist = self.rep_wishlist.update(wishlist_id, update_data)
+        wishlist = await self.rep_wishlist.update(wishlist_id, update_data)
         if wishlist:
             return await self.get_wishlist(wishlist_id)
         return None
@@ -66,40 +64,47 @@ class WishlistService:
     async def get_user_wishlist(
         self,
         user_id: int,
-        limit: 10
+        limit: int = 10
     ) -> List[WishlistResponse]:
         wishlists = await self.rep_wishlist.get_user_wishlist(user_id, limit)
 
         result = []
         for wishlist in wishlists:
             response = WishlistResponse.model_validate(wishlist)
-            response = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+            count = await self.rep_wish_wishlist.count_wishes_in_wishlist(
                 wishlist.id
             )
+            response.wishes_count = count
             result.append(response)
         return result
 
     async def add_wish_to_wishlist(
         self,
         connection_data: WishWishlistCreate
-    ) -> Optional[WishWishlist]:
-        return await self.rep_wish_wishlist.create_wish_to_wishlist(
+    ) -> Optional[WishWishlistResponse]:
+        connection = await self.rep_wish_wishlist.create_wish_to_wishlist(
             connection_data.wish_id,
             connection_data.wishlist_id,
             connection_data.is_pinned,
             connection_data.order_position
         )
-    
+        if connection:
+            return WishWishlistResponse.model_validate(connection)
+        return None
+
     async def update_wihs_in_wishlits(
         self,
         connection_id: int,
         update_data: WishWishlistUpdate
-    ) -> Optional[WishWishlist]:
+    ) -> Optional[WishWishlistResponse]:
         data = update_data.model_dump(exclude_unset=True)
-        return await self.rep_wish_wishlist.create_wish_to_wishlist(
+        connection = await self.rep_wish_wishlist.create_wish_to_wishlist(
             connection_id,
             data
         )
+        if connection:
+            return WishWishlistResponse.model_validate(connection)
+        return None
 
     async def remove_wish_from_wishlist(
         self,
@@ -115,9 +120,16 @@ class WishlistService:
         self,
         wishlits_id: int,
         limit: int,
-    ) -> List[WishWishlist]:
+    ) -> List[WishWishlistResponse]:
 
-        return await self.rep_wish_wishlist.get_wishlist_from_all_wishes(
+        connection = await self.rep_wish_wishlist.get_wishlist_from_all_wishes(
             wishlits_id,
             limit
         )
+        if connection:
+            result = []
+            for conn in connection:
+                response = WishWishlistResponse.model_validate(conn)
+                result.append(response)
+            return result
+        return None
