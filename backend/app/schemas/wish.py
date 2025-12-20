@@ -14,19 +14,28 @@ class CurrencyEnum(str, Enum):
 
 
 class WishBase(BaseModel):
-    name: str
     user_id: int
+    name: str
     photo: Optional[str] = None
     url_gift: str
     price: float
     currency: CurrencyEnum = CurrencyEnum.RUB
     description: str
 
-    # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
-class WishCreate(WishBase):
-    pass
+class WishCreate(BaseModel):
+    name: str
+    photo: Optional[str] = None
+    url_gift: str
+    price: float
+    currency: CurrencyEnum = CurrencyEnum.RUB
+    description: str
+
+
+class WishCreateDb(WishCreate):
+    user_id: int
 
 
 class WishUpdate(BaseModel):

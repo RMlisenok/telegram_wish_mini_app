@@ -35,10 +35,12 @@ async def get_wish(
     return wish
 
 
-@router.post("/", response_model=WishResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/",
+             response_model=WishResponse,
+             status_code=status.HTTP_201_CREATED)
 async def create_wish(
-    wish_data: WishCreate,
     user_id: int,
+    wish_data: WishCreate,
     db: AsyncSession = Depends(get_db)
 ):
     service = WishService(db)

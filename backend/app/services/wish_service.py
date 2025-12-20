@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wish_repository import WishRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
-from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort
+from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort, WishCreateDb
 
 
 class WishService:
@@ -29,10 +29,15 @@ class WishService:
         user_id: int,
         wish_data: WishCreate
     ) -> WishResponse:
-        data = wish_data.model_dump()
-        data["user_id"] = user_id
-        wish = await self.rep_wish.create(wish_data)
-        return WishResponse.model_validate(wish)
+        # data = wish_data.model_dump()
+        # data["user_id"] = user_id
+        wish_data_wish_user = WishCreateDb(
+            user_id=user_id,
+            **wish_data.model_dump()
+        )
+        wish = await self.rep_wish.create(wish_data_wish_user)
+        response = WishResponse.model_validate(wish)
+        return response
 
     async def update_wish(
         self,

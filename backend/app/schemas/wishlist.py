@@ -30,6 +30,7 @@ class WishlistCreate(BaseModel):
 class WishlistCreateDb(WishlistCreate):
     user_id: int
 
+
 class WishlistUpdate(BaseModel):
     name: str
     description: str
