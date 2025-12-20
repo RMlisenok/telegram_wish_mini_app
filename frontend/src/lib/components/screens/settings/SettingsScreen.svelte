@@ -84,7 +84,7 @@
             <button class="settings-item" type="button" on:click={navigateToInterfaceSettings}>
                 <div class="item-info">
                     <span class="item-title">Настройки интерфейса</span>
-                    <span class="item-subtitle">Тема, язык и внешний вид приложения</span>
+                    <span class="item-subtitle">Тема, размер текста</span>
                 </div>
                 <div class="item-arrow">›</div>
             </button>
@@ -92,7 +92,7 @@
             <button class="settings-item" type="button" on:click={navigateToNotificationSettings}>
                 <div class="item-info">
                     <span class="item-title">Настройки уведомлений</span>
-                    <span class="item-subtitle">Управление push-уведомлениями и email-рассылкой</span>
+                    <span class="item-subtitle">Управление push-уведомлениями</span>
                 </div>
                 <div class="item-arrow">›</div>
             </button>

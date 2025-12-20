@@ -85,11 +85,14 @@
 
     import { onMount } from 'svelte';
     onMount(() => {
+        if (!$userStore.ui.textSize || !['small', 'medium', 'large'].includes($userStore.ui.textSize)) {
         const savedSize = localStorage.getItem('app-font-size');
         if (savedSize && ['small', 'medium', 'large'].includes(savedSize)) {
             $userStore.ui.textSize = savedSize;
+        } else {
+            $userStore.ui.textSize = 'medium';
         }
-        
+    }
         applySettings();
         const handleClickOutside = () => closeDropdowns();
         document.addEventListener('click', handleClickOutside);
@@ -154,9 +157,7 @@
             </div>
         </div>
     </section>
-
     
-        
 </div>
 
 <style>
