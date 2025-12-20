@@ -262,3 +262,32 @@ export const questionnaireStore = writable({
     interests: [],
     noGifts: []
 });
+
+
+// --- FPS: partage profil via Telegram Mini App Direct Link ---
+
+export const BOT_USERNAME = 'padari_minyebot';
+
+// IMPORTANT (FPS):
+// WEBAPP_SHORT_NAME doit être EXACTEMENT le slug du Direct Link créé dans BotFather.
+// Ex: si BotFather te montre: t.me/padari_minyebot/app  -> alors c'est "app"
+export const WEBAPP_SHORT_NAME = 'directlink';
+
+export const APP_NAME = 'Подари мне';
+
+// URL Telegram officielle qui donne la "carte" (preview bot + bouton Lancer)
+// startapp contient la valeur que tu lis via tg.initDataUnsafe.start_param
+export const makeProfileTgUrl = (userId) =>
+    `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}?startapp=${encodeURIComponent(
+        `profile_${userId}`
+    )}`;
+
+// URL de partage Telegram (ouvre la fenêtre "choisir un chat")
+// On partage TOUJOURS l’URL Telegram ci-dessus (pas ngrok, pas localhost)
+export const makeProfileShareUrl = (userId, fullName = '') => {
+    const url = makeProfileTgUrl(userId);
+    const text = fullName ? `Профиль: ${fullName}` : `Мой профиль в «${APP_NAME}»`;
+    return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
+        text
+    )}`;
+};
