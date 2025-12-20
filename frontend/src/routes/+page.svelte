@@ -25,12 +25,44 @@
         currentScreen = screen;
     }
 
+    function applyTheme() {
+        const theme = $userStore.ui.theme || 'system';
+        let effectiveTheme = theme;
+        
+        if (theme === 'system') {
+            effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effectiveTheme);
+        document.documentElement.setAttribute('theme-preference', theme);
+    }
+
     onMount(() => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
         }
+
+        applyTheme();
+        
+        // Слушаем изменения системной темы
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = () => {
+            if ($userStore.ui.theme === 'system') {
+                applyTheme();
+            }
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        
+        // Подписываемся на изменения store для темы
+        const unsubscribe = userStore.subscribe(() => {
+            applyTheme();
+        });
+        
+        return () => {
+            unsubscribe();
+            mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        };
     });
 
 

@@ -14,6 +14,19 @@
         { value: 'large', label: 'Большой', icon: 'Б', style: 'font-size: 1.4em' }
     ];
 
+    //2002_3_Dass_20.12.2025 -->
+    const themeOptions = [
+        { value: 'light', label: 'Светлая', icon: '☀️' },
+        { value: 'dark', label: 'Темная', icon: '🌙' },
+        { value: 'system', label: 'Как в системе', icon: '⚙️' }
+    ];
+
+    function setTheme(theme) {
+        $userStore.ui.theme = theme;
+        applySettings();
+    }
+    //2002_3_Dass_20.12.2025 <--
+
     function setTextSize(size) {
         $userStore.ui.textSize = size;
         applySettings();
@@ -43,6 +56,24 @@
         const option = textSizeOptions.find(opt => opt.value === $userStore.ui.textSize);
         return option ? option.label : 'Средний';
     }
+
+    //2002_3_Dass_20.12.2025 -->
+    function getCurrentThemeLabel() {
+        const option = themeOptions.find(opt => opt.value === $userStore.ui.theme);
+        return option ? option.label : 'Как в системе';
+    }
+
+    function applyTheme() {
+        const theme = $userStore.ui.theme || 'system';
+        let effectiveTheme = theme;
+        if (theme === 'system') {
+            effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effectiveTheme);
+        document.documentElement.setAttribute('theme-preference', theme);
+        localStorage.setItem('app-theme', theme);
+    }
+    //2002_3_Dass_20.12.2025 <--
 
     let activeDropdown = null;
     
@@ -81,25 +112,47 @@
 
     function applySettings() {
         applyTextSize();
+        applyTheme(); //2002_3_Dass_20.12.2025
     }
 
     import { onMount } from 'svelte';
     onMount(() => {
         if (!$userStore.ui.textSize || !['small', 'medium', 'large'].includes($userStore.ui.textSize)) {
-        const savedSize = localStorage.getItem('app-font-size');
-        if (savedSize && ['small', 'medium', 'large'].includes(savedSize)) {
-            $userStore.ui.textSize = savedSize;
-        } else {
-            $userStore.ui.textSize = 'medium';
+            const savedSize = localStorage.getItem('app-font-size');
+            if (savedSize && ['small', 'medium', 'large'].includes(savedSize)) {
+                $userStore.ui.textSize = savedSize;
+            } else {
+                $userStore.ui.textSize = 'medium';
+            }
         }
-    }
+
+        if (!$userStore.ui.theme || !['light', 'dark', 'system'].includes($userStore.ui.theme)) {
+            const savedTheme = localStorage.getItem('app-theme');
+            if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+                $userStore.ui.theme = savedTheme;
+            } else {
+                $userStore.ui.theme = 'system';
+            }
+        }
+
         applySettings();
+
+        //2002_3_Dass_20.12.2025 -->
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = () => {
+            if ($userStore.ui.theme === 'system') {
+                applyTheme();
+            }
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        //2002_3_Dass_20.12.2025 <--
+
         const handleClickOutside = () => closeDropdowns();
         document.addEventListener('click', handleClickOutside);
         
         return () => {
             document.removeEventListener('click', handleClickOutside);
-            
+            mediaQuery.removeEventListener('change', handleSystemThemeChange);
         };
     });
 </script>
@@ -158,6 +211,58 @@
         </div>
     </section>
     
+    <section class="settings-section">
+        <h2 class="section-title">Тема</h2>
+        <div class="dropdown {activeDropdown === 'theme' ? 'active' : ''}">
+            <button 
+                class="dropdown-toggle" 
+                type="button"
+                on:click={(e) => toggleDropdown('theme', e)}
+                on:keydown={(e) => handleDropdownKeydown('theme', e)}
+                aria-expanded={activeDropdown === 'theme'}
+                aria-haspopup="listbox"
+                aria-controls="theme-dropdown"
+            >
+                <span class="dropdown-selected">
+                    <span class="selected-icon">
+                        {#if $userStore.ui.theme === 'light'}
+                            ☀️
+                        {:else if $userStore.ui.theme === 'dark'}
+                            🌙
+                        {:else}
+                            ⚙️
+                        {/if}
+                    </span>
+                    <span class="selected-label">{getCurrentThemeLabel()}</span>
+                </span>
+                <span class="dropdown-arrow">▼</span>
+            </button>
+            
+            <div 
+                class="dropdown-menu" 
+                id="theme-dropdown"
+                role="listbox"
+                aria-label="Выберите тему"
+            >
+                {#each themeOptions as option (option.value)}
+                    <button
+                        type="button"
+                        class="dropdown-item {option.value === $userStore.ui.theme ? 'selected' : ''}"
+                        on:click={() => setTheme(option.value)}
+                        on:keydown={(e) => handleOptionKeydown(() => setTheme(option.value), e)}
+                        role="option"
+                        aria-selected={option.value === $userStore.ui.theme}
+                    >
+                        <span class="item-icon">{option.icon}</span>
+                        <span class="item-label">{option.label}</span>
+                        {#if option.value === $userStore.ui.theme}
+                            <span class="item-check" aria-hidden="true">✓</span>
+                        {/if}
+                    </button>
+                {/each}
+            </div>
+        </div>
+    </section>
 </div>
 
 <style>
@@ -230,11 +335,11 @@
     .dropdown-toggle {
         width: 100%;
         padding: 14px 16px;
-        background: var(--card-bg, #f2f2f7);
+        background: var(--tg-theme-secondary-bg-color, #f2f2f7);
         border: none;
         border-radius: 12px;
         font-size: 16px;
-        color: var(--text-color, #1d1d1f);
+        color: var(--tg-theme-text-color, #1d1d1f);
         cursor: pointer;
         display: flex;
         justify-content: space-between;
@@ -244,8 +349,8 @@
 
     .dropdown-toggle:hover,
     .dropdown-toggle:focus {
-        background: var(--hover-bg, #e5e5e7);
-        outline: 2px solid var(--primary-color, #007AFF);
+        background: var(--tg-theme-hint-color, #e5e5e7);
+        outline: 2px solid var(--tg-theme-link-color, #007AFF);
         outline-offset: 2px;
     }
 
@@ -269,7 +374,7 @@
 
     .dropdown-arrow {
         font-size: 12px;
-        color: var(--secondary-text, #8e8e93);
+        color: var(--tg-theme-hint-color, #8e8e93);
         transition: transform 0.3s;
     }
 
@@ -283,7 +388,7 @@
         top: calc(100% + 4px);
         left: 0;
         right: 0;
-        background: var(--bg-color, #ffffff);
+        background: var(--tg-theme-bg-color, #ffffff);
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
         overflow: hidden;
@@ -292,7 +397,7 @@
         visibility: hidden;
         transform: translateY(-10px);
         transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-        border: 1px solid var(--border-color, #e5e5e7);
+        border: 1px solid var(--tg-theme-hint-color, #e5e5e7);
     }
 
     .dropdown.active .dropdown-menu {
@@ -312,7 +417,7 @@
         align-items: center;
         gap: 12px;
         transition: background-color 0.2s;
-        border-bottom: 1px solid var(--border-color, #e5e5e7);
+        border-bottom: 1px solid var(--tg-theme-hint-color, #e5e5e7);
         color: inherit;
         font: inherit;
     }
@@ -323,12 +428,12 @@
 
     .dropdown-menu button:hover,
     .dropdown-menu button:focus {
-        background: var(--card-bg, #f2f2f7);
+        background: var(-tg-theme-secondary-bg-color, #f2f2f7);
         outline: none;
     }
 
     .dropdown-menu button.selected {
-        background: var(--primary-color, #007AFF);
+        background: var(--tg-theme-link-color, #007AFF);
         color: white;
     }
 
@@ -360,7 +465,7 @@
 
     /* Фокус для доступности */
     *:focus {
-        outline: 2px solid var(--primary-color, #007AFF);
+        outline: 2px solid var(--tg-theme-link-color, #007AFF);
         outline-offset: 2px;
     }
     
