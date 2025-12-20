@@ -3,12 +3,22 @@
 
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
+    
+    //Dass_18.12.2025 -->
+    import SettingsScreen from '$lib/components/screens/settings/SettingsScreen.svelte'; 
+    import SettingsScreenEditProfile from '$lib/components/screens/settings/SettingsScreen_EditProfile.svelte';
+    import SettingsScreenPrivacySettings from '$lib/components/screens/settings/SettingsScreen_PrivacySettings.svelte';
+    import SettingsScreenInterfaceSettings from '$lib/components/screens/settings/SettingsScreen_InterfaceSettings.svelte'; //2002_3_Dass_18.12.2025
+    import SettingsScreenLegalInformation from '$lib/components/screens/settings/SettingsScreen_LegalInformation.svelte'; //2002_5_Dass_18.12.2025
+    import SettingsScreenNotificationSettings from '$lib/components/screens/settings/SettingsScreen_NotificationSettings.svelte'; //2002_4_Dass_18.12.2025
+    //Dass_18.12.2025 <--
+
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
-<<<<<<< HEAD
+
     import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
-=======
+
     import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
->>>>>>> origin/front
+
 
     import { userStore } from '$lib/stores/data.js';
 
@@ -22,12 +32,44 @@
         currentScreen = screen;
     }
 
+    function applyTheme() {
+        const theme = $userStore.ui.theme || 'system';
+        let effectiveTheme = theme;
+        
+        if (theme === 'system') {
+            effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', effectiveTheme);
+        document.documentElement.setAttribute('theme-preference', theme);
+    }
+
     onMount(() => {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
         }
+
+        applyTheme();
+        
+        // Слушаем изменения системной темы
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemThemeChange = () => {
+            if ($userStore.ui.theme === 'system') {
+                applyTheme();
+            }
+        };
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        
+        // Подписываемся на изменения store для темы
+        const unsubscribe = userStore.subscribe(() => {
+            applyTheme();
+        });
+        
+        return () => {
+            unsubscribe();
+            mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        };
     });
 
 
@@ -44,8 +86,8 @@
             <StartScreen on:start={() => navigate('main')} />
         </div>
     {:else}
-           <div class="app-root {user.ui.theme} {user.ui.textSize}">
-
+           <!--<div class="app-root {user.ui.theme} {user.ui.textSize}"> -->
+            <div class="app-root {$userStore.ui.theme} {$userStore.ui.textSize}">
           <!--  Mainscreen -->
 
             <div class="app-scroll">
@@ -60,22 +102,51 @@
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
                     />
+                <!-- Dass_18.12.2025 add SettingsScreen-->
+                    {:else if currentScreen === 'settings'}
+                    <SettingsScreen
+                        onGoBack={() => navigate('main')}
+                        onNavigateToEditProfile={() => navigate('editProfile')}
+                        onNavigateToPrivacySettings={() => navigate('privacySettings')}
+                        onNavigateToInterfaceSettings={() => navigate('interfaceSettings')}
+                        onNavigateToLegalInformation={() => navigate('legalInformation')}
+                        onNavigateToNotificationSettings={() => navigate('notifficationSettings')} 
+                    />
+                <!-- Dass_18.12.2025 add EditProfile-->
+                    {:else if currentScreen === 'editProfile'}
+                    <SettingsScreenEditProfile
+                        onGoBack={() => navigate('settings')}
+                    />
+                <!-- 2002_2_Dass_18.12.2025 add PrivacySettings-->
+                    {:else if currentScreen === 'privacySettings'}
+                    <SettingsScreenPrivacySettings 
+                        onGoBack={() => navigate('settings')}
+                    />
+                <!-- 2002_3_Dass_18.12.2025 add interfaceSettings-->
+                    {:else if currentScreen === 'interfaceSettings'}
+                    <SettingsScreenInterfaceSettings
+                        onGoBack={() => navigate('settings')}   
+                    />
+                <!-- 2002_5_Dass_18.12.2025 add legalInformation-->
+                    {:else if currentScreen === 'legalInformation'}
+                    <SettingsScreenLegalInformation
+                        onGoBack={() => navigate('settings')}
+                    />
+                <!-- 2002_4_Dass_20.12.2025 add notificationSettings-->
+                    {:else if currentScreen === 'notifficationSettings'}
+                    <SettingsScreenNotificationSettings
+                        onGoBack={() => navigate('settings')}
+                    />
+                    <!--   QuestionnaireScreen    -->
 
-                       <!--   QuestionnaireScreen    -->
+                    {:else if currentScreen === 'questionnaire'}
+                        <QuestionnaireScreen {user} on:back={() => navigate('main')} />
+                    {:else if currentScreen === 'wishes'}
+                        <WishesScreen />
+                {/if}
+            </div>
+            
 
-                {:else if currentScreen === 'questionnaire'}
-<<<<<<< HEAD
-                    <QuestionnaireScreen />
-                {:else if currentScreen === 'wishes'}
-                    <WishesScreen />
-=======
-                    <QuestionnaireScreen {user} on:back={() => navigate('main')} />
->>>>>>> origin/front
-
-
-
-                    {/if}
-                </div>
 
 
             <!-- TAB BAR -->
@@ -135,5 +206,33 @@
 {/if}
 
 <style>
+
+    .app-root.small,
+    .app-root.small * {
+        font-size: 14px !important;
+    }
+    
+    .app-root.medium,
+    .app-root.medium * {
+        font-size: 16px !important;
+    }
+    
+    .app-root.large,
+    .app-root.large * {
+        font-size: 18px !important;
+    }
+    
+    /* элементы, которые не должны масштабироваться */
+    .app-root.small img,
+    .app-root.medium img,
+    .app-root.large img {
+        font-size: initial !important;
+    }
+    
+    /* Для иконок и других фиксированных элементов */
+    .tab-icon {
+        width: 24px !important;
+        height: 24px !important;
+    }
 
 </style>

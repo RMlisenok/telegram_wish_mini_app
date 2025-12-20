@@ -378,8 +378,8 @@
         padding: 8px;
         width: 100%;
         border-radius: 12px;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
+        background: var(--tg-theme-secondary-bg-color, #f9fafb);
+        border: 1px solid var(--tg-theme-secondary-bg-color, #e5e7eb);
         cursor: pointer;
         text-align: left;
     }
