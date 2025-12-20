@@ -4,6 +4,15 @@
     import TextField from '$lib/components/ui/TextField.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import {questionnaireStore} from '$lib/stores/data.js';
+    import { createEventDispatcher } from 'svelte';
+
+    const dispatch = createEventDispatcher();
+
+    const goBack = () => {
+        dispatch('back');
+    };
+
+
 
     const predefinedInterests = [
         'кино', 'театр', 'аниме', 'мультфильмы', 'фэнтези', 'музыка', 'музыкальные инструменты',
@@ -221,7 +230,7 @@
 <div style="padding:0 16px 12px;">
     <Button
             full
-            kind="primary"
+            kind="ghost"
             inactive={!isValidInterests || !isValidNoGifts}
             on:click={save}
     >
@@ -229,6 +238,11 @@
     </Button>
 </div>
 
+<div style="padding:0 16px 12px;">
+    <Button kind="primary" full on:click={goBack}>
+        Вернуться в профиль
+    </Button>
+</div>
 
 <style>
     .hint {
