@@ -139,15 +139,11 @@
                     />
                     <!--   QuestionnaireScreen    -->
 
-                {:else if currentScreen === 'questionnaire'}
-
-                    <QuestionnaireScreen />
-                {:else if currentScreen === 'wishes'}
-                    <WishesScreen />
-
-                    <QuestionnaireScreen {user} on:back={() => navigate('main')} />
+                    {:else if currentScreen === 'questionnaire'}
+                        <QuestionnaireScreen {user} on:back={() => navigate('main')} />
+                    {:else if currentScreen === 'wishes'}
+                        <WishesScreen />
                 {/if}
-
             </div>
             
 
