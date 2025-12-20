@@ -1,8 +1,6 @@
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from typing import List
 from app.core.db import get_db
 from app.models.wish import Wish
 from app.services.wish_service import WishService
@@ -11,7 +9,8 @@ from app.schemas.wish import WishCreate, WishResponse, WishShort, WishUpdate
 
 router = APIRouter(prefix="/wishes", tags=["wishes"])
 
-@router.get("/", response_model=WishShort)
+
+@router.get("/", response_model=List[WishShort])
 async def get_wishes(
     user_id: int,
     limit: int = Query(100, ge=1, le=200),
@@ -67,10 +66,11 @@ async def delete_wish(
     wish_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    service = WishService(db)
-    delete_status = service.delete_wish(wish_id)
-    if not delete_status:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Wish not found"
-        )
+    async with db.begin():
+        service = WishService(db)
+        delete_status = await service.delete_wish(wish_id)
+        if not delete_status:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Wish not found"
+            )

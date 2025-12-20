@@ -85,7 +85,7 @@ async def delete_wishlist(
 
 @router.post("/{wishlist_id}/wishes",
              response_model=WishWishlistResponse,
-             status_code=status.HTTP_204_NO_CONTENT)
+             status_code=status.HTTP_201_CREATED)
 async def add_wish_to_wishlist(
     wishlist_id: int,
     connect_data: WishWishlistCreate,
