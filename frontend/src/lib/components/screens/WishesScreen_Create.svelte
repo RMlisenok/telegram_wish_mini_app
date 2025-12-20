@@ -6,6 +6,11 @@
             onGoBack();
         }
     }
+    function clearError() {
+        error = ''; 
+    }
+    let error = '';
+    let title = '';
 </script>
 
 <div class="screen">
@@ -16,6 +21,25 @@
         <div class="h1">Создать желание</div>
         <div class="header-placeholder"></div>
     </header>
+    <div class="form-container">
+        <!-- Обязательное поле: Название -->
+        <div class="form-group">
+            <label for="title" class="form-label">
+                Название <span class="required">*</span>
+            </label>
+            <input
+                id="title"
+                type="text"
+                bind:value={title}
+                on:input={clearError}
+                {error}
+                placeholder="Например, Настольная лампа"
+                maxlength="100"
+                required
+            />
+            <div class="char-count">{title.length}/100</div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -66,5 +90,31 @@
 
     .header-placeholder {
         width: 44px;
+    }
+
+    .form-container {
+        padding: 0 16px 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--tg-theme-text-color, #1d1d1f);
+    }
+
+    .required {
+        color: #ff3b30;
+    }
+    .char-count {
+        text-align: right;
+        font-size: 12px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        margin-top: 4px;
     }
 </style>

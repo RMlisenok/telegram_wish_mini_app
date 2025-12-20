@@ -149,7 +149,7 @@
                         />
                     {:else if currentScreen === 'shareProfile'}
                         <ShareProfileScreen {user} on:back={() => navigate('main') }/>
-                    
+                    <!-- 2005_Dass_21.12.2025 -->
                     {:else if currentScreen === 'wishesCreate'}
                         <WishesScreenCreate
                             onGoBack={() => navigate('wishes')}
