@@ -9,7 +9,7 @@
 
     // Состояния для переключателей
     let birthdayReminders = true;
-
+    let newFollowers = true;
 
     function saveSettings() {
         
@@ -23,6 +23,9 @@
             switch(settingName) {
                 case 'birthdayReminders':
                     birthdayReminders = !birthdayReminders;
+                    break;
+                case 'newFollowers':
+                    newFollowers = !newFollowers;
                     break;
             }
         }
@@ -66,7 +69,33 @@
                     <span class="toggle-label" aria-hidden="true"></span>
                 </div>
             </button>
-
+            
+            <!-- Новые подписчики -->
+            <button
+                type="button"
+                class="setting-item"
+                on:click={() => newFollowers = !newFollowers}
+                on:keydown={(e) => handleSettingKeydown(e, 'newFollowers')}
+                aria-label="Новые подписчики"
+                aria-pressed={newFollowers}
+            >
+                <div class="setting-info">
+                    <div class="setting-title">Новые подписчики</div>
+                    <div class="setting-description">
+                        Получать уведомления о новых подписчиках
+                    </div>
+                </div>
+                <div class="toggle-switch">
+                    <input 
+                        type="checkbox" 
+                        bind:checked={newFollowers}
+                        id="newFollowers"
+                        class="toggle-input"
+                        aria-hidden="true"
+                    />
+                    <span class="toggle-label" aria-hidden="true"></span>
+                </div>
+            </button>
         </div>
         
         <div class="save-button-container">
