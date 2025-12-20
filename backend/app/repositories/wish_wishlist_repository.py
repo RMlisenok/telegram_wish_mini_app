@@ -1,7 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
-from sqlalchemy.orm import selectinload
 
 from app.models.wish_wishlist import WishWishlist
 from app.models.wish import Wish
@@ -30,8 +29,9 @@ class WishWishlistRepository:
         self,
         wish_wishlist_id: int
     ) -> Optional[WishWishlist]:
-        query = select(WishWishlist).where(
-            WishWishlist.id == wish_wishlist_id
+        query = (
+            select(WishWishlist)
+            .where(WishWishlist.id == wish_wishlist_id)
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
@@ -44,19 +44,16 @@ class WishWishlistRepository:
         order_position: Optional[int] = None
     ) -> Optional[WishWishlist]:
         existing = await self.get(wish_id, wishlist_id)
-
         if existing:
             return None
         wish_exists = await self.session.execute(
             select(Wish).where(Wish.id == wish_id)
         )
-
         if not wish_exists.scalar_one_or_none():
             return None
         wishlist_exists = await self.session.execute(
             select(Wishlist).where(Wishlist.id == wishlist_id)
         )
-
         if not wishlist_exists.scalar_one_or_none():
             return None
 
@@ -126,12 +123,7 @@ class WishWishlistRepository:
         query = (
             select(WishWishlist)
             .where(WishWishlist.wish_id == wish_id)
-            .order_by(WishWishlist.order_position)
             .limit(limit)
-            .options(
-                selectinload(WishWishlist.wish),
-                selectinload(WishWishlist.wishlist)
-            )
         )
         result = await self.session.execute(query)
         return list(result.scalars().all())
@@ -146,10 +138,6 @@ class WishWishlistRepository:
             .where(WishWishlist.wishlist_id == wishlist_id)
             .order_by(WishWishlist.order_position)
             .limit(limit)
-            .options(
-                selectinload(WishWishlist.wish),
-                selectinload(WishWishlist.wishlist)
-            )
         )
         result = await self.session.execute(query)
         return list(result.scalars().all())
@@ -158,8 +146,11 @@ class WishWishlistRepository:
         self,
         wishlist_id
     ) -> int:
-        query = select(func.count()).select_from(WishWishlist).where(
-            WishWishlist.wishlist_id == wishlist_id
+        query = (
+            select(func.count())
+            .select_from(WishWishlist)
+            .where(WishWishlist.wishlist_id == wishlist_id)
         )
-        result = self.session.execute(query)
-        return result.scalar_one() or 0
+        result = await self.session.execute(query)
+        count = result.scalar_one_or_none()
+        return count if count is not None else 0
