@@ -95,6 +95,10 @@
     {/if}
 </section>
 
+<div style="padding:0 16px 12px;">
+    <Button full on:click={openForm}>+ Новое желание</Button>
+</div>
+
 <!-- Модальное окно детального просмотра -->
 {#if showDetailModal && selectedWish}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
