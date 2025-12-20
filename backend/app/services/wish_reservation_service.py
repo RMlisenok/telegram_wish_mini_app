@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wish_reservation_repository import WishReservationRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
+from app.repositories.wishlist_repository import WishlistRepository
+from app.repositories.wish_repository import WishRepository
 from app.schemas.wish_reservation import ReservationCreate, ReservationResponse
 
 
@@ -13,6 +15,8 @@ class ReservationService:
     ):
         self.session = session
         self.rep_reservation = WishReservationRepository(session)
+        self.rep_wish = WishRepository(session)
+        self.rep_wishlist = WishlistRepository(session)
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def get_reservation(
@@ -40,17 +44,15 @@ class ReservationService:
         )
         if not connection:
             return None
+        
         reservation = await self.rep_reservation.create(
             wish_wishlist_id=reservation_data.wish_wishlist_id,
             reserved_by_id=user_id
         )
         if reservation:
-            await connection.wish.update(is_booked=True)
+            await self.rep_wish.update(connection.wish_id, is_booked=True)
             await self.session.commit()
-            reservation_with_detail = await self.rep_reservation.get(
-                reservation.id
-            )
-            return ReservationResponse.model_validate(reservation_with_detail)
+            return ReservationResponse.model_validate(reservation)
         return None
 
     async def remove_reservation(
@@ -88,9 +90,10 @@ class ReservationService:
     async def get_wish_reservation(
         self,
         wish_wishlist_id: int,
-    ) -> ReservationResponse:
-        reservation = self.rep_reservation.get_wish(
-            wish_wishlist_id=wish_wishlist_id
+        limit: int = 10
+    ) -> List[ReservationResponse]:
+        reservations = self.rep_reservation.get_reservations_by_wish_wishlist(
+            wish_wishlist_id=wish_wishlist_id,
+            limit=limit
         )
-
-        return ReservationResponse.model_validate(reservation)
+        return [ReservationResponse.model_validate(res) for res in reservations]
