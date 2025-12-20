@@ -1,6 +1,7 @@
 <!-- 2002_2_Dass_18.12.2025 -->
 <script>
     import Button from '$lib/components/ui/Button.svelte';
+    import { userStore } from '$lib/stores/data';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {
@@ -8,9 +9,12 @@
         }
     }
 
-    let showSubscriptions = true;
+    let showSubscriptions = $userStore.showSubscriptions;
 
     function saveSettings() {
+        userStore.set({
+            showSubscriptions,
+        });
         console.log('Сохранение настроек:', { showSubscriptions });
         // Здесь будет запрос к API для сохранения настройки
         goBack();
