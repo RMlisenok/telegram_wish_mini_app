@@ -34,8 +34,11 @@ class WishlistRepository:
         user_id: int,
         limit: int = 10
     ) -> List[Wishlist]:
-        query = select(
-            Wishlist).where(Wishlist.user_id == user_id).limit(limit)
+        query = (
+            select(Wishlist)
+            .where(Wishlist.user_id == user_id)
+            .limit(limit)
+        )
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
@@ -44,15 +47,15 @@ class WishlistRepository:
         wishlist_id: int,
         wishlist_data: WishlistUpdate
     ) -> Optional[Wishlist]:
-        update_data = wishlist_data.model_dump(exclude_unset=True)
+        # update_data = wishlist_data.model_dump(exclude_unset=True)
 
-        if not update_data:
+        if not wishlist_data:
             return await self.get(wishlist_id)
 
         stmt = (
             update(Wishlist)
             .where(Wishlist.id == wishlist_id)
-            .values(**update_data)
+            .values(**wishlist_data)
             .returning(Wishlist)
         )
 
