@@ -10,6 +10,8 @@
     // Состояния для переключателей
     let birthdayReminders = true;
     let newFollowers = true;
+    let postBirthdayNotifications = true;
+    let wishlistAccessRequests = true;
 
     function saveSettings() {
         
@@ -26,6 +28,12 @@
                     break;
                 case 'newFollowers':
                     newFollowers = !newFollowers;
+                    break;
+                case 'postBirthdayNotifications':
+                    postBirthdayNotifications = !postBirthdayNotifications;
+                    break;
+                case 'wishlistAccessRequests':
+                    wishlistAccessRequests = !wishlistAccessRequests;
                     break;
             }
         }
@@ -90,6 +98,60 @@
                         type="checkbox" 
                         bind:checked={newFollowers}
                         id="newFollowers"
+                        class="toggle-input"
+                        aria-hidden="true"
+                    />
+                    <span class="toggle-label" aria-hidden="true"></span>
+                </div>
+            </button>
+
+            <!-- Уведомления после собственного ДР -->
+            <button
+                type="button"
+                class="setting-item"
+                on:click={() => postBirthdayNotifications = !postBirthdayNotifications}
+                on:keydown={(e) => handleSettingKeydown(e, 'postBirthdayNotifications')}
+                aria-label="Уведомления после собственного ДР"
+                aria-pressed={postBirthdayNotifications}
+            >
+                <div class="setting-info">
+                    <div class="setting-title">Уведомления после собственного ДР</div>
+                    <div class="setting-description">
+                        Перемещение забронированных подарков в исполненные (п.6)
+                    </div>
+                </div>
+                <div class="toggle-switch">
+                    <input 
+                        type="checkbox" 
+                        bind:checked={postBirthdayNotifications}
+                        id="postBirthdayNotifications"
+                        class="toggle-input"
+                        aria-hidden="true"
+                    />
+                    <span class="toggle-label" aria-hidden="true"></span>
+                </div>
+            </button>
+
+            <!-- Заявки на доступ к вишлистам -->
+            <button
+                type="button"
+                class="setting-item"
+                on:click={() => wishlistAccessRequests = !wishlistAccessRequests}
+                on:keydown={(e) => handleSettingKeydown(e, 'wishlistAccessRequests')}
+                aria-label="Заявки на доступ к вишлистам"
+                aria-pressed={wishlistAccessRequests}
+            >
+                <div class="setting-info">
+                    <div class="setting-title">Заявки на доступ к вишлистам</div>
+                    <div class="setting-description">
+                        Уведомления о запросах доступа к вашим вишлистам (п.10)
+                    </div>
+                </div>
+                <div class="toggle-switch">
+                    <input 
+                        type="checkbox" 
+                        bind:checked={wishlistAccessRequests}
+                        id="wishlistAccessRequests"
                         class="toggle-input"
                         aria-hidden="true"
                     />
