@@ -59,7 +59,10 @@ class WishlistService:
         self,
         wishlist_id: int
     ) -> bool:
-        return await self.rep_wishlist.delete(wishlist_id)
+        success = await self.rep_wishlist.delete(wishlist_id)
+        if success:
+            await self.session.commit()
+        return success
 
     async def get_user_wishlist(
         self,

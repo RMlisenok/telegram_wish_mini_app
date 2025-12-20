@@ -73,14 +73,14 @@ async def delete_wishlist(
     wishlist_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    service = WishlistService(db)
-    wishlist = await service.delete(wishlist_id)
-    if not wishlist:
+    async with db.begin():
+        service = WishlistService(db)
+        delete_status = await service.delete(wishlist_id)
+    if not delete_status:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Wishlist not found"
         )
-    return wishlist
 
 
 @router.post("/{wishlist_id}/wishes",

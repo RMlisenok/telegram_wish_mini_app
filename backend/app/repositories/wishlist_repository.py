@@ -72,9 +72,12 @@ class WishlistRepository:
         self,
         wishlist_id
     ) -> bool:
-        wishlist = await self.session.get(wishlist_id)
-        if wishlist:
+        try:
+            wishlist = await self.get(wishlist_id)
+            if not wishlist:
+                return False
             await self.session.delete(wishlist)
-            await self.session.commit()
             return True
-        return False
+        except Exception as e:
+            print(f"Error deleting wishlist: {e}")
+            return False
