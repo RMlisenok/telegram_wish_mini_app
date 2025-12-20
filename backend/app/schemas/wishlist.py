@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
-from datetime import date, datetime
+from typing import Optional
+from datetime import datetime
 from enum import Enum
 
 
@@ -17,12 +17,18 @@ class WishlistBase(BaseModel):
     photo: Optional[str] = None
     typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
 
-    model_config = ConfigDict(from_attributes=True)
+    # model_config = ConfigDict(from_attributes=True)
 
 
-class WishlistCreate(WishlistBase):
-    pass
+class WishlistCreate(BaseModel):
+    name: str
+    description: str
+    photo: Optional[str] = None
+    typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
 
+
+class WishlistCreateDb(WishlistCreate):
+    user_id: int
 
 class WishlistUpdate(BaseModel):
     name: str
@@ -35,7 +41,6 @@ class WishlistResponse(WishlistBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    wishes: List["WishShort"] = []
     wishes_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)
