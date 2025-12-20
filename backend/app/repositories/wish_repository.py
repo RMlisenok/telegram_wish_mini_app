@@ -23,15 +23,15 @@ class WishRepository:
     async def update(
         self,
         wish_id: int,
-        wish_data: WishUpdate
+        wish_data: dict
     ) -> Optional[Wish]:
-        update_data = wish_data.model_dump(exclude_unset=True)
-        if not update_data:
+        # update_data = wish_data.model_dump(exclude_unset=True)
+        if not wish_data:
             return await self.get(wish_id)
         stmt = (
             update(Wish)
             .where(Wish.id == wish_id)
-            .values(**update_data)
+            .values(**wish_data)
             .returning(Wish)
         )
         result = await self.session.execute(stmt)
@@ -63,9 +63,13 @@ class WishRepository:
         self,
         wish_id: int
     ) -> bool:
-        wish = await self.session.get(wish_id)
-        if wish:
+        try:
+            wish = await self.get(wish_id)
+            if not wish:
+                return False
             await self.session.delete(wish)
-            await self.session.commit()
             return True
-        return False
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error deleting wish: {e}")
+            return False
