@@ -53,6 +53,22 @@
         }
     };
 
+    // Заглушки для кнопок создания, редактирования и удаления желания
+    const openForm = () => {
+        console.log('Создание нового желания');
+        // TODO: Реализовать создание
+    };
+    
+    const handleEdit = () => {
+        console.log('Редактирование желания:', selectedWish.id);
+        // TODO: Реализовать редактирование
+    };
+
+    const handleDelete = () => {
+        console.log('Удаление желания:', selectedWish.id);
+        // TODO: Реализовать удаление
+    };
+
 </script>
 
 <header class="app-header">
@@ -105,6 +121,12 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="detail-backdrop" on:click={closeDetailModal}>
         <div class="detail-panel" on:click|stopPropagation>
+            <!-- Кнопка закрытия (крестик) -->
+            <button class="close-button" on:click={closeDetailModal} aria-label="Закрыть">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
             <h2>Детальное описание желания</h2>
             <div class="detail-content">
                 <!-- Изображение -->
@@ -165,10 +187,11 @@
                     <p class="detail-no-info">Нет дополнительной информации</p>
                 {/if}
 
-                <!-- Кнопка закрытия -->
-                <div class="panel-actions">
-                    <Button kind="ghost" on:click={closeDetailModal}>Закрыть</Button>
-                </div>
+                <!-- Кнопки действий -->
+            <div class="panel-actions">
+                <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
+                <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+            </div>
             </div>
         </div>
     </div>
@@ -406,6 +429,23 @@
         font-style: italic;
         padding: 20px 0;
         font-size: 14px;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        z-index: 10;
     }
 </style>
 
