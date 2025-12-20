@@ -35,9 +35,14 @@
     }
     // 2002_3_Dass_18.12.2025 <--
     
+    //2002_4_Dass_20.12.2025 -->
+    export let onNavigateToNotificationSettings;
     function navigateToNotificationSettings() {
-        alert('Переход к разделу "Настройки уведомлений" (FS-3.4)');
+        if (onNavigateToNotificationSettings) {
+            onNavigateToNotificationSettings();
+        }
     }
+    //2002_4_Dass_20.12.2025 <--
 
     // 2002_5_Dass_18.12.2025 -->
     export let onNavigateToLegalInformation;

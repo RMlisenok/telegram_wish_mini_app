@@ -10,6 +10,7 @@
     import SettingsScreenPrivacySettings from '$lib/components/screens/settings/SettingsScreen_PrivacySettings.svelte';
     import SettingsScreenInterfaceSettings from '$lib/components/screens/settings/SettingsScreen_InterfaceSettings.svelte'; //2002_3_Dass_18.12.2025
     import SettingsScreenLegalInformation from '$lib/components/screens/settings/SettingsScreen_LegalInformation.svelte'; //2002_5_Dass_18.12.2025
+    import SettingsScreenNotificationSettings from '$lib/components/screens/settings/SettingsScreen_NotificationSettings.svelte'; //2002_4_Dass_18.12.2025
     //Dass_18.12.2025 <--
 
     import { userStore } from '$lib/stores/data.js';
@@ -70,6 +71,7 @@
                         onNavigateToPrivacySettings={() => navigate('privacySettings')}
                         onNavigateToInterfaceSettings={() => navigate('interfaceSettings')}
                         onNavigateToLegalInformation={() => navigate('legalInformation')}
+                        onNavigateToNotificationSettings={() => navigate('notifficationSettings')} 
                     />
                 <!-- Dass_18.12.2025 add EditProfile-->
                     {:else if currentScreen === 'editProfile'}
@@ -89,6 +91,11 @@
                 <!-- 2002_5_Dass_18.12.2025 add legalInformation-->
                     {:else if currentScreen === 'legalInformation'}
                     <SettingsScreenLegalInformation
+                        onGoBack={() => navigate('settings')}
+                    />
+                <!-- 2002_4_Dass_20.12.2025 add notificationSettings-->
+                    {:else if currentScreen === 'notifficationSettings'}
+                    <SettingsScreenNotificationSettings
                         onGoBack={() => navigate('settings')}
                     />
                 {/if}
