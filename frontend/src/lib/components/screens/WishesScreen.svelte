@@ -178,6 +178,7 @@
         gap: 16px;
         padding: 0 16px;
         justify-content: center;
+        justify-items: center;
     }
 
     .wish-card {
@@ -352,13 +353,6 @@
 
     .detail-section {
         margin-bottom: 16px;
-    }
-
-    .detail-section h4 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #374151;
-        margin: 0 0 8px 0;
     }
 
     .detail-description {
