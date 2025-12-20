@@ -143,6 +143,9 @@
                         <QuestionnaireScreen {user} on:back={() => navigate('main')} />
                     {:else if currentScreen === 'wishes'}
                         <WishesScreen />
+                    {:else if currentScreen === 'shareProfile'}
+                        <ShareProfileScreen 
+                            {user} on:back={() => navigate('main') }/>
                 {/if}
             </div>
             
