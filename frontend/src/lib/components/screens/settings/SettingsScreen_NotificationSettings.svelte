@@ -1,5 +1,6 @@
 <!-- 2002_4_Dass_20.12.2025 -->
 <script>
+    import { notificationSettingsStore } from '$lib/stores/data';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {
@@ -8,13 +9,18 @@
     }
 
     // Состояния для переключателей
-    let birthdayReminders = true;
-    let newFollowers = true;
-    let postBirthdayNotifications = true;
-    let wishlistAccessRequests = true;
+    let birthdayReminders = $notificationSettingsStore.birthdayReminders;
+    let newFollowers = $notificationSettingsStore.newFollowers;
+    let postBirthdayNotifications = $notificationSettingsStore.postBirthdayNotifications;
+    let wishlistAccessRequests = $notificationSettingsStore.wishlistAccessRequests;
 
     function saveSettings() {
-        
+        notificationSettingsStore.set({
+            birthdayReminders,
+            newFollowers,
+            postBirthdayNotifications,
+            wishlistAccessRequests
+        });
         // Здесь будет запрос к API для сохранения настроек
         goBack();
     }
@@ -117,7 +123,7 @@
                 <div class="setting-info">
                     <div class="setting-title">Уведомления после собственного ДР</div>
                     <div class="setting-description">
-                        Перемещение забронированных подарков в исполненные (п.6)
+                        Перемещение забронированных подарков в исполненные
                     </div>
                 </div>
                 <div class="toggle-switch">
@@ -144,7 +150,7 @@
                 <div class="setting-info">
                     <div class="setting-title">Заявки на доступ к вишлистам</div>
                     <div class="setting-description">
-                        Уведомления о запросах доступа к вашим вишлистам (п.10)
+                        Уведомления о запросах доступа к вашим вишлистам
                     </div>
                 </div>
                 <div class="toggle-switch">

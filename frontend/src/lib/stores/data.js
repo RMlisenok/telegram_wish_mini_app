@@ -249,3 +249,11 @@ export const subscribersStore = writable([
 
 
 ]);
+
+// Настройки уведомлений 2002_4_Dass_20.12.2025
+export const notificationSettingsStore = writable({
+    birthdayReminders: true,
+    newFollowers: true,
+    postBirthdayNotifications: false,
+    wishlistAccessRequests: false
+});
