@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wish_repository import WishRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
-from app.models.wish import Wish
 from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort
 
 
@@ -12,24 +11,18 @@ class WishService:
         self,
         session: AsyncSession
     ):
+        self.session = session
         self.rep_wish = WishRepository(session)
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def get_wish(
         self,
         wish_id: int
-    ) -> Optional[Wish]:
+    ) -> Optional[WishResponse]:
         wish = await self.rep_wish.get(wish_id)
         if not wish:
             return None
-        connections = await self.rep_wish_wishlist.get_wish_from_all_wishlist(
-            wish_id
-        )
-        response = WishResponse.model_validate(wish)
-        response.wishlists = [
-            connection.wishlist for connection in connections
-        ]
-        return response
+        return WishResponse.model_validate(wish)
 
     async def create_wish(
         self,
@@ -38,8 +31,8 @@ class WishService:
     ) -> WishResponse:
         data = wish_data.model_dump()
         data["user_id"] = user_id
-        wish = self.rep_wish.create(wish_data)
-        return wish_data.model_validate(wish)
+        wish = await self.rep_wish.create(wish_data)
+        return WishResponse.model_validate(wish)
 
     async def update_wish(
         self,
@@ -53,15 +46,18 @@ class WishService:
         return None
 
     async def delete_wish(
-        self,    
+        self,
         wish_id: int
     ) -> bool:
-        return self.rep_wish.delete(wish_id)
+        success = await self.rep_wish.delete(wish_id)
+        if success:
+            await self.session.commit()
+        return success
 
     async def get_user_wish(
         self,
         user_id: int,
         limit: int = 10
     ) -> Optional[WishShort]:
-        wishes = self.rep_wish.get_user_wishlist(user_id, limit)
+        wishes = await self.rep_wish.get_user_wishlist(user_id, limit)
         return [WishShort.model_validate(wish) for wish in wishes]
