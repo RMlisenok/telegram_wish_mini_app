@@ -13,6 +13,13 @@
     import SettingsScreenNotificationSettings from '$lib/components/screens/settings/SettingsScreen_NotificationSettings.svelte'; //2002_4_Dass_18.12.2025
     //Dass_18.12.2025 <--
 
+    import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
+
+    import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
+
+    import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
+
+
     import { userStore } from '$lib/stores/data.js';
 
     let currentScreen = 'start';
@@ -130,10 +137,20 @@
                     <SettingsScreenNotificationSettings
                         onGoBack={() => navigate('settings')}
                     />
+                    <!--   QuestionnaireScreen    -->
+
+                {:else if currentScreen === 'questionnaire'}
+
+                    <QuestionnaireScreen />
+                {:else if currentScreen === 'wishes'}
+                    <WishesScreen />
+
+                    <QuestionnaireScreen {user} on:back={() => navigate('main')} />
                 {/if}
 
             </div>
             
+
 
 
             <!-- TAB BAR -->
