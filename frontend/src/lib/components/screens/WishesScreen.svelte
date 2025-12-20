@@ -121,7 +121,7 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="detail-backdrop" on:click={closeDetailModal}>
         <div class="detail-panel" on:click|stopPropagation>
-            <!-- Кнопка закрытия (крестик) -->
+            <!-- Кнопка закрытия -->
             <button class="close-button" on:click={closeDetailModal} aria-label="Закрыть">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 6L6 18M6 6L18 18" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -188,10 +188,10 @@
                 {/if}
 
                 <!-- Кнопки действий -->
-            <div class="panel-actions">
-                <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
-                <Button kind="danger" on:click={handleDelete}>Удалить</Button>
-            </div>
+                <div class="panel-actions">
+                    <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
+                    <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+                </div>
             </div>
         </div>
     </div>
