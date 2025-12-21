@@ -14,6 +14,7 @@
     //Dass_18.12.2025 <--
 
     import WishesScreenCreate from '$lib/components/screens/WishesScreen_Create.svelte'; //2005_Dass_21.12.2025
+    import WishlistsScreenCreate from '$lib/components/screens/WishlistsScreen_Create.svelte'; //2008/2_Dass_21.12.2025
 
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
@@ -103,6 +104,7 @@
                             on:openSubscriptions={() => navigate('subscriptions')}
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
+                            on:openCreateWishlists={() => navigate('wishlistsCreate')}
                     />
                 <!-- Dass_18.12.2025 add SettingsScreen-->
                     {:else if currentScreen === 'settings'}
@@ -154,6 +156,12 @@
                         <WishesScreenCreate
                             onGoBack={() => navigate('wishes')}
                         />
+                    <!-- 2008/2_Dass_21.12.2025 -->
+                     {:else if currentScreen === 'wishlistsCreate'}
+                        <WishlistsScreenCreate
+                            onGoBack={() => navigate('wishlists')}
+                        />
+                    
                 {/if}
             </div>
             
