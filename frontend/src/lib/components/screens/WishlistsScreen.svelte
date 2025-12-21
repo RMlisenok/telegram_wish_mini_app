@@ -38,6 +38,26 @@
         dispatch('openMainScreen');
     };
 
+    // Получить слово "желание" в корректной форме в зависимости от числа
+    const getWishesWord = (count) => {
+        if (count === 0) return 'желаний';
+        
+        const lastDigit = count % 10;
+        const lastTwoDigits = count % 100;
+        
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+            return 'желаний';
+        }
+        
+        if (lastDigit === 1) {
+            return 'желание';
+        } else if (lastDigit >= 2 && lastDigit <= 4) {
+            return 'желания';
+        } else {
+            return 'желаний';
+        }
+    };
+
     // Получить количество желаний в вишлисте
     const getWishlistCount = (wishlistId) => {
         return $wishesStore.filter((wish) => 
@@ -126,7 +146,7 @@
 
                         <!-- Количество желаний -->
                         <div class="wishlist-count">
-                            {getWishlistCount(wishlist.id)} желаний
+                            {getWishlistCount(wishlist.id)} {getWishesWord(getWishlistCount(wishlist.id))}
                         </div>
 
                         <!-- Владелец -->
