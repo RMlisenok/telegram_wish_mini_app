@@ -4,9 +4,10 @@
     import Avatar from '$lib/components/ui/Avatar.svelte';
     import {createEventDispatcher} from 'svelte';
     import {makeProfileTgUrl, makeProfileShareUrl} from '$lib/stores/data.js';
+    import {userStore } from '$lib/stores/data.js';
 
 
-    export let user;
+    let user = $userStore;
 
     const dispatch = createEventDispatcher();
     const goBack = () => dispatch('back');

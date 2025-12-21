@@ -13,6 +13,8 @@
     import SettingsScreenNotificationSettings from '$lib/components/screens/settings/SettingsScreen_NotificationSettings.svelte'; //2002_4_Dass_18.12.2025
     //Dass_18.12.2025 <--
 
+    import WishesScreenCreate from '$lib/components/screens/WishesScreen_Create.svelte'; //2005_Dass_21.12.2025
+
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
     import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
@@ -143,7 +145,16 @@
                     {:else if currentScreen === 'questionnaire'}
                         <QuestionnaireScreen {user} on:back={() => navigate('main')} />
                     {:else if currentScreen === 'wishes'}
-                        <WishesScreen />
+                        <WishesScreen 
+                            onNavigateToCreateWishes={() => navigate('wishesCreate')} 
+                        />
+                    {:else if currentScreen === 'shareProfile'}
+                        <ShareProfileScreen {user} on:back={() => navigate('main') }/>
+                    <!-- 2005_Dass_21.12.2025 -->
+                    {:else if currentScreen === 'wishesCreate'}
+                        <WishesScreenCreate
+                            onGoBack={() => navigate('wishes')}
+                        />
                 {/if}
             </div>
             

@@ -54,9 +54,11 @@
     };
 
     // Заглушки для кнопок создания, редактирования и удаления желания
+    export let onNavigateToCreateWishes; //2005_Dass_20.12.2025
     const openForm = () => {
         console.log('Создание нового желания');
         // TODO: Реализовать создание
+        onNavigateToCreateWishes(); //2005_Dass_20.12.2025
     };
     
     const handleEdit = () => {
