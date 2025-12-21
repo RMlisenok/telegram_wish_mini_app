@@ -10,7 +10,7 @@ from app.core.security import (
 from app.core.dependencies import get_current_user_id
 from app.services.user_service import UserService
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -73,3 +73,20 @@ async def create_test_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Exception as e: {str(e)}"
         )
+
+
+@router.put("/me")
+async def update_current_user(
+    user_data: UserUpdate,
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+) -> UserResponse:
+    service = UserService(db)
+    user = await service.update_user(user_id, user_data)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user
