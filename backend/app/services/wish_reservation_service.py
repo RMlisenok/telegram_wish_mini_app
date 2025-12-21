@@ -44,13 +44,13 @@ class ReservationService:
         )
         if not connection:
             return None
-        
+
         reservation = await self.rep_reservation.create(
             wish_wishlist_id=reservation_data.wish_wishlist_id,
             reserved_by_id=user_id
         )
         if reservation:
-            await self.rep_wish.update(connection.wish_id, is_booked=True)
+            await self.rep_wish.update(connection.wish_id, {"is_booked": True})
             await self.session.commit()
             return ReservationResponse.model_validate(reservation)
         return None

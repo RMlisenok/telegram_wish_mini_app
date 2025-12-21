@@ -37,7 +37,7 @@ async def create_reservation(
     if not reservation:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to create reservation"
+            detail="Failed TO create reservation"
         )
     return reservation
 

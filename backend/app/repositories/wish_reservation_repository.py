@@ -49,31 +49,36 @@ class WishReservationRepository:
 
     async def check_wish_reservation(
         self,
-        wish_wihslist_id: int
+        wish_wishlist_id: int
     ) -> bool:
         query = (
             select(WishReservation)
-            .where(WishReservation.wish_wishlist_id == wish_wihslist_id)
+            .where(WishReservation.wish_wishlist_id == wish_wishlist_id)
         )
         result = await self.session.execute(query)
-        return result.scalar_one_or_none is not None
+        return result.scalar_one_or_none() is not None
 
     async def create(
         self,
         wish_wishlist_id: int,
-        user_id: int
+        reserved_by_id: int
     ) -> Optional[WishReservation]:
-        existing = self.check_wish_reservation(wish_wishlist_id)
+        existing = await self.check_wish_reservation(wish_wishlist_id)
         if existing:
             return None
         reservation = WishReservation(
             wish_wishlist_id=wish_wishlist_id,
-            reserved_by_id=user_id
+            reserved_by_id=reserved_by_id
         )
-        self.session.add(reservation)
-        await self.session.commit()
-        await self.session.refresh(reservation)
-        return reservation
+        try:
+            self.session.add(reservation)
+            await self.session.commit()
+            await self.session.refresh(reservation)
+            return reservation
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Error creating reservation: {e}")
+            return None
 
     async def delete(
         self,
