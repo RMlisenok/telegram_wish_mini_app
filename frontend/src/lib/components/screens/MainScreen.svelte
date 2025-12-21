@@ -23,6 +23,7 @@
     const openSubscriptions = () => dispatch('openSubscriptions');
     const openSubscribers = () => dispatch('openSubscribers');
     const openShareProfile = () => dispatch('openShareProfile');
+    const openCreateWishlists = () => dispatch('openCreateWishlists');
 
     const ICON_GIFT = '/icons/maingift.svg';
 
@@ -129,7 +130,7 @@
             </div>
         {/if}
 
-        <Button full kind="ghost" on:click={openWishlists}>+ Создать вишлист</Button>
+        <Button full kind="ghost" on:click={openCreateWishlists}>+ Создать вишлист</Button>
     </section>
 
     <!-- Подписки -->

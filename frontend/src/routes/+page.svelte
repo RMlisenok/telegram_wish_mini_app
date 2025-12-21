@@ -101,6 +101,7 @@
                             on:openSubscriptions={() => navigate('subscriptions')}
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
+                            on:openCreateWishlists={() => navigate('createWishlists')}
                     />
                 <!-- Dass_18.12.2025 add SettingsScreen-->
                     {:else if currentScreen === 'settings'}
