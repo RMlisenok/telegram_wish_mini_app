@@ -5,7 +5,7 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.block_repository import BlockRepository
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from app.schemas.block import BlockCreate, BlockListResponse, BlockResponse, BlockStatusResponse
+from app.schemas.block import BlockResponse
 
 
 class UserService:
