@@ -61,35 +61,35 @@
             <div class="char-count">{title.length}/100</div>
         </div>
         <!-- Фото -->
-            <div class="form-group">
-                <div class="form-label">
-                    Фотография
-                </div>
-                <div class="photo-upload-area">
-                    {#if photoPreview}
-                        <div class="photo-preview">
-                            <img src={photoPreview} alt="Preview" />
-                            <Button type="button" kind="ghost" on:click={removePhoto}>
-                            <img src="/icons/delete.png" alt="" class="remove-photo-btn" />
-                            <span>Удалить</span>
-                            </Button>
-                        </div>
-                    {:else}
-                        <label class="photo-upload-label">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                on:change={handlePhotoUpload}
-                                class="photo-upload-input"
-                            />
-                            <div class="photo-upload-placeholder">
-                                <img src="/icons/add.png" alt="" class="upload-icon">
-                                <div class="upload-text">Добавить фото</div>
-                            </div>
-                        </label>
-                    {/if}
-                </div>
+        <div class="form-group">
+            <div class="form-label">
+                Фотография
             </div>
+            <div class="photo-upload-area">
+                {#if photoPreview}
+                    <div class="photo-preview">
+                        <img src={photoPreview} alt="Preview" />
+                        <Button type="button" kind="ghost" on:click={removePhoto}>
+                        <img src="/icons/delete.png" alt="" class="remove-photo-btn" />
+                        <span>Удалить</span>
+                        </Button>
+                    </div>
+                {:else}
+                    <label class="photo-upload-label">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            on:change={handlePhotoUpload}
+                            class="photo-upload-input"
+                        />
+                        <div class="photo-upload-placeholder">
+                            <img src="/icons/add.png" alt="" class="upload-icon">
+                            <div class="upload-text">Добавить фото</div>
+                        </div>
+                    </label>
+                {/if}
+            </div>
+        </div>
     </div>
 </div>
 
