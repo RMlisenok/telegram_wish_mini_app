@@ -105,3 +105,27 @@ async def get_all_users(
             detail="Users not found"
         )
     return users
+
+
+@router.get("/{user_id}")
+async def get_user_by_id(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+
+    # is_book = await service.check_block_status(
+    #     user_id, current_user_id
+    # )
+    # if not is_book:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="Cannot access blocked user"
+    #     )
+    user = await service.get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user
