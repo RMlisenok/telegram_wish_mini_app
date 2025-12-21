@@ -79,10 +79,10 @@ class ReservationService:
     async def get_user_reservation(
         self,
         user_id: int,
-        limit: 10
+        limit: int = 10
     ) -> List[ReservationResponse]:
         reservations = await self.rep_reservation.get_user_reservations(
-            reserved_id=user_id,
+            user_id=user_id,
             limit=limit
         )
         return [ReservationResponse.model_validate(res) for res in reservations]

@@ -17,7 +17,7 @@ async def get_user_reservation(
     limit: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
-    service = ReservationService(get_db)
+    service = ReservationService(db)
     return await service.get_user_reservation(user_id, limit)
 
 
@@ -27,10 +27,10 @@ async def get_user_reservation(
 async def create_reservation(
     user_id: int,
     reservation_data: ReservationCreate,
-    db: AsyncSession = Depends(get_db)    
+    db: AsyncSession = Depends(get_db)
 ):
     service = ReservationService(db)
-    reservation = service.create_reservation(
+    reservation = await service.create_reservation(
         user_id,
         reservation_data
     )
@@ -48,7 +48,7 @@ async def delete_reservation(
     db: AsyncSession = Depends(get_db)
 ):
     service = ReservationService(db)
-    succes = service.remove_reservation(reservation_id)
+    succes = await service.remove_reservation(reservation_id)
     if not succes:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
