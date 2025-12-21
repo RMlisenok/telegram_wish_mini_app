@@ -1,6 +1,8 @@
 <!-- 2005_Dass_21.12.2025 -->
 <script>
     import TextField from '$lib/components/ui/TextField.svelte';
+    import Button from '$lib/components/ui/Button.svelte';
+    import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {
@@ -18,6 +20,7 @@
     let price = '';
     let currency = '';
     let description = '';
+    let selectedWishlists = [];
 
     const currencies = [
         { value: 'RUB', label: '₽' },
@@ -44,6 +47,32 @@
     function removePhoto() {
         photoFile = null;
         photoPreview = null;
+    }
+
+    // Сохранение желания
+    function saveWish() {
+        // Валидация
+        if (!title.trim()) {
+            error = 'Пожалуйста, заполните название желания';
+            return;
+        }
+        
+        error = '';
+        
+        // Создание объекта желания
+        const newWish = {
+            title: title.trim(),
+            description: description.trim(),
+            price: price ? parseFloat(price) : null,
+            currency: currency || null,
+            link: link.trim(),
+            photo: photoPreview,
+            wishlistIds: selectedWishlists.map(id => parseInt(id))
+        };
+        wishesStore.update(wishes => [...wishes, newWish]);
+        
+        // Возвращаемся назад
+        goBack();
     }
 </script>
 
@@ -165,6 +194,68 @@
                 maxlength="500"
             ></textarea>
             <div class="char-count">{description.length}/500</div>
+        </div>
+        <!-- Выбор вишлистов -->
+        <div class="form-group">
+            <div class="form-label">
+                Вишлисты для привязки
+            </div>
+            
+            {#if $wishlistsStore.length === 0}
+                <div class="empty-state">
+                    У вас пока нет вишлистов. Создайте вишлист, чтобы привязать к нему желание.
+                </div>
+            {:else}
+                <div class="wishlists-selector">
+                    {#each $wishlistsStore as wishlist}
+                        <label class="wishlist-option">
+                            <input
+                                type="checkbox"
+                                value={wishlist.id}
+                                bind:group={selectedWishlists}
+                                class="wishlist-checkbox"
+                            />
+                            <div class="wishlist-option-content">
+                                <div class="wishlist-option-title">
+                                    {wishlist.title}
+                                </div>
+                                <div class="wishlist-option-meta">
+                                    {wishlist.privacy === 'public' 
+                                        ? 'Виден всем' 
+                                        : wishlist.privacy === 'private' 
+                                            ? 'Только мне' 
+                                            : 'Для выбранных'}
+                                    · {wishlist.count || 0} жел.
+                                </div>
+                            </div>
+                            <div class="wishlist-checkmark">
+                                {#if selectedWishlists.includes(wishlist.id.toString())}
+                                    ✓
+                                {/if}
+                            </div>
+                        </label>
+                    {/each}
+                </div>
+                
+                <div class="selected-count">
+                    Выбрано: {selectedWishlists.length} из {$wishlistsStore.length}
+                </div>
+            {/if}
+        </div>
+        
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+            <Button kind="primary" full on:click={goBack}>
+                Отменить
+            </Button>
+            <Button 
+                type="button" 
+                kind="primary" 
+                full
+                on:click={saveWish}
+            >
+                Сохранить
+            </Button>
         </div>
     </div>
 </div>
@@ -334,5 +425,96 @@
         resize: vertical;
         min-height: 100px;
         font-family: inherit;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+    } 
+
+    .wishlists-selector {
+        border: 1px solid var(--tg-theme-hint-color, #d1d1d6);
+        border-radius: 12px;
+        overflow: hidden;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .wishlist-option {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+        cursor: pointer;
+        transition: background-color 0.2s;
+        background: var(--tg-theme-secondary-bg-color, #ffffff);
+    }
+
+    .wishlist-option:last-child {
+        border-bottom: none;
+    }
+
+    .wishlist-option:hover {
+        background: var(--tg-theme-hint-color, #f5f5f7);
+    }
+
+    .wishlist-checkbox {
+        display: none;
+    }
+
+    .wishlist-option-content {
+        flex: 1;
+        margin-right: 12px;
+    }
+
+    .wishlist-option-title {
+        font-weight: 500;
+        color: var(--tg-theme-text-color, #1d1d1f);
+        margin-bottom: 2px;
+    }
+
+    .wishlist-option-meta {
+        font-size: 12px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+    }
+
+    .wishlist-checkmark {
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        border: 2px solid var(--tg-theme-hint-color, #d1d1d6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: transparent;
+        transition: all 0.2s;
+    }
+
+    .wishlist-option input:checked + .wishlist-option-content + .wishlist-checkmark {
+        background: var(--tg-theme-link-color, #007AFF);
+        border-color: var(--tg-theme-link-color, #007AFF);
+        color: white;
+    }
+
+    .selected-count {
+        text-align: right;
+        font-size: 13px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        margin-top: 8px;
+    }
+
+    .empty-state {
+        padding: 16px;
+        text-align: center;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        font-size: 14px;
+        border: 1px dashed var(--tg-theme-hint-color, #d1d1d6);
+        border-radius: 12px;
+        background: var(--tg-theme-secondary-bg-color, #f9f9f9);
     }
 </style>
