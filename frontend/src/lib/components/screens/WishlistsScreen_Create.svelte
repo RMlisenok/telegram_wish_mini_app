@@ -26,6 +26,12 @@
             reader.readAsDataURL(file);
         }
     }
+    let privacy = 'public'; // Значение по умолчанию
+    const privacyOptions = [
+        { value: 'private', label: 'Приватный', description: 'Виден только владельцу' },
+        { value: 'restricted', label: 'Для определенных пользователей', description: 'Виден владельцу и пользователям, которым владелец дал доступ' },
+        { value: 'public', label: 'Публичный', description: 'Виден всем' }
+    ];
     
     // Удаление фото
     function removePhoto() {
@@ -49,7 +55,8 @@
         const newWishlist = {
             title: title.trim(),
             description: description.trim(),
-            photo: photoPreview
+            photo: photoPreview,
+            privacy: privacy
         };
         wishlistsStore.update(wishlists => [...wishlists, newWishlist]);
         
@@ -128,6 +135,35 @@
                     </div>
                 </label>
             {/if}
+        </div>
+    </div>
+
+    <!-- Приватность -->
+    <div class="form-group">
+        <div class="form-label">
+            Приватность
+        </div>
+        <div class="privacy-options">
+            {#each privacyOptions as option}
+                <label class="privacy-option">
+                    <input
+                        type="radio"
+                        name="privacy"
+                        value={option.value}
+                        bind:group={privacy}
+                        class="privacy-input"
+                    />
+                    <div class="privacy-content">
+                        <div class="privacy-title">{option.label}</div>
+                        <div class="privacy-description">{option.description}</div>
+                    </div>
+                    <div class="radio-indicator">
+                        {#if privacy === option.value}
+                            <div class="radio-dot"></div>
+                        {/if}
+                    </div>
+                </label>
+            {/each}
         </div>
     </div>
 
@@ -290,4 +326,71 @@
         padding-top: 20px;
         border-top: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
     } 
+
+    .privacy-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .privacy-option {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border: 1px solid var(--tg-theme-hint-color, #d1d1d6);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--tg-theme-secondary-bg-color, #f9f9f9);
+    }
+
+    .privacy-option:hover {
+        border-color: var(--tg-theme-link-color, #007AFF);
+        background: var(--tg-theme-secondary-bg-color, #f0f0f5);
+    }
+
+    .privacy-input {
+        display: none;
+    }
+
+    .privacy-content {
+        flex: 1;
+        margin-right: 12px;
+    }
+
+    .privacy-title {
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--tg-theme-text-color, #1d1d1f);
+        margin-bottom: 4px;
+    }
+
+    .privacy-description {
+        font-size: 14px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        line-height: 1.4;
+    }
+
+    .radio-indicator {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--tg-theme-hint-color, #8e8e93);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .privacy-option input:checked + .privacy-content ~ .radio-indicator {
+        border-color: var(--tg-theme-link-color, #007AFF);
+    }
+
+    .radio-dot {
+        width: 10px;
+        height: 10px;
+        background: var(--tg-theme-link-color, #007AFF);
+        border-radius: 50%;
+    }
 </style>
