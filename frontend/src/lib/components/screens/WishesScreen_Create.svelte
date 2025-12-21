@@ -14,6 +14,7 @@
     let title = '';
     let photoFile = null;
     let photoPreview = null;
+    let link = '';
 
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
@@ -89,6 +90,18 @@
                     </label>
                 {/if}
             </div>
+        </div>
+        <!-- Ссылка -->
+        <div class="form-group">
+            <label for="link" class="form-label">
+                Ссылка на товар
+            </label>
+            <TextField
+                id="link"
+                type="url"
+                bind:value={link}
+                placeholder="https://example.com/product"
+            />
         </div>
     </div>
 </div>
