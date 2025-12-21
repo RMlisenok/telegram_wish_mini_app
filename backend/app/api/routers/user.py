@@ -129,3 +129,40 @@ async def get_user_by_id(
             detail="User not found"
         )
     return user
+
+
+@router.post("/block/{blocked_id}")
+async def block_user(
+    blocker_id: int,
+    blocked_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    if blocker_id == blocked_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot block yourself "
+        )
+    service = UserService(db)
+    block = await service.block_user(blocker_id, blocked_id)
+    if not block:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to block user"
+        )
+    return block
+
+
+@router.delete("/block/{blocked_id}")
+async def unblock_user(
+    blocker_id: int,
+    blocked_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+    success = await service.unblock_user(blocker_id, blocked_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Block record not found"
+        )
+    return {'message': 'User unblocked successfully'}

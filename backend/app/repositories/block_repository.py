@@ -43,7 +43,7 @@ class BlockRepository:
         )
         self.session.add(block)
         await self.session.commit()
-        await self.session.refresh()
+        await self.session.refresh(block)
         return block
 
     async def unblock_user(
