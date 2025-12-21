@@ -17,6 +17,7 @@
     let link = '';
     let price = '';
     let currency = '';
+    let description = '';
 
     const currencies = [
         { value: 'RUB', label: '₽' },
@@ -149,6 +150,21 @@
                     {/each}
                 </select>
             </div>
+        </div>
+        <!-- Описание -->
+        <div class="form-group">
+            <label for="description" class="form-label">
+                Описание
+            </label>
+            <textarea
+                id="description"
+                bind:value={description}
+                class="form-textarea"
+                placeholder="Расскажите подробнее о вашем желании..."
+                rows="4"
+                maxlength="500"
+            ></textarea>
+            <div class="char-count">{description.length}/500</div>
         </div>
     </div>
 </div>
@@ -287,7 +303,8 @@
     }
 
     .form-input,
-    .form-select {
+    .form-select,
+    .form-textarea {
         width: 100%;
         padding: 12px 16px;
         border: 1px solid var(--tg-theme-hint-color, #d1d1d6);
@@ -305,5 +322,17 @@
     }
     .form-group.half {
         flex: 1;
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--tg-theme-link-color, #007AFF);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
     }
 </style>
