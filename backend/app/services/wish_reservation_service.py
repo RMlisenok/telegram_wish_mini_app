@@ -67,18 +67,15 @@ class ReservationService:
             )
             if not deleted:
                 return False
-            other_reservation = await self.rep_reservation.get(
+
+            connection = await self.rep_wish_wishlist.get_by_id(
                 wish_wishlist_id
             )
-            if not other_reservation:
-                connection = await self.rep_wish_wishlist.get_by_id(
-                    wish_wishlist_id
+            if connection:
+                await self.rep_wish.update(
+                    connection.wish_id,
+                    {"is_booked": False}
                 )
-                if connection:
-                    await self.rep_wish.update(
-                        connection.wish_id,
-                        {"is_booked": False}
-                    )
             return True
         except Exception as e:
             await self.session.rollback()

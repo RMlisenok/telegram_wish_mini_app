@@ -92,9 +92,7 @@ class WishlistService:
         )
         result = []
         for connection in connections:
-            # Создаем объект ответа
             wish_data = WishInWishlistResponse(
-                # Поля из Wish
                 id=connection.wish.id,
                 name=connection.wish.name,
                 photo=connection.wish.photo,
@@ -107,7 +105,6 @@ class WishlistService:
                 created_at=connection.wish.created_at,
                 updated_at=connection.wish.updated_at,
 
-                # Поля из WishWishlist
                 connection_id=connection.id,
                 is_pinned=connection.is_pinned,
                 order_position=connection.order_position,

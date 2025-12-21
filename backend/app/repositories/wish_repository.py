@@ -35,7 +35,7 @@ class WishRepository:
             .returning(Wish)
         )
         result = await self.session.execute(stmt)
-        await self.session.commit()
+        # await self.session.commit()
         wish = result.scalar_one_or_none()
 
         if wish:

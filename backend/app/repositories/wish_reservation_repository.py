@@ -11,11 +11,11 @@ class WishReservationRepository:
 
     async def get(
         self,
-        wish_reservation_id: int
+        wish_wishlist_id: int
     ) -> Optional[WishReservation]:
         query = (
             select(WishReservation)
-            .where(WishReservation.wish_wishlist_id == wish_reservation_id)
+            .where(WishReservation.wish_wishlist_id == wish_wishlist_id)
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()

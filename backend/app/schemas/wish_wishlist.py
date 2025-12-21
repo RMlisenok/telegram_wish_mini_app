@@ -44,11 +44,10 @@ class WishInWishlistResponse(BaseModel):
     status_is_finished: bool
     created_at: datetime
     updated_at: datetime
-    
 
     connection_id: int
     is_pinned: bool
     order_position: int
     added_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
