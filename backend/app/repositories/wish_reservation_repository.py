@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from app.models.wish_reservation import WishReservation
 
@@ -15,7 +15,7 @@ class WishReservationRepository:
     ) -> Optional[WishReservation]:
         query = (
             select(WishReservation)
-            .where(WishReservation.id == wish_reservation_id)
+            .where(WishReservation.wish_wishlist_id == wish_reservation_id)
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
@@ -80,14 +80,20 @@ class WishReservationRepository:
             print(f"Error creating reservation: {e}")
             return None
 
-    async def delete(
+    async def delete_reservation_idx(
         self,
         wish_wishlist_id: int,
         reserved_by_id: int
     ) -> bool:
-        reservation = self.get(wish_wishlist_id, reserved_by_id)
-        if reservation:
-            await self.session.delete(reservation)
-            await self.session.commit()
-            return True
-        return False
+        query = select(WishReservation).where(
+            and_(
+                WishReservation.wish_wishlist_id == wish_wishlist_id,
+                WishReservation.reserved_by_id == reserved_by_id
+            )
+        )
+        result = await self.session.execute(query)
+        reservation = result.scalar_one_or_none()
+        if not reservation:
+            return False
+        await self.session.delete(reservation)
+        return True

@@ -42,24 +42,21 @@ async def create_reservation(
     return reservation
 
 
-@router.delete("/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/")
 async def delete_reservation(
-    reservation_id: int,
+    wish_wishlist_id: int,
+    reserved_by_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    service = ReservationService(db)
-    succes = await service.remove_reservation(reservation_id)
-    if not succes:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found reservetion"
+    async with db.begin():
+        service = ReservationService(db)
+        success = await service.remove_reservation(
+            wish_wishlist_id,
+            reserved_by_id
         )
-
-# @router.get("/wish/{wish_wishlist_id}", response_model=List[ReservationResponse])
-# async def get_wish_reservations(
-#     wish_wishlist_id: int,
-#     limit: int = Query(100, ge=1, le=200),
-#     db: AsyncSession = Depends(get_db)
-# ):
-#     service = ReservationService(db)
-#     return await service.get_wish_reservations(wish_wishlist_id, limit)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reservation not found"
+            )
+    return

@@ -57,24 +57,33 @@ class ReservationService:
 
     async def remove_reservation(
         self,
-        reservation_id: int
+        wish_wishlist_id: int,
+        reserved_by_id: int
     ) -> bool:
-        reservation = await self.rep_reservation.get(reservation_id)
-        if not reservation:
-            return False
-        connect = await self.rep_wish_wishlist.get_by_id(
-            reservation.wish_wishlist_id
-        )
-        remove_status = await self.remove_reservation(reservation_id)
-
-        if remove_status and connect:
-            other_reservation = await self.rep_reservation.get_wish(
-                reservation.wish_wishlist_id
+        try:
+            deleted = await self.rep_reservation.delete_reservation_idx(
+                wish_wishlist_id,
+                reserved_by_id
+            )
+            if not deleted:
+                return False
+            other_reservation = await self.rep_reservation.get(
+                wish_wishlist_id
             )
             if not other_reservation:
-                await connect.wish.update(is_booked=False)
-                await self.session.commit()
-        return remove_status
+                connection = await self.rep_wish_wishlist.get_by_id(
+                    wish_wishlist_id
+                )
+                if connection:
+                    await self.rep_wish.update(
+                        connection.wish_id,
+                        {"is_booked": False}
+                    )
+            return True
+        except Exception as e:
+            await self.session.rollback()
+            print(f"Ошибка в remove_reservation: {e}")
+            return False
 
     async def get_user_reservation(
         self,
@@ -85,7 +94,9 @@ class ReservationService:
             user_id=user_id,
             limit=limit
         )
-        return [ReservationResponse.model_validate(res) for res in reservations]
+        return [
+            ReservationResponse.model_validate(res) for res in reservations
+        ]
 
     async def get_wish_reservation(
         self,
@@ -96,4 +107,6 @@ class ReservationService:
             wish_wishlist_id=wish_wishlist_id,
             limit=limit
         )
-        return [ReservationResponse.model_validate(res) for res in reservations]
+        return [
+            ReservationResponse.model_validate(res) for res in reservations
+        ]
