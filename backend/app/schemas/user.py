@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
 
@@ -47,6 +47,23 @@ class UserResponse(UserBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserPublicResponse(BaseModel):
+    id: int
+    name: str
+    photo: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserListResponse(BaseModel):
+    users: List[UserPublicResponse]
+    total: int
+
+    class Config:
+        from_attributes = True
 
 
 class TelegramAuthReques(BaseModel):
