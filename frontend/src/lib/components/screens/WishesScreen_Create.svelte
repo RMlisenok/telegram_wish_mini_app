@@ -15,6 +15,17 @@
     let photoFile = null;
     let photoPreview = null;
     let link = '';
+    let price = '';
+    let currency = '';
+
+    const currencies = [
+        { value: 'RUB', label: '₽' },
+        { value: 'BYN', label: 'Br' },
+        { value: 'USD', label: '$' },
+        { value: 'EUR', label: '€' },
+        { value: 'UAH', label: '₴' },
+        { value: 'KZT', label: '₸' }
+    ];
 
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
@@ -102,6 +113,42 @@
                 bind:value={link}
                 placeholder="https://example.com/product"
             />
+        </div>
+
+        <!-- Цена и Валюта -->
+        <div class="form-row">
+            <div class="form-group half">
+                <label for="price" class="form-label">
+                    Цена
+                </label>
+                <input
+                    id="price"
+                    type="number"
+                    bind:value={price}
+                    class="form-input"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                />
+            </div>
+            
+            <div class="form-group half">
+                <label for="currency" class="form-label">
+                    Валюта
+                </label>
+                <select
+                    id="currency"
+                    bind:value={currency}
+                    class="form-select"
+                >
+                    <option value="">Выберите валюту</option>
+                    {#each currencies as currencyOption}
+                        <option value={currencyOption.value}>
+                            {currencyOption.label}
+                        </option>
+                    {/each}
+                </select>
+            </div>
         </div>
     </div>
 </div>
@@ -237,5 +284,26 @@
         width: 100%;
         height: auto;
         border-radius: 8px;
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--tg-theme-hint-color, #d1d1d6);
+        border-radius: 12px;
+        font-size: 16px;
+        background: var(--tg-theme-secondary-bg-color, #ffffff);
+        color: var(--tg-theme-text-color, #1d1d1f);
+        transition: border-color 0.2s;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .form-group.half {
+        flex: 1;
     }
 </style>

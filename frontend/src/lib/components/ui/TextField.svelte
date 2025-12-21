@@ -58,6 +58,8 @@
     padding: 8px 10px;
     font-size: 15px;
     outline: none;
+    background: var(--tg-theme-secondary-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #1d1d1f);
   }
   input:focus {
     border-color: #2563eb;
