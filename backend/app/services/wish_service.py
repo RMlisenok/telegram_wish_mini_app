@@ -19,10 +19,14 @@ class WishService:
         self,
         wish_id: int
     ) -> Optional[WishResponse]:
-        wish = await self.rep_wish.get(wish_id)
-        if not wish:
+        try:
+            wish = await self.rep_wish.get(wish_id)
+            if not wish:
+                return None
+            return WishResponse.model_validate(wish)
+        except Exception as e:
+            print(f"Exception: {e}")
             return None
-        return WishResponse.model_validate(wish)
 
     async def create_wish(
         self,

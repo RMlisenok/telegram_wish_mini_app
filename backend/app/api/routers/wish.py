@@ -13,7 +13,7 @@ router = APIRouter(prefix="/wishes", tags=["wishes"])
 @router.get("/", response_model=List[WishShort])
 async def get_wishes(
     user_id: int,
-    limit: int = Query(100, ge=1, le=200),
+    limit: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
     service = WishService(db)
