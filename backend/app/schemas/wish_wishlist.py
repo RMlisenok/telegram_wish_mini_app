@@ -5,13 +5,15 @@ from datetime import datetime
 
 class WishWishlistBase(BaseModel):
     is_pinned: bool
-    orded_position: int
+    order_position: int
 
 
 class WishWishlistResponse(BaseModel):
     id: int
     wish_id: int
-    wishlist_id: str
+    wishlist_id: int
+    is_pinned: Optional[bool]
+    order_position: Optional[int]
     created_at: datetime
     updated_at: datetime
 

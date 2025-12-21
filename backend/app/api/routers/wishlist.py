@@ -97,7 +97,7 @@ async def add_wish_to_wishlist(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Wishlist ID mismatch"
         )
-    connection = service.add_wish_to_wishlist(connect_data)
+    connection = await service.add_wish_to_wishlist(connect_data)
     if not connection:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,6 +105,7 @@ async def add_wish_to_wishlist(
         )
 
     return connection
+
 
 @router.put("/connections/{connection_id}",
             response_model=WishWishlistResponse)
@@ -135,7 +136,7 @@ async def delete_wish_to_wishlist(
     db: AsyncSession = Depends(get_db)
 ):
     service = WishlistService(db)
-    succes = service.remove_wish_from_wishlist(
+    succes = await service.remove_wish_from_wishlist(
         wish_id,
         wishlist_id
     )

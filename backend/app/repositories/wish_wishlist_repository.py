@@ -76,9 +76,9 @@ class WishWishlistRepository:
     async def update_connection(
         self,
         connection_id: int,
-        **update_data
+        update_data
     ) -> Optional[WishWishlist]:
-        connection = self.get_by_id(connection_id)
+        connection = await self.get_by_id(connection_id)
         if not connection:
             return None
         for key, value in update_data.items():
@@ -87,28 +87,43 @@ class WishWishlistRepository:
         await self.session.refresh(connection)
         return connection
 
-    async def update_connection_by_ids(
-        self,
-        wish_id: int,
-        wishlist_id,
-        **update_data
-    ) -> Optional[WishWishlist]:
-        connection = self.get(wish_id, wishlist_id)
-        if not connection:
-            return None
-        for key, value in update_data.items():
-            setattr(connection, key, value)
+    # async def update_connection_by_ids(
+    #     self,
+    #     wish_id: int,
+    #     wishlist_id: int,
+    #     **update_data
+    # ) -> Optional[WishWishlist]:
+    #     connection = await self.get(wish_id, wishlist_id)
+    #     if not connection:
+    #         return None
+    #     for key, value in update_data.items():
+    #         setattr(connection, key, value)
 
-        await self.session.commit()
-        await self.session.refresh(connection)
-        return connection
+    #     await self.session.commit()
+    #     await self.session.refresh(connection)
+    #     return connection
+
+    # async def update_connection_by_ids(
+    #     self,
+    #     connection_id: int,
+    #     **update_data
+    # ) -> Optional[WishWishlist]:
+    #     connection = await self.get_by_id(connection_id)
+    #     if not connection:
+    #         return None
+    #     for key, value in update_data.items():
+    #         setattr(connection, key, value)
+
+    #     await self.session.commit()
+    #     await self.session.refresh(connection)
+    #     return connection
 
     async def remove_wish_from_wishlist(
         self,
         wish_id: int,
         wishlist_id: int
     ) -> bool:
-        connection = self.get(wish_id, wishlist_id)
+        connection = await self.get(wish_id, wishlist_id)
         if connection:
             await self.session.delete(connection)
             await self.session.commit()

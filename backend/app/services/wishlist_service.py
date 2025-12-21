@@ -101,7 +101,7 @@ class WishlistService:
         update_data: WishWishlistUpdate
     ) -> Optional[WishWishlistResponse]:
         data = update_data.model_dump(exclude_unset=True)
-        connection = await self.rep_wish_wishlist.create_wish_to_wishlist(
+        connection = await self.rep_wish_wishlist.update_connection(
             connection_id,
             data
         )

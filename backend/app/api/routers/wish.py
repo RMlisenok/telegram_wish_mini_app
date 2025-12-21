@@ -63,7 +63,8 @@ async def update_wish(
     return wish
 
 
-@router.delete("/{wish_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{wish_id}",
+               status_code=status.HTTP_204_NO_CONTENT)
 async def delete_wish(
     wish_id: int,
     db: AsyncSession = Depends(get_db)

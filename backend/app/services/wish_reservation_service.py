@@ -59,10 +59,10 @@ class ReservationService:
         self,
         reservation_id: int
     ) -> bool:
-        reservation = self.rep_reservation.get(reservation_id)
+        reservation = await self.rep_reservation.get(reservation_id)
         if not reservation:
             return False
-        connect = self.rep_wish_wishlist.get_by_id(
+        connect = await self.rep_wish_wishlist.get_by_id(
             reservation.wish_wishlist_id
         )
         remove_status = await self.remove_reservation(reservation_id)
@@ -81,7 +81,7 @@ class ReservationService:
         user_id: int,
         limit: 10
     ) -> List[ReservationResponse]:
-        reservations = self.rep_reservation.get_user_reservations(
+        reservations = await self.rep_reservation.get_user_reservations(
             reserved_id=user_id,
             limit=limit
         )
@@ -92,7 +92,7 @@ class ReservationService:
         wish_wishlist_id: int,
         limit: int = 10
     ) -> List[ReservationResponse]:
-        reservations = self.rep_reservation.get_reservations_by_wish_wishlist(
+        reservations = await self.rep_reservation.get_reservations_by_wish_wishlist(
             wish_wishlist_id=wish_wishlist_id,
             limit=limit
         )
