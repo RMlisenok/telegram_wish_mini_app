@@ -38,7 +38,7 @@ class UserService:
         user_id: int,
         user_data: UserUpdate
     ) -> Optional[UserResponse]:
-        user = await self.update_user(user_id, user_data)
+        user = await self.rep_user.update(user_id, user_data)
         if user:
             return UserResponse.model_validate(user)
         return None
