@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
-
+from sqlalchemy.orm import joinedload
 from app.models.wish_wishlist import WishWishlist
 from app.models.wish import Wish
 from app.models.wishlist import Wishlist
@@ -35,6 +35,21 @@ class WishWishlistRepository:
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_wishes_from_wishlist(
+        self,
+        wishlist_id: int,
+        limit: int = 10
+    ) -> List[WishWishlist]:
+        query = (
+            select(WishWishlist)
+            .where(WishWishlist.wishlist_id == wishlist_id)
+            .options(joinedload(WishWishlist.wish))
+            .order_by(WishWishlist.order_position)
+            .limit(limit)
+        )
+        result = await self.session.execute(query)
+        return list(result.unique().scalars().all())
 
     async def create_wish_to_wishlist(
         self,

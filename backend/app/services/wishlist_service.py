@@ -6,7 +6,7 @@ from app.repositories.wish_wishlist_repository import WishWishlistRepository
 from app.models.wishlist import Wishlist
 from app.models.wish_wishlist import WishWishlist
 from app.schemas.wishlist import WishlistCreate, WishlistCreateDb, WishlistResponse, WishlistUpdate
-from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate, WishWishlistResponse
+from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate, WishWishlistResponse, WishInWishlistResponse
 
 
 class WishlistService:
@@ -79,6 +79,42 @@ class WishlistService:
             )
             response.wishes_count = count
             result.append(response)
+        return result
+
+    async def get_wishes_from_wishlist(
+        self,
+        wishlist_id: int,
+        limit: int = 10
+    ) -> List[dict]:
+        connections = await self.rep_wish_wishlist.get_wishes_from_wishlist(
+            wishlist_id,
+            limit
+        )
+        result = []
+        for connection in connections:
+            # Создаем объект ответа
+            wish_data = WishInWishlistResponse(
+                # Поля из Wish
+                id=connection.wish.id,
+                name=connection.wish.name,
+                photo=connection.wish.photo,
+                url_gift=connection.wish.url_gift,
+                price=float(connection.wish.price) if connection.wish.price else None,
+                currency=connection.wish.currency,
+                description=connection.wish.description,
+                is_booked=connection.wish.is_booked,
+                status_is_finished=connection.wish.status_is_finished,
+                created_at=connection.wish.created_at,
+                updated_at=connection.wish.updated_at,
+
+                # Поля из WishWishlist
+                connection_id=connection.id,
+                is_pinned=connection.is_pinned,
+                order_position=connection.order_position,
+                added_at=connection.created_at
+            )
+            result.append(wish_data)
+
         return result
 
     async def add_wish_to_wishlist(

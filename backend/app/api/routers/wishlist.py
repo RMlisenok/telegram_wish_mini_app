@@ -6,7 +6,7 @@ from app.core.db import get_db
 from app.models.wishlist import Wishlist
 from app.services.wishlist_service import WishlistService
 from app.schemas.wishlist import WishlistCreate, WishlistResponse, WishlistUpdate
-from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistResponse, WishWishlistUpdate
+from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistResponse, WishWishlistUpdate, WishInWishlistResponse
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
@@ -126,6 +126,25 @@ async def update_wish_to_wishlist(
             detail="Connection not found"
         )
     return connection
+
+
+@router.get("/{wishlist_id}/wishes",
+            response_model=List[WishInWishlistResponse])
+async def get_wishes_from_wishlist(
+    wishlist_id: int,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db)
+):
+    service = WishlistService(db)
+    
+    wishlist = await service.get_wishlist(wishlist_id)
+    if not wishlist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="WIshlist not found"
+        )
+    wishes = await service.get_wishes_from_wishlist(wishlist_id, limit)
+    return wishes
 
 
 @router.delete("/{wishlist_id}/wishes/{wish_id}",
