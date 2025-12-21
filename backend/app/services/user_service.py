@@ -26,7 +26,7 @@ class UserService:
         self,
         limit: int = 10
     ) -> List[UserResponse]:
-        users = await self.get_all_users(limit)
+        users = await self.rep_user.get_all_users(limit)
         return [UserResponse.model_validate(user) for user in users]
 
     async def create_user(self, user_data: UserCreate) -> User:

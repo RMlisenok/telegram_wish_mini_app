@@ -90,3 +90,18 @@ async def update_current_user(
             detail="User not found"
         )
     return user
+
+
+@router.get("/all")
+async def get_all_users(
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+    users = await service.get_all_users(limit)
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Users not found"
+        )
+    return users
