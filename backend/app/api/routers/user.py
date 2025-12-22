@@ -166,3 +166,29 @@ async def unblock_user(
             detail="Block record not found"
         )
     return {'message': 'User unblocked successfully'}
+
+
+@router.get("/block/status/{user_id}")
+async def check_block_status(
+    user_id: int,
+    blocker_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+    is_blocked = await service.check_block_status(blocker_id, user_id)
+    return {"is_blocked": is_blocked}
+
+
+@router.get("/block/list")
+async def get_blocked_user_list(
+    blocker_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+    users = await service.get_user_block(blocker_id)
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No bloked users found"
+        )
+    return users
