@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from database import get_db  # Твой генератор сессии
-from schemas.questionnaire import (
+from telegram_wish_mini_app.backend.app.core.db import get_db
+from telegram_wish_mini_app.backend.app.schemas.questionnaire import (
     QuestionnaireCreate,
     QuestionnaireResponse,
     TagResponse
 )
-from services.questionnaire_service import QuestionnaireService
-from auth.utils import get_current_user_id  # Твоя функция извлечения ID из токена
+from telegram_wish_mini_app.backend.app.service.questionnaire_service import QuestionnaireService
+from telegram_wish_mini_app.backend.app.core.dependencies import get_current_user_id
 
 router = APIRouter(
     prefix="/questionnaire",
@@ -21,9 +21,7 @@ async def get_my_questionnaire(
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    """
-    Получить анкету текущего пользователя (интересы и ограничения).
-    """
+
     service = QuestionnaireService(db)
     questionnaire = await service.get_user_questionnaire(user_id)
     if not questionnaire:

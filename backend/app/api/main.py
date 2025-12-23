@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import user, questionnaire
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.core.db import init_database, drop_tables
-from app.api.routers.auth import router as auth_routers
-from app.api.routers.user import router as user_routers
+from telegram_wish_mini_app.backend.app.core.db import init_database, drop_tables
+from telegram_wish_mini_app.backend.app.api.routers.auth import router as auth_routers
+from telegram_wish_mini_app.backend.app.api.routers.user import router as user_routers
 
 
 # Настройка логов

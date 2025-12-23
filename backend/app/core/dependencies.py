@@ -6,8 +6,8 @@ from typing import Optional
 
 from .db import get_db
 from .security import verify_jwt_token
-from services.user_service import UserService
-from models.user import User
+from telegram_wish_mini_app.backend.app.services.user_service import UserService
+from telegram_wish_mini_app.backend.app.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -58,4 +58,33 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail='Internal server error'
+        )
+
+async def get_current_user_id(
+        credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> int:
+
+    token = credentials.credentials
+    payload = verify_jwt_token(token)
+
+    if not payload:
+        logger.warning(f'Invalid JWT Token attempt')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token'
+        )
+
+    user_id_str = payload.get('sub')
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token payload: missing sub'
+        )
+
+    try:
+        return int(user_id_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid user ID format in token'
         )
