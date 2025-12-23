@@ -1,6 +1,6 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.questionnaire import UserForm, TagForm
+from app.models.questionnaire import UserForm, TagForm
 
 class QuestionnaireRepository:
     def __init__(self, session: AsyncSession):

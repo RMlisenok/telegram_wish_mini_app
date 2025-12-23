@@ -2,7 +2,7 @@ from repositories.questionnaire_repository import QuestionnaireRepository
 from models.questionnaire import UserForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from telegram_wish_mini_app.backend.app.schemas.questionnaire import QuestionnaireCreate
+from app.schemas.questionnaire import QuestionnaireCreate
 
 
 class QuestionnaireService:

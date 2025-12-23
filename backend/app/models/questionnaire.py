@@ -2,7 +2,7 @@ from typing import Optional, List
 from sqlalchemy import BigInteger, String, ForeignKey, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.base import Base
-from .user import User
+from app.models.user import User
 
 
 class TagForm(Base):
