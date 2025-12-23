@@ -8,10 +8,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./frontend:/usr/share/nginx/html
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
+      - /root/projects/telegram_wish_mini_app/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /root/projects/telegram_wish_mini_app/frontend:/usr/share/nginx/html
+      - /root/projects/telegram_wish_mini_app/certbot/www:/var/www/certbot
+      - /root/projects/telegram_wish_mini_app/certbot/conf:/etc/letsencrypt
     depends_on:
       - backend
     networks:
