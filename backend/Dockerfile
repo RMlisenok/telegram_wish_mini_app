@@ -9,4 +9,6 @@ RUN uv sync --frozen --no-dev
 COPY . .
 ENV PATH="/.venv/bin:$PATH"
 
+ENV PYTHONPATH=/app
+
 CMD ["uv", "run", "uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "80"]
