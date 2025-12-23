@@ -6,8 +6,8 @@ from typing import Optional
 
 from .db import get_db
 from .security import verify_jwt_token
-from telegram_wish_mini_app.backend.app.services.user_service import UserService
-from telegram_wish_mini_app.backend.app.models.user import User
+from app.services.user_service import UserService
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 

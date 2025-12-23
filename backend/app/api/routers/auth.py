@@ -3,15 +3,15 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
-from telegram_wish_mini_app.backend.app.core.db import get_db
-from telegram_wish_mini_app.backend.app.core.security import (
+from app.core.db import get_db
+from app.core.security import (
     verify_jwt_token,
     verify_tg_init_data,
     create_jwt_token
 )
-from telegram_wish_mini_app.backend.app.schemas.user import UserCreate, UserResponse
-from telegram_wish_mini_app.backend.app.services.user_service import UserService
-from telegram_wish_mini_app.backend.app.models.user import User
+from app.schemas.user import UserCreate, UserResponse
+from app.services.user_service import UserService
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 

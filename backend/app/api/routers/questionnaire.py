@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from telegram_wish_mini_app.backend.app.core.db import get_db
-from telegram_wish_mini_app.backend.app.schemas.questionnaire import (
+from app.core.db import get_db
+from app.schemas.questionnaire import (
     QuestionnaireCreate,
     QuestionnaireResponse,
     TagResponse
 )
-from telegram_wish_mini_app.backend.app.service.questionnaire_service import QuestionnaireService
-from telegram_wish_mini_app.backend.app.core.dependencies import get_current_user_id
+from app.service.questionnaire_service import QuestionnaireService
+from app.core.dependencies import get_current_user_id
 
 router = APIRouter(
     prefix="/questionnaire",
