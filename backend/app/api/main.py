@@ -3,10 +3,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import user, questionnaire
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from app.core.db import init_database, drop_tables
+from app.api.routers.auth import router as auth_routers
+from app.api.routers.user import router as user_routers
+
 
 # Настройка логов
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_database()
+    yield
+    print('Stop work and clean tables')
+    await drop_tables()
+    print('clean completed')
 
 app = FastAPI(
     title="Подари мне API",
@@ -14,22 +27,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Настройка CORS для Mini App
+app = FastAPI(lifespan=lifespan)
+app.include_router(auth_routers, prefix='/api/v1')
+app.include_router(user_routers, prefix='/api/v1')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # В продакшене укажи конкретные домены
+    allow_origins=['*'],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=['*'],
+    allow_headers=['*']
 )
+
 
 app.include_router(user.router)
 app.include_router(questionnaire.router) # Подключаем анкеты
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Podari Mne API"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    return {'message': 'Backend Telegramm mini app work'}

@@ -14,49 +14,48 @@ logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 
-async def get_current_user_id(
-        credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> int:
-
-    token = credentials.credentials
-    payload = verify_jwt_token(token)
-
-    if not payload:
-        logger.warning(f'Invalid JWT Token attempt')
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid token'
-        )
-
-    user_id_str = payload.get('sub')
-    if not user_id_str:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid token payload: missing sub'
-        )
-
-    try:
-        return int(user_id_str)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid user ID format in token'
-        )
-
 
 async def get_current_user(
-        user_id: int = Depends(get_current_user_id),
-        db: AsyncSession = Depends(get_db)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db)
 ) -> User:
+    try:
+        token = credentials.credentials
 
-    user_service = UserService(db)
-    user = await user_service.get_user(user_id)
+        payload = verify_jwt_token(token)
 
-    if not user:
-        logger.warning(f'User not found in database: {user_id}')
+        if not payload:
+            logger.warning(f'invalid JWT Token: {token[:20]}...')
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Invalid token'
+            )
+
+        user_id = int(payload.get('sub'))
+
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Invelid token payload'
+            )
+        user_service = UserService(db)
+        user = await user_service.get_user(user_id)
+
+        if not user:
+            logger.warning(f'User not found: {user_id}')
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='User not found'
+            )
+
+        return user
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(f'Erro in get_current_user: {e}')
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='User not found'
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail='Internal server error'
         )
-
-    return user

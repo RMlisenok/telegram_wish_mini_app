@@ -4,7 +4,7 @@ from sqlalchemy import text
 from typing import AsyncGenerator
 from fastapi import HTTPException, status
 
-from .base import (Base)
+from .base import Base
 from .config import settings
 
 async_engine = create_async_engine(

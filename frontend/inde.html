@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .state { display: none; }
+        .hidden { display: none; }
+        .show { display: block; }
+        button { margin: 5px; padding: 10px; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>Телеграм Мини Приложение</h1>
+    
+    <div id="loading" class="state show">
+        <p>Загрузка...</p>
+    </div>
+    
+    <div id="auth-screen" class="state">
+        <h2>Авторизация</h2>
+        <button id="retry-auth">Авторизоваться</button>
+    </div>
+    
+    <div id="main-app" class="state">
+        <h2>✅ Успешная авторизация!</h2>
+        
+        <div>
+            <p><strong>Token:</strong> <span id="jwt-token">...</span></p>
+            <p id="token-status">Проверка токена...</p>
+        </div>
+        
+        <div>
+            <button id="test-me">Получить /me</button>
+            <button id="test-health">Проверить API</button>
+            <button id="refresh-token">Обновить токен</button>
+            <button id="logout">Выйти</button>
+        </div>
+        
+        <div id="test-results" class="hidden">
+            <pre id="response-output"></pre>
+        </div>
+    </div>
+    
+    <div id="error-screen" class="state">
+        <h2>❌ Ошибка</h2>
+        <p id="error-message"></p>
+        <button id="retry-error">Повторить</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        let authToken = null;
+        
+        // Telegram инициализация
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Управление состояниями
+        function showState(stateName) {
+            document.querySelectorAll('.state').forEach(el => el.classList.remove('show'));
+            document.getElementById(stateName).classList.add('show');
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            showState('error-screen');
+        }
+        
+        // Аутентификация
+        async function authenticateWithTelegram() {
+            showState('loading');
+            try {
+                const initData = tg.initData;
+                const initDataUnsafe = tg.initDataUnsafe;
+                
+                if (!initData || !initDataUnsafe?.user) {
+                    throw new Error('Нет данных от Telegram');
+                }
+                
+                const response = await fetch('/api/v1/auth/telegram', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ initData: initData, user: initDataUnsafe.user })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    document.getElementById('jwt-token').textContent = 
+                        authToken.substring(0, 30) + '...';
+                    await verifyToken();
+                    showState('main-app');
+                } else {
+                    throw new Error(data.error || 'Ошибка аутентификации');
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        async function verifyToken() {
+            try {
+                const response = await fetch('/api/v1/users/me', {
+                    headers: {'Authorization': `Bearer ${authToken}`}
+                });
+                
+                if (response.ok) {
+                    document.getElementById('token-status').textContent = '✅ Токен валиден';
+                } else {
+                    document.getElementById('token-status').textContent = '❌ Токен невалиден';
+                }
+            } catch (error) {
+                document.getElementById('token-status').textContent = '⚠️ Ошибка проверки';
+            }
+        }
+        
+        async function testAPI(endpoint, method = 'GET', headers = {}) {
+            try {
+                const response = await fetch(endpoint, { method, headers });
+                const data = await response.json();
+                return { status: response.status, data };
+            } catch (error) {
+                return { status: 'ERROR', data: error.message };
+            }
+        }
+        
+        function displayResponse(endpoint, status, data) {
+            const output = document.getElementById('response-output');
+            const results = document.getElementById('test-results');
+            
+            results.classList.remove('hidden');
+            output.textContent = `${endpoint}\nStatus: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+        }
+        
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('auth_token');
+            if (savedToken) {
+                authToken = savedToken;
+                verifyToken().then(() => {
+                    showState('main-app');
+                }).catch(() => {
+                    authenticateWithTelegram();
+                });
+            } else {
+                authenticateWithTelegram();
+            }
+            
+            document.getElementById('retry-auth').onclick = authenticateWithTelegram;
+            document.getElementById('retry-error').onclick = () => {
+                showState('loading');
+                authenticateWithTelegram();
+            };
+            
+            document.getElementById('test-me').onclick = async () => {
+                const result = await testAPI('/api/v1/users/me', 'GET', {
+                    'Authorization': `Bearer ${authToken}`
+                });
+                displayResponse('GET /api/v1/users/me', result.status, result.data);
+            };
+            
+            document.getElementById('test-health').onclick = async () => {
+                const result = await testAPI('/docs');
+                displayResponse('GET /dosc', result.status, result.data);
+            };
+
+            document.getElementById('test-health').onclick = async () => {
+                try {
+                    const response = await fetch('/api/docs');
+                    if (response.ok) {
+                        window.open('/docs', '_blank');
+                        displayResponse('GET /docs', response.status, '✅ Документация открыта в новой вкладке');
+                    } else {
+                        displayResponse('GET /docs', response.status, '❌ Документация недоступна');
+                    }
+                } catch (error) {
+                    displayResponse('GET /docs', 'ERROR', error.message);
+                }
+            };
+            
+            
+            document.getElementById('refresh-token').onclick = async () => {
+                const result = await testAPI('/api/v1/auth/refresh', 'POST', {
+                    'Authorization': `Bearer ${authToken}`
+                });
+                if (result.data?.success && result.data?.token) {
+                    authToken = result.data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    document.getElementById('jwt-token').textContent = 
+                        authToken.substring(0, 30) + '...';
+                    alert('✅ Токен обновлен!');
+                }
+                displayResponse('POST /api/v1/auth/refresh', result.status, result.data);
+            };
+            
+            document.getElementById('logout').onclick = () => {
+                if (confirm('Выйти?')) {
+                    localStorage.removeItem('auth_token');
+                    location.reload();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
