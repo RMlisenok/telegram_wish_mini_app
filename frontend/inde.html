@@ -5,155 +5,372 @@
     <title>Telegram Mini App - Анкета</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
         .state { display: none; }
-        .hidden { display: none; }
         .show { display: block; }
-        button { margin: 5px; padding: 10px 15px; cursor: pointer; border: none; border-radius: 5px; font-size: 14px; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ffc107; color: black; }
-        .btn-info { background: #17a2b8; color: white; }
-        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-        pre { background: #f5f5f5; padding: 10px; overflow: auto; border-radius: 5px; font-size: 12px; max-height: 400px; }
-        .response-area { margin-top: 20px; }
-        .tag-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-        .tag { background: #e9ecef; padding: 5px 10px; border-radius: 15px; font-size: 14px; }
-        .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; }
-        .error { color: #dc3545; font-weight: bold; }
-        .success { color: #28a745; font-weight: bold; }
-        .warning { color: #ffc107; font-weight: bold; }
-        #jwt-token { font-family: monospace; font-size: 12px; word-break: break-all; }
-        .debug-info { background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 15px;
+        }
+        h2 { color: #444; margin-top: 0; }
+        h3 { color: #555; margin-top: 25px; }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .auth-form, .questionnaire-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .questionnaire-display {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .questionnaire-field {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .field-value {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #e9ecef;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .tag-interest {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .tag-hobby {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
     </style>
 </head>
 <body>
-    <h1>📝 Тестирование API Анкеты</h1>
-
-    <!-- Базовые состояния -->
-    <div id="loading" class="state show">
-        <p>Загрузка...</p>
-    </div>
-
-    <div id="auth-screen" class="state">
-        <h2>Авторизация</h2>
-        <p id="telegram-info">Ожидание данных Telegram...</p>
-        <button id="retry-auth" class="btn-primary">Авторизоваться</button>
-    </div>
-
-    <!-- Основной интерфейс -->
-    <div id="main-app" class="state">
-        <div class="section">
-            <h2>🔐 Статус аутентификации</h2>
-            <div class="debug-info">
-                <p><strong>Telegram User ID:</strong> <span id="telegram-user-id">-</span></p>
-                <p><strong>Токен:</strong> <span id="jwt-token">...</span></p>
-                <p id="token-status">Проверка токена...</p>
+    <div class="container">
+        <!-- Экран загрузки -->
+        <div id="loading" class="state show">
+            <div class="loading">
+                <h2>Загрузка приложения...</h2>
+                <p>Пожалуйста, подождите</p>
             </div>
-            <button id="refresh-status" class="btn-info">Обновить статус</button>
-            <button id="logout" class="btn-danger">Выйти</button>
         </div>
 
-        <!-- Секция анкеты -->
-        <div class="section">
-            <h2>📊 Тестирование ручек анкеты</h2>
+        <!-- Экран авторизации -->
+        <div id="auth-screen" class="state">
+            <h1>🔐 Авторизация</h1>
+            <div class="auth-form">
+                <p id="telegram-info">Подключение к Telegram...</p>
+                <div class="form-group">
+                    <button id="retry-auth" class="btn-primary" style="width: 100%; padding: 15px;">
+                        Авторизоваться через Telegram
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            <div style="margin-bottom: 20px;">
-                <button id="get-my-questionnaire" class="btn-primary">GET /api/v1/questionnaire (моя анкета)</button>
-                <button id="get-tags" class="btn-warning">GET /api/v1/questionnaire/tags/available</button>
+        <!-- Основное приложение -->
+        <div id="main-app" class="state">
+            <h1>📝 Анкета пользователя</h1>
+
+            <!-- Статус бар -->
+            <div class="status-bar">
+                <p><strong>Статус:</strong> <span id="token-status">Проверка авторизации...</span></p>
+                <p><strong>Telegram ID:</strong> <span id="telegram-user-id">-</span></p>
+                <div style="margin-top: 10px;">
+                    <button id="refresh-status" class="btn-secondary">Обновить статус</button>
+                    <button id="logout" class="btn-danger">Выйти</button>
+                </div>
             </div>
 
-            <!-- Форма создания/обновления анкеты -->
-            <div class="form-group">
-                <h3>Создать/Обновить анкету</h3>
+            <!-- Форма анкеты -->
+            <div class="questionnaire-form">
+                <h2>Заполните анкету</h2>
 
-                <label for="name">Имя:</label>
-                <input type="text" id="name" placeholder="Ваше имя">
+                <div class="form-group">
+                    <label for="name">👤 Имя *</label>
+                    <input type="text" id="name" placeholder="Введите ваше имя" required>
+                </div>
 
-                <label for="age">Возраст:</label>
-                <input type="number" id="age" placeholder="Ваш возраст" min="1" max="120">
+                <div class="form-group">
+                    <label for="age">🎂 Возраст</label>
+                    <input type="number" id="age" placeholder="Ваш возраст" min="1" max="120">
+                </div>
 
-                <label for="gender">Пол:</label>
-                <select id="gender">
-                    <option value="">Выберите пол</option>
-                    <option value="male">Мужской</option>
-                    <option value="female">Женский</option>
-                    <option value="other">Другой</option>
-                </select>
+                <div class="form-group">
+                    <label for="gender">⚧ Пол</label>
+                    <select id="gender">
+                        <option value="">Выберите пол</option>
+                        <option value="male">Мужской</option>
+                        <option value="female">Женский</option>
+                        <option value="other">Другой</option>
+                    </select>
+                </div>
 
-                <label for="bio">О себе:</label>
-                <textarea id="bio" rows="3" placeholder="Расскажите о себе..."></textarea>
+                <div class="form-group">
+                    <label for="bio">📝 О себе</label>
+                    <textarea id="bio" rows="3" placeholder="Расскажите о своих интересах, увлечениях, хобби..."></textarea>
+                </div>
 
-                <label>Интересы (теги):</label>
-                <div id="interests-container" class="checkbox-group">
-                    <!-- Теги будут загружены динамически -->
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="tag-1" value="1">
-                        <label for="tag-1">Спорт</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="tag-2" value="2">
-                        <label for="tag-2">Музыка</label>
+                <div class="form-group">
+                    <label>💰 Бюджет на подарок (руб.)</label>
+                    <input type="number" id="budget" placeholder="Сумма, которую вы готовы потратить" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>🏷️ Интересы</label>
+                    <div class="checkbox-grid" id="interests-container">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-1" value="1">
+                            <label for="tag-1">Спорт</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-2" value="2">
+                            <label for="tag-2">Музыка</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-3" value="3">
+                            <label for="tag-3">Кино</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-4" value="4">
+                            <label for="tag-4">Игры</label>
+                        </div>
                     </div>
                 </div>
 
-                <label>Хобби (теги):</label>
-                <div id="hobbies-container" class="checkbox-group">
-                    <!-- Теги будут загружены динамически -->
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="tag-3" value="3">
-                        <label for="tag-3">Чтение</label>
+                <div class="form-group">
+                    <label>🎯 Хобби</label>
+                    <div class="checkbox-grid" id="hobbies-container">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-5" value="5">
+                            <label for="tag-5">Путешествия</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-6" value="6">
+                            <label for="tag-6">Кулинария</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-7" value="7">
+                            <label for="tag-7">Фотография</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tag-8" value="8">
+                            <label for="tag-8">Рисование</label>
+                        </div>
                     </div>
                 </div>
 
-                <label for="budget">Бюджет подарка (руб):</label>
-                <input type="number" id="budget" placeholder="Сумма" min="0">
-
-                <button id="save-questionnaire" class="btn-success">POST /api/v1/questionnaire (сохранить)</button>
-            </div>
-
-            <!-- Получение анкеты другого пользователя -->
-            <div class="form-group">
-                <h3>Получить анкету другого пользователя</h3>
-                <input type="number" id="other-user-id" placeholder="ID пользователя" style="width: 200px; display: inline-block;">
-                <button id="get-other-questionnaire" class="btn-primary">GET /api/v1/questionnaire/{id}</button>
-            </div>
-        </div>
-
-        <!-- Секция для отображения результатов -->
-        <div class="section">
-            <h2>📋 Результаты запросов</h2>
-            <div class="response-area">
-                <div style="margin-bottom: 10px;">
-                    <button id="test-api-health" class="btn-info">Проверить доступность API</button>
-                    <button id="test-docs" class="btn-info">Открыть документацию</button>
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button id="get-questionnaire" class="btn-primary" style="flex: 1;">
+                        📥 Получить мою анкету
+                    </button>
+                    <button id="save-questionnaire" class="btn-success" style="flex: 1;">
+                        💾 Сохранить анкету
+                    </button>
                 </div>
-                <pre id="response-output">Здесь будут отображаться ответы от API...</pre>
             </div>
-            <button id="clear-output" class="btn-warning">Очистить вывод</button>
-        </div>
-    </div>
 
-    <div id="error-screen" class="state">
-        <h2>❌ Ошибка</h2>
-        <p id="error-message"></p>
-        <div class="debug-info" style="margin: 10px 0;">
-            <p><strong>URL:</strong> <span id="error-url">-</span></p>
-            <p><strong>Статус:</strong> <span id="error-status">-</span></p>
+            <!-- Отображение анкеты -->
+            <div id="questionnaire-display" class="questionnaire-display" style="display: none;">
+                <h2>📄 Ваша анкета</h2>
+                <div id="questionnaire-content">
+                    <!-- Здесь будет отображаться анкета -->
+                </div>
+                <button id="edit-questionnaire" class="btn-primary" style="margin-top: 20px;">
+                    ✏️ Редактировать анкету
+                </button>
+            </div>
+
+            <!-- Управление тегами -->
+            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h3>Управление тегами</h3>
+                <p>Теги используются для указания интересов и хобби в анкете.</p>
+                <div style="display: flex; gap: 10px;">
+                    <button id="load-tags" class="btn-secondary">🔄 Загрузить теги</button>
+                    <button id="clear-tags" class="btn-warning">🗑️ Сбросить выбор</button>
+                </div>
+            </div>
         </div>
-        <button id="retry-error" class="btn-primary">Повторить</button>
-        <button onclick="location.reload()" class="btn-warning">Перезагрузить страницу</button>
+
+        <!-- Экран ошибки -->
+        <div id="error-screen" class="state">
+            <h1>❌ Ошибка</h1>
+            <div class="error-message">
+                <p id="error-message">Произошла ошибка</p>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="retry-error" class="btn-primary">Повторить попытку</button>
+                <button onclick="location.reload()" class="btn-secondary">Перезагрузить страницу</button>
+            </div>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
         let authToken = null;
-        let availableTags = [];
 
         // Управление состояниями
         function showState(stateName) {
@@ -161,46 +378,56 @@
             document.getElementById(stateName).classList.add('show');
         }
 
-        function showError(message, url = '', status = '') {
+        function showError(message) {
             document.getElementById('error-message').textContent = message;
-            document.getElementById('error-url').textContent = url;
-            document.getElementById('error-status').textContent = status;
             showState('error-screen');
         }
 
-        // Проверка Telegram Web App
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            successDiv.style.marginTop = '20px';
+
+            const container = document.querySelector('.questionnaire-form');
+            container.insertBefore(successDiv, container.firstChild);
+
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // Инициализация Telegram
         function initTelegram() {
             if (!tg) {
-                document.getElementById('telegram-info').textContent = 'Telegram Web App не найден. Запустите через Telegram.';
+                console.warn('Telegram Web App не найден');
                 return false;
             }
 
-            tg.expand();
-            tg.enableClosingConfirmation();
+            try {
+                tg.expand();
+                tg.enableClosingConfirmation();
 
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('telegram-user-id').textContent = user.id;
-                document.getElementById('telegram-info').textContent = `Пользователь: ${user.first_name} (ID: ${user.id})`;
-            } else {
-                document.getElementById('telegram-info').textContent = 'Данные пользователя не получены';
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    document.getElementById('telegram-user-id').textContent = user.id;
+                }
+                return true;
+            } catch (error) {
+                console.error('Ошибка инициализации Telegram:', error);
+                return false;
             }
-
-            return true;
         }
 
-        // Аутентификация
-        async function authenticateWithTelegram() {
+        // Авторизация
+        async function authenticate() {
             showState('loading');
+
             try {
                 const initData = tg?.initData;
                 const initDataUnsafe = tg?.initDataUnsafe;
 
                 if (!initData || !initDataUnsafe?.user) {
-                    throw new Error('Нет данных от Telegram. Запустите приложение через Telegram.');
+                    throw new Error('Данные Telegram не получены');
                 }
-
-                console.log('Отправляем запрос на аутентификацию...');
 
                 const response = await fetch('/api/v1/auth/telegram', {
                     method: 'POST',
@@ -214,34 +441,36 @@
                     })
                 });
 
-                console.log('Ответ получен:', response.status);
-
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    throw new Error(`Ошибка сервера: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log('Данные ответа:', data);
 
                 if (data.success && data.token) {
                     authToken = data.token;
                     localStorage.setItem('auth_token', authToken);
-                    document.getElementById('jwt-token').textContent = authToken;
-
-                    await verifyToken();
-                    await loadAvailableTags();
+                    await updateAuthStatus();
                     showState('main-app');
                 } else {
-                    throw new Error(data.error || data.detail || 'Ошибка аутентификации');
+                    throw new Error(data.error || 'Ошибка авторизации');
                 }
             } catch (error) {
-                console.error('Ошибка аутентификации:', error);
-                showError(`Ошибка аутентификации: ${error.message}`, '/api/v1/auth/telegram', 'POST');
+                console.error('Ошибка авторизации:', error);
+                showError(`Ошибка авторизации: ${error.message}`);
             }
         }
 
-        async function verifyToken() {
+        // Обновление статуса авторизации
+        async function updateAuthStatus() {
+            const statusEl = document.getElementById('token-status');
+
+            if (!authToken) {
+                statusEl.textContent = '❌ Не авторизован';
+                statusEl.style.color = '#dc3545';
+                return;
+            }
+
             try {
                 const response = await fetch('/api/v1/users/me', {
                     headers: {
@@ -250,25 +479,213 @@
                     }
                 });
 
-                const statusEl = document.getElementById('token-status');
                 if (response.ok) {
                     const data = await response.json();
-                    statusEl.textContent = `✅ Токен валиден. User ID: ${data.id}`;
-                    statusEl.className = 'success';
+                    statusEl.textContent = `✅ Авторизован как ${data.username || 'пользователь'}`;
+                    statusEl.style.color = '#28a745';
                 } else {
-                    statusEl.textContent = `❌ Токен невалиден (${response.status})`;
-                    statusEl.className = 'error';
+                    statusEl.textContent = '❌ Токен недействителен';
+                    statusEl.style.color = '#dc3545';
                     localStorage.removeItem('auth_token');
                     authToken = null;
                 }
             } catch (error) {
-                document.getElementById('token-status').textContent = '⚠️ Ошибка проверки';
-                document.getElementById('token-status').className = 'error';
+                statusEl.textContent = '⚠️ Ошибка проверки';
+                statusEl.style.color = '#ffc107';
             }
         }
 
-        // Загрузка доступных тегов
-        async function loadAvailableTags() {
+        // Получение анкеты
+        async function getQuestionnaire() {
+            try {
+                const response = await fetch('/api/v1/questionnaire', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showSuccess('Анкета не найдена. Заполните форму ниже.');
+                        hideQuestionnaireDisplay();
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayQuestionnaire(data);
+                fillFormWithData(data);
+
+            } catch (error) {
+                console.error('Ошибка получения анкеты:', error);
+                showError(`Не удалось получить анкету: ${error.message}`);
+            }
+        }
+
+        // Отображение анкеты
+        function displayQuestionnaire(data) {
+            const content = document.getElementById('questionnaire-content');
+
+            let html = `
+                <div class="questionnaire-field">
+                    <div class="field-label">Имя</div>
+                    <div class="field-value">${data.name || 'Не указано'}</div>
+                </div>
+
+                <div class="questionnaire-field">
+                    <div class="field-label">Возраст</div>
+                    <div class="field-value">${data.age || 'Не указан'}</div>
+                </div>
+
+                <div class="questionnaire-field">
+                    <div class="field-label">Пол</div>
+                    <div class="field-value">${getGenderText(data.gender)}</div>
+                </div>
+
+                <div class="questionnaire-field">
+                    <div class="field-label">О себе</div>
+                    <div class="field-value">${data.bio || 'Не заполнено'}</div>
+                </div>
+
+                <div class="questionnaire-field">
+                    <div class="field-label">Бюджет подарка</div>
+                    <div class="field-value">${data.gift_budget ? data.gift_budget + ' руб.' : 'Не указан'}</div>
+                </div>
+            `;
+
+            if (data.interests && data.interests.length > 0) {
+                html += `
+                    <div class="questionnaire-field">
+                        <div class="field-label">Интересы</div>
+                        <div class="tags-container">
+                            ${data.interests.map(tag => `<span class="tag tag-interest">${tag.name}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (data.hobbies && data.hobbies.length > 0) {
+                html += `
+                    <div class="questionnaire-field">
+                        <div class="field-label">Хобби</div>
+                        <div class="tags-container">
+                            ${data.hobbies.map(tag => `<span class="tag tag-hobby">${tag.name}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+            showQuestionnaireDisplay();
+        }
+
+        function getGenderText(gender) {
+            switch(gender) {
+                case 'male': return 'Мужской';
+                case 'female': return 'Женский';
+                case 'other': return 'Другой';
+                default: return 'Не указан';
+            }
+        }
+
+        function showQuestionnaireDisplay() {
+            document.getElementById('questionnaire-display').style.display = 'block';
+            document.querySelector('.questionnaire-form').style.display = 'none';
+        }
+
+        function hideQuestionnaireDisplay() {
+            document.getElementById('questionnaire-display').style.display = 'none';
+            document.querySelector('.questionnaire-form').style.display = 'block';
+        }
+
+        // Заполнение формы данными из анкеты
+        function fillFormWithData(data) {
+            document.getElementById('name').value = data.name || '';
+            document.getElementById('age').value = data.age || '';
+            document.getElementById('gender').value = data.gender || '';
+            document.getElementById('bio').value = data.bio || '';
+            document.getElementById('budget').value = data.gift_budget || '';
+
+            // Сбросить все чекбоксы
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            // Отметить выбранные теги интересов
+            if (data.interests) {
+                data.interests.forEach(tag => {
+                    const checkbox = document.getElementById(`tag-${tag.id}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+
+            // Отметить выбранные теги хобби
+            if (data.hobbies) {
+                data.hobbies.forEach(tag => {
+                    const checkbox = document.getElementById(`tag-${tag.id}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        }
+
+        // Сохранение анкеты
+        async function saveQuestionnaire() {
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                showError('Пожалуйста, введите имя');
+                return;
+            }
+
+            const questionnaireData = {
+                name: name,
+                age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+                gender: document.getElementById('gender').value || null,
+                bio: document.getElementById('bio').value || null,
+                gift_budget: document.getElementById('budget').value ? parseInt(document.getElementById('budget').value) : null,
+                interests_tag_ids: [],
+                hobbies_tag_ids: []
+            };
+
+            // Собираем выбранные теги интересов
+            document.querySelectorAll('#interests-container input[type="checkbox"]:checked').forEach(cb => {
+                questionnaireData.interests_tag_ids.push(parseInt(cb.value));
+            });
+
+            // Собираем выбранные теги хобби
+            document.querySelectorAll('#hobbies-container input[type="checkbox"]:checked').forEach(cb => {
+                questionnaireData.hobbies_tag_ids.push(parseInt(cb.value));
+            });
+
+            try {
+                const response = await fetch('/api/v1/questionnaire', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(questionnaireData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                showSuccess('✅ Анкета успешно сохранена!');
+
+                // Обновляем отображение
+                getQuestionnaire();
+
+            } catch (error) {
+                console.error('Ошибка сохранения анкеты:', error);
+                showError(`Не удалось сохранить анкету: ${error.message}`);
+            }
+        }
+
+        // Загрузка тегов с сервера
+        async function loadTags() {
             try {
                 const response = await fetch('/api/v1/questionnaire/tags/available?is_interest=true', {
                     headers: {
@@ -279,237 +696,72 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    availableTags = data;
-                    console.log('Загружены теги:', availableTags);
-                } else {
-                    console.warn('Не удалось загрузить теги:', response.status);
+                    console.log('Загруженные теги:', data);
+                    showSuccess('Теги успешно загружены');
                 }
             } catch (error) {
                 console.error('Ошибка загрузки тегов:', error);
             }
         }
 
-        // Функция для выполнения запросов
-        async function makeRequest(url, method = 'GET', body = null) {
-            const headers = {
-                'Authorization': `Bearer ${authToken}`,
-                'Accept': 'application/json'
-            };
-
-            if (body && method !== 'GET') {
-                headers['Content-Type'] = 'application/json';
-            }
-
-            const options = {
-                method,
-                headers,
-                mode: 'cors',
-                credentials: 'omit'
-            };
-
-            if (body && method !== 'GET') {
-                options.body = JSON.stringify(body);
-            }
-
-            try {
-                console.log(`Отправка ${method} запроса на: ${url}`);
-                const response = await fetch(url, options);
-
-                const result = {
-                    url: url,
-                    method: method,
-                    status: response.status,
-                    ok: response.ok,
-                    headers: Object.fromEntries(response.headers.entries())
-                };
-
-                try {
-                    result.data = await response.json();
-                } catch (e) {
-                    result.data = { text: await response.text() };
-                }
-
-                return result;
-            } catch (error) {
-                console.error('Ошибка запроса:', error);
-                return {
-                    url: url,
-                    method: method,
-                    status: 'ERROR',
-                    ok: false,
-                    data: { error: error.message }
-                };
-            }
+        // Сброс выбора тегов
+        function clearTags() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            showSuccess('Выбор тегов сброшен');
         }
 
-        // Отображение результата
-        function displayResult(title, result) {
-            const output = document.getElementById('response-output');
-            const timestamp = new Date().toLocaleTimeString();
-            const statusClass = result.ok ? '✅' : '❌';
-
-            const resultText = `${statusClass} ${title} [${timestamp}]
-URL: ${result.url}
-Method: ${result.method}
-Status: ${result.status}
-Headers: ${JSON.stringify(result.headers, null, 2)}
-Response: ${JSON.stringify(result.data, null, 2)}
-──────────────────────────────────────
-${output.textContent}`;
-
-            output.textContent = resultText;
-
-            // Прокрутка вверх
-            output.scrollTop = 0;
-        }
-
-        // Обработчики событий
+        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
-            // Инициализация Telegram
+            // Проверяем авторизацию Telegram
             if (!initTelegram()) {
                 showError('Запустите приложение через Telegram');
                 return;
             }
 
-            // Показываем информацию о Telegram
-            showState('auth-screen');
-
             // Проверяем сохраненный токен
             const savedToken = localStorage.getItem('auth_token');
             if (savedToken) {
                 authToken = savedToken;
-                document.getElementById('jwt-token').textContent = savedToken;
-
-                await verifyToken();
+                await updateAuthStatus();
                 if (authToken) {
-                    await loadAvailableTags();
                     showState('main-app');
+                    // Автоматически загружаем анкету при открытии
+                    setTimeout(() => getQuestionnaire(), 500);
                 } else {
                     showState('auth-screen');
                 }
+            } else {
+                showState('auth-screen');
             }
 
-            // Кнопки аутентификации
-            document.getElementById('retry-auth').onclick = authenticateWithTelegram;
+            // Назначаем обработчики событий
+            document.getElementById('retry-auth').onclick = authenticate;
             document.getElementById('retry-error').onclick = () => {
                 showState('loading');
-                authenticateWithTelegram();
+                setTimeout(authenticate, 500);
             };
 
-            document.getElementById('refresh-status').onclick = verifyToken;
+            document.getElementById('refresh-status').onclick = updateAuthStatus;
 
-            // Получить мою анкету
-            document.getElementById('get-my-questionnaire').onclick = async () => {
-                const result = await makeRequest('/api/v1/questionnaire');
-                displayResult('GET Моя анкета', result);
-
-                if (result.ok && result.data) {
-                    const q = result.data;
-                    document.getElementById('name').value = q.name || '';
-                    document.getElementById('age').value = q.age || '';
-                    document.getElementById('gender').value = q.gender || '';
-                    document.getElementById('bio').value = q.bio || '';
-                    document.getElementById('budget').value = q.gift_budget || '';
-
-                    alert(`✅ Анкета загружена: ${q.name || 'без имени'}`);
-                }
-            };
-
-            // Получить доступные теги
-            document.getElementById('get-tags').onclick = async () => {
-                const result = await makeRequest('/api/v1/questionnaire/tags/available?is_interest=true');
-                displayResult('GET Доступные теги (интересы)', result);
-
-                const result2 = await makeRequest('/api/v1/questionnaire/tags/available?is_interest=false');
-                displayResult('GET Доступные теги (хобби)', result2);
-            };
-
-            // Сохранить анкету
-            document.getElementById('save-questionnaire').onclick = async () => {
-                const name = document.getElementById('name').value.trim();
-                if (!name) {
-                    alert('Пожалуйста, введите имя');
-                    return;
-                }
-
-                const questionnaireData = {
-                    name: name,
-                    age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
-                    gender: document.getElementById('gender').value || null,
-                    bio: document.getElementById('bio').value || null,
-                    gift_budget: document.getElementById('budget').value ? parseInt(document.getElementById('budget').value) : null,
-                    interests_tag_ids: [],
-                    hobbies_tag_ids: []
-                };
-
-                // Собираем выбранные теги
-                document.querySelectorAll('#interests-container input[type="checkbox"]:checked').forEach(cb => {
-                    questionnaireData.interests_tag_ids.push(parseInt(cb.value));
-                });
-
-                document.querySelectorAll('#hobbies-container input[type="checkbox"]:checked').forEach(cb => {
-                    questionnaireData.hobbies_tag_ids.push(parseInt(cb.value));
-                });
-
-                console.log('Отправляемые данные:', questionnaireData);
-
-                const result = await makeRequest('/api/v1/questionnaire', 'POST', questionnaireData);
-                displayResult('POST Сохранить анкету', result);
-
-                if (result.ok) {
-                    alert('✅ Анкета успешно сохранена!');
-                } else {
-                    alert('❌ Ошибка сохранения: ' + (result.data?.detail || JSON.stringify(result.data)));
-                }
-            };
-
-            // Получить анкету другого пользователя
-            document.getElementById('get-other-questionnaire').onclick = async () => {
-                const otherUserId = document.getElementById('other-user-id').value;
-                if (!otherUserId) {
-                    alert('Введите ID пользователя');
-                    return;
-                }
-
-                const result = await makeRequest(`/api/v1/questionnaire/${otherUserId}`);
-                displayResult(`GET Анкета пользователя ${otherUserId}`, result);
-            };
-
-            // Проверить доступность API
-            document.getElementById('test-api-health').onclick = async () => {
-                const result = await fetch('/api/v1/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                displayResult('Проверка API', {
-                    url: '/api/v1/users/me',
-                    method: 'GET',
-                    status: result.status,
-                    ok: result.ok,
-                    data: result.ok ? '✅ API доступен' : '❌ API недоступен'
-                });
-            };
-
-            // Открыть документацию
-            document.getElementById('test-docs').onclick = () => {
-                window.open('/api/docs', '_blank');
-            };
-
-            // Выход
             document.getElementById('logout').onclick = () => {
-                if (confirm('Выйти из аккаунта?')) {
+                if (confirm('Вы уверены, что хотите выйти?')) {
                     localStorage.removeItem('auth_token');
                     location.reload();
                 }
             };
 
-            // Очистить вывод
-            document.getElementById('clear-output').onclick = () => {
-                document.getElementById('response-output').textContent = 'Здесь будут отображаться ответы от API...';
-            };
+            document.getElementById('get-questionnaire').onclick = getQuestionnaire;
+            document.getElementById('save-questionnaire').onclick = saveQuestionnaire;
+            document.getElementById('edit-questionnaire').onclick = hideQuestionnaireDisplay;
+            document.getElementById('load-tags').onclick = loadTags;
+            document.getElementById('clear-tags').onclick = clearTags;
+
+            // Валидация формы
+            const form = document.querySelector('.questionnaire-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveQuestionnaire();
+            });
         });
     </script>
 </body>
