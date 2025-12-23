@@ -1,5 +1,5 @@
-from repositories.questionnaire_repository import QuestionnaireRepository
-from models.questionnaire import UserForm
+from app.repositories.questionnaire_repository import QuestionnaireRepository
+from app.models.questionnaire import UserForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.questionnaire import QuestionnaireCreate

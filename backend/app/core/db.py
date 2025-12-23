@@ -4,8 +4,8 @@ from sqlalchemy import text
 from typing import AsyncGenerator
 from fastapi import HTTPException, status
 
-from .base import Base
-from .config import settings
+from app.core.base import Base
+from app.core.config import settings
 
 async_engine = create_async_engine(
     url=settings.DATABASE_URL_asyncpg,

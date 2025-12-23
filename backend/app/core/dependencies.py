@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 from typing import Optional
 
-from .db import get_db
-from .security import verify_jwt_token
+from app.core.db import get_db
+from app.core.security import verify_jwt_token
 from app.services.user_service import UserService
 from app.models.user import User
 

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import logging
 import hmac
-from .config import settings
+from app.core.config import settings
 import urllib
 
 logger = logging.getLogger(__name__)
