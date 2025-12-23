@@ -2,12 +2,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import user, questionnaire
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from telegram_wish_mini_app.backend.app.core.db import init_database, drop_tables
 from telegram_wish_mini_app.backend.app.api.routers.auth import router as auth_routers
 from telegram_wish_mini_app.backend.app.api.routers.user import router as user_routers
+from telegram_wish_mini_app.backend.app.api.routers.questionnaire import router as questionnaire_routers
 
 
 # Настройка логов
@@ -30,6 +30,7 @@ app = FastAPI(
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_routers, prefix='/api/v1')
 app.include_router(user_routers, prefix='/api/v1')
+app.include_router(questionnaire_routers, prefix='/api/v1')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -39,8 +40,7 @@ app.add_middleware(
 )
 
 
-app.include_router(user.router)
-app.include_router(questionnaire.router) # Подключаем анкеты
+
 
 @app.get("/")
 async def root():
