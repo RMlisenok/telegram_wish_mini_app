@@ -607,5 +607,193 @@
         transition: background-color 0.2s;
         z-index: 10;
     }
+    /*Стили для модального окна добавления желаний */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001; /* Выше чем detail-backdrop */
+        padding: 20px;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 24px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 24px 24px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6b7280;
+        padding: 4px;
+        line-height: 1;
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 24px;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #6b7280;
+        padding: 40px 0;
+    }
+
+    .wishes-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .wish-selection-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .wish-selection-item:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .wish-selection-item.selected {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .selection-checkbox {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .checkbox-empty {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 6px;
+    }
+
+    .checkbox-checked {
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .checkbox-empty {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 6px;
+        background: white;
+    }
+
+    .wish-selection-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .wish-selection-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .wish-selection-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+    }
+
+    .wish-selection-price {
+        font-size: 13px;
+        color: #059669;
+        font-weight: 500;
+    }
+
+    .wish-selection-image {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f9fafb;
+    }
+
+    .wish-selection-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .wish-selection-image .placeholder {
+        object-fit: contain;
+        width: 30px;
+        height: 30px;
+        margin: 10px;
+        opacity: 0.7;
+    }
+
+    .modal-footer {
+        padding: 16px 24px 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
 </style>
 
