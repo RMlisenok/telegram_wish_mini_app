@@ -30,8 +30,52 @@ export const wishesStore = writable([
         wishlistIds: [1]
         // массив id вишлистов, где лежит желание
     },
-    {
+{
         id: 2,
+        title: 'Наушники с шумоподавлением',
+        price: 15000,
+        currency: 'RUB',
+        // imageUrl: '/icons/gitf1.jpg',
+        link: 'https://www.wildberries.ru/catalog/239484963/detail.aspx?size=376607842',
+        description: 'McLaren Who',
+        pinned: true,
+        wishlistIds: [1]
+        // массив id вишлистов, где лежит желание
+    },{
+        id: 3,
+        title: 'Наушники с шумоподавлением',
+        price: 15000,
+        currency: 'RUB',
+        // imageUrl: '/icons/gitf1.jpg',
+        link: 'https://www.wildberries.ru/catalog/239484963/detail.aspx?size=376607842',
+        description: 'McLaren Who',
+        pinned: true,
+        wishlistIds: [1]
+        // массив id вишлистов, где лежит желание
+    },{
+        id: 4,
+        title: 'Наушники с шумоподавлением',
+        price: 15000,
+        currency: 'RUB',
+        // imageUrl: '/icons/gitf1.jpg',
+        link: 'https://www.wildberries.ru/catalog/239484963/detail.aspx?size=376607842',
+        description: 'McLaren Who',
+        pinned: true,
+        wishlistIds: [1]
+        // массив id вишлистов, где лежит желание
+    },{
+        id: 5,
+        title: 'Наушники с шумоподавлением',
+        price: 15000,
+        currency: 'RUB',
+        // imageUrl: '/icons/gitf1.jpg',
+        link: 'https://www.wildberries.ru/catalog/239484963/detail.aspx?size=376607842',
+        description: 'McLaren Who',
+        pinned: true,
+        wishlistIds: [1]
+        // массив id вишлистов, где лежит желание
+    },    {
+        id: 6,
         title: 'Человек-Паук McLaren 720S',
         price: 999999999,
         currency: 'EUR',
@@ -64,18 +108,18 @@ export const wishlistsStore = writable([
         id: 1,
         title: 'День рождения',
         description: 'Идеи подарков к 25-летию',
-        privacy: 'public',      // public | restricted | private
+        privacy: 'restricted',      // public | restricted | private
         coverUrl: '',
-        count: 3
+        count: 31
     },
 
     {
         id: 3,
-        title: '8-ого марта ',
+        title: '8-ого марта',
         description: 'Идеи подарков на 8-ого ммарта',
         privacy: 'private',
-        count: 3
-        // rUrl: '/icons/gift2.svg'
+        count: 10,
+        rUrl: '/icons/2018_McLaren_720S.jpg',
     },
 
     {
@@ -83,7 +127,7 @@ export const wishlistsStore = writable([
         title: '18-ого мая  ',
         description: 'Flag day',
         privacy: 'public',
-        count: 3
+        count: 13
 
     },
 
@@ -92,7 +136,7 @@ export const wishlistsStore = writable([
         title: 'Marriage',
         description: 'Shopping du siecle',
         privacy: 'public',
-        count: 3
+        count: 12
 
 
     },
@@ -102,62 +146,106 @@ export const wishlistsStore = writable([
 
 // Подписки (на кого я подписан)
 export const subscriptionsStore = writable([
-    // structure пример, потом подменишь реальными данными
-    {
-        id: 'user-2',
-        fullName: 'Иван Иванов',
-        birthDate: '05.04.1995',
-        avatarUrl: '',
-        wishlistTitle: 'Новый год'
-    },
-
-    {
-        id: 'u-ivan',
-        fullName: 'Иван Иванов',
-        birthDate: '05.04.1995',
-        mainWishlistTitle: 'Новый год'
-    },
-
-
-    {
+{
         id: 'sub-1',
-        fullName: 'Ива нов',
-        birthDate: '05.04.2005',
-        mainOccasion: 'Новый год'
+        subscriber_id: 'demo-user-1',
+        type_sub: true,
+        user: {
+            user_id: 1,
+            name: 'Иван Петров',
+            photo: '',
+            birth_date: '15.07.1995'
+        },
+        wishlist: null
     },
     {
         id: 'sub-2',
-        fullName: 'Катя Петрова',
-        birthDate: '11.01.1998',
-        mainOccasion: 'День рождения'
+        subscriber_id: 'demo-user-1',
+        type_sub: true,
+        user: {
+            user_id: 2,
+            name: 'Мария Сидорова',
+            photo: '/icons/avatar-maria.jpg',
+            birth_date: '22.11.1992'
+        },
+        wishlist: null
     },
-
     {
-        id: 'f-1',
-        fullName: 'Мари Марква',
-        birthDate: '10.09.1990',
-        mainOccasion: 'День рождения'
+        id: 'sub-3',
+        subscriber_id: 'demo-user-1',
+        type_sub: true,
+        user: {
+            user_id: 3,
+            name: 'Алексей Козлов',
+            photo: '/icons/avatar-alex.jpg',
+            birth_date: '03.09.1989'
+        },
+        wishlist: null
     },
-    {
-        id: 'f-2',
-        fullName: 'Кирилл',
-        birthDate: '10.10.2000',
-        mainOccasion: 'Новый год'
-    },
-
     {
         id: 'sub-4',
-        fullName: 'Кат Перва',
-        birthDate: '11.04.1998',
-        mainOccasion: 'День рождения'
+        subscriber_id: 'demo-user-1',
+        type_sub: true,
+        user: {
+            user_id: 4,
+            name: 'Елена Васнецова',
+            photo: '',
+            birth_date: '28.02.1997'
+        },
+        wishlist: null
     },
-
     {
-        id: 'u-maria',
-        fullName: 'Мария Маркова',
-        birthDate: '10.09.1990',
-        mainWishlistTitle: 'День рождения'
+        id: 'sub-5',
+        subscriber_id: 'demo-user-1',
+        type_sub: false,
+        user: null,
+        wishlist: {
+            wishlist_id: 1,
+            name: 'Идеи для отпуска',
+            photo: '/icons/vacation.jpg',
+            user_name: 'Дмитрий Волков',
+            number_of_wishes: 7
+        }
     },
+    {
+        id: 'sub-6',
+        subscriber_id: 'demo-user-1',
+        type_sub: false,
+        user: null,
+        wishlist: {
+            wishlist_id: 1,
+            name: 'Гаджеты 2024',
+            photo: null,
+            user_name: 'Техно-блог',
+            number_of_wishes: 12
+        }
+    },
+    {
+        id: 'sub-7',
+        subscriber_id: 'demo-user-1',
+        type_sub: false,
+        user: null,
+        wishlist: {
+            wishlist_id: 1,
+            name: 'Книжный клуб',
+            photo: '/icons/books.png',
+            user_name: 'Читательское сообщество',
+            number_of_wishes: 24
+        }
+    },
+    {
+        id: 'sub-8',
+        subscriber_id: 'demo-user-1',
+        type_sub: false,
+        user: null,
+        wishlist: {
+            wishlist_id: 1,
+            name: 'Кулинарные рецепты',
+            photo: '/icons/cooking.jpg',
+            user_name: 'Шеф-повар Антон',
+            number_of_wishes: 15
+        }
+    }
 
 
 ]);
@@ -165,96 +253,7 @@ export const subscriptionsStore = writable([
 
 // Подписчики (кто подписан на меня)
 export const subscribersStore = writable([
-    {
-        id: 'user-3',
-        fullName: 'Мария Маркова',
-        birthDate: '10.09.1990',
-        avatarUrl: '',
-        wishlistTitle: 'День рождения'
-    },
-    {
-        id: 'sub-4',
-        fullName: 'Кат Перва',
-        birthDate: '11.01.1999',
-        mainOccasion: 'День рождения'
-    },
-    {
-        id: 'sub-8',
-        fullName: 'Ив нов',
-        birthDate: '05.04.1999',
-        mainOccasion: 'Новый год'
-    },
-
-    {
-        id: 'f-1',
-        fullName: 'Мари Марка',
-        birthDate: '10.09.2009',
-        mainOccasion: 'День рождения'
-    },
-
-    {
-        id: 'u-maria',
-        fullName: 'Мария Маркова',
-        birthDate: '10.09.1990',
-        avatarUrl: '',
-        isSubscribed: false,
-        publicWishlists: [
-            {
-                id: 'wl-birthday',
-                title: 'День рождения',
-                visibility: 'public',
-                wishesCount: 4,
-                iconUrl: '/icons/wishlist-card.png'
-            }
-        ],
-        subscriptions: [
-            {
-                id: 'sub-ivan',
-                fullName: 'Иван Иванов',
-                birthDate: '05.04.1995',
-                wishlistTitle: 'Новый год',
-                avatarUrl: ''
-            }
-        ],
-        questionnaire: {
-            interests: ['книги', 'фотография', 'путешествия'],
-            noGifts: ['мягкие игрушки', 'алкоголь']
-        }
-    },
-
-    {
-        id: 'u-maria',
-        fullName: 'Мария Маркова',
-        birthDate: '10.09.1990',
-        avatarUrl: '',
-        isSubscribed: false,
-        publicWishlists: [
-            {
-                id: 'wl-birthday',
-                title: 'День рождения',
-                visibility: 'public',
-                wishesCount: 4,
-                iconUrl: '/icons/wishlist-card.png'
-            }
-        ],
-        subscriptions: [
-            {
-                id: 'sub-ivan',
-                fullName: 'Иван Иванов',
-                birthDate: '05.04.1995',
-                wishlistTitle: 'Новый год',
-                avatarUrl: ''
-            }
-        ],
-        questionnaire: {
-            interests: ['книги', 'фотография', 'путешествия'],
-            noGifts: ['мягкие игрушки', 'алкоголь']
-        },
-
-
-    }
-
-
+    
 ]);
 
 // Настройки уведомлений 2002_4_Dass_20.12.2025

@@ -20,6 +20,7 @@
 
     import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
     import WishlistsScreen from '$lib/components/screens/WishlistsScreen.svelte'; //2008/1_locust_21.12.2025
+    import SubscriptionsScreen from '$lib/components/screens/SubscriptionsScreen.svelte'; //2010/1-5_locust_24.12.2025
 
     import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
 
@@ -168,7 +169,10 @@
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
                         />
-                    
+                    <!-- 2010/1-5_locust_24.12.2025 -->
+                     {:else if currentScreen === 'subscriptions'}
+                        <SubscriptionsScreen
+                        />
                 {/if}
             </div>
             
