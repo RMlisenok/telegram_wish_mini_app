@@ -15,6 +15,7 @@
 
     import WishesScreenCreate from '$lib/components/screens/WishesScreen_Create.svelte'; //2005_Dass_21.12.2025
     import WishlistsScreenCreate from '$lib/components/screens/WishlistsScreen_Create.svelte'; //2008/2_Dass_21.12.2025
+    import WishlistsScreenEdit from '$lib/components/screens/WishlistsScreen_Edit.svelte'; //2008/3_Dass_22.12.2025
 
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
@@ -76,7 +77,7 @@
         };
     });
 
-
+    let selectedWishlistId = null;
 </script>
 
 {#if !user}
@@ -167,8 +168,15 @@
                         <WishlistsScreen
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
+                            
                         />
-                    
+                    <!-- 2008/3_Dass_24.12.2025 -->
+                     {:else if currentScreen === 'wishlistsEdit'}
+                        <WishlistsScreenEdit
+                            onGoBack={() => {
+                                navigate('wishlists');
+                            }}
+                        />
                 {/if}
             </div>
             
