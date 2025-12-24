@@ -1,6 +1,9 @@
 <script>
+    import { createEventDispatcher } from 'svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
+
+    const dispatch = createEventDispatcher();
 
     const iconGift = '/icons/gift3.png';
 
@@ -64,6 +67,7 @@
     const handleEdit = () => {
         console.log('Редактирование желания:', selectedWish.id);
         // TODO: Реализовать редактирование
+        dispatch('openEditWishes', { id: selectedWish.id }) //2006_2_Dass_24.12.2025
     };
 
     const handleDelete = () => {
