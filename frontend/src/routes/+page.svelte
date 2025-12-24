@@ -19,6 +19,7 @@
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
     import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
+    import WishlistsScreen from '$lib/components/screens/WishlistsScreen.svelte'; //2008/1_locust_21.12.2025
 
     import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
 
@@ -160,6 +161,12 @@
                      {:else if currentScreen === 'wishlistsCreate'}
                         <WishlistsScreenCreate
                             onGoBack={() => navigate('wishlists')}
+                        />
+                    <!-- 2008/1_locust_21.12.2025 -->
+                     {:else if currentScreen === 'wishlists'}
+                        <WishlistsScreen
+                            on:openCreateWishlists={() => navigate('wishlistsCreate')}
+                            on:openMainScreen={() => navigate('main')}
                         />
                     
                 {/if}
