@@ -9,7 +9,7 @@ from app.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
     SubscriptionWithDetailsResponse,
-    SubscriptionStatusResponse
+    # SubscriptionStatusResponse
     )
 
 
@@ -124,14 +124,13 @@ class SubscriptionService:
         )
         result = [self.get_subscription_data(sub) for sub in subscriptions]
         return result, total
-    
-    
+
     async def get_my_sibscriptions(
         self,
         subscriber_id: int, # Добавить Dependencies
         limit: int = 100,
     ) -> Tuple[List[SubscriptionWithDetailsResponse], int]:
-        
+
         subscriptions, total = await self.rep_subs.get_user_subscribers(
             subscriber_id,
             limit

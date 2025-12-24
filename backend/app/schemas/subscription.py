@@ -49,6 +49,6 @@ class SubscriptionWithDetailsResponse(SubscriptionResponse):
     target_wishlist_title: Optional[str] = None
 
 
-class SubscriptionStatusResponse(BaseModel):
-    is_subscribed: bool
-    subscription_id: Optional[int] = None
+# class SubscriptionStatusResponse(BaseModel):
+#     is_subscribed: bool
+#     subscription_id: Optional[int] = None

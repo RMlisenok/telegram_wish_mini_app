@@ -24,7 +24,7 @@ class Subscription(Base):
     type_sub: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
-        default=True
+        default=True  # To subscribe to a user
     )
     target_user_id: Mapped[int] = mapped_column(
         BigInteger,

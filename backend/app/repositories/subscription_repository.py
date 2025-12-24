@@ -100,6 +100,14 @@ class SubscriptionRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_subscribe_id(
+        self,
+        subscribe_id: int
+    ) -> Optional[Subscription]:
+        query = select().where(Subscription.id == subscribe_id)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
     async def get_user_subscription(
         self,
         subscriber_id: int,
