@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field, validator
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
 
 
@@ -25,3 +25,30 @@ class SubscriptionBase(BaseModel):
                 raise ValueError("target_wishlist_id must be add ot subscribe")
             if field_name == "target_user_id" and v is not None:
                 raise ValueError("target_wishlist_id must be None to user_sub")
+
+
+class SubscriptionCreate(SubscriptionBase):
+    subscriber_id: Optional[int] = None
+
+
+class SubscriptionUpdate(BaseModel):
+    pass
+
+
+class SubscriptionResponse(SubscriptionBase):
+    id: int
+    subscriber_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SubscriptionWithDetailsResponse(SubscriptionResponse):
+    subscriber_name: Optional[str] = None
+    target_user_name: Optional[str] = None
+    target_wishlist_title: Optional[str] = None
+
+
+class SubscriptionStatusResponse(BaseModel):
+    is_subscribed: bool
+    subscription_id: Optional[int] = None
