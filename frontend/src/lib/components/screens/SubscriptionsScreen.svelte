@@ -8,24 +8,103 @@
     const ICON_ARROW = '/icons/arrow-right.png';
 
     let searchQuery = '';
+    let sortBy = 'default'; // 'default', 'users', 'wishlists', 'birth_date_asc', 'birth_date_desc'
 
     // Фильтрация подписок по поисковому запросу
-    const getFilteredSubscriptions = () => {
+    $: sortedSubscriptions = (() => {
+        let result = $subscriptionsStore;
         const query = searchQuery.trim().toLowerCase();
-        if (!query) return $subscriptionsStore;
 
-        return $subscriptionsStore.filter(item => {
-            if (item.type_sub) {
-                // Подписка на пользователя
-                const userName = item.user?.name?.toLowerCase() || '';
-                return userName.includes(query);
-            } else {
-                // Подписка на вишлист
-                const wishlistName = item.wishlist?.name?.toLowerCase() || '';
-                const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
-                return wishlistName.includes(query) || wishlistOwner.includes(query);
-            }
-        });
+        if (query) {
+            result = result.filter(item => {
+                if (item.type_sub) {
+                    // Подписка на пользователя
+                    const userName = item.user?.name?.toLowerCase() || '';
+                    return userName.includes(query);
+                } else {
+                    // Подписка на вишлист
+                    const wishlistName = item.wishlist?.name?.toLowerCase() || '';
+                    const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
+                    return wishlistName.includes(query) || wishlistOwner.includes(query);
+                }
+            });
+        }
+
+        return sortSubscriptions(result, sortBy);
+    })();
+
+    // Функция сортировки
+    const sortSubscriptions = (subscriptions, sortType) => {
+        let result = [...subscriptions];
+        
+        switch (sortType) {
+            case 'users':
+                // Только пользователи
+                return result.filter(item => item.type_sub);
+                
+            case 'wishlists':
+                // Только вишлисты
+                return result.filter(item => !item.type_sub);
+                
+            case 'birth_date_asc':
+                // Сначала сортируем пользователей по дате рождения по возрастанию
+                const usersAsc = result
+                    .filter(item => item.type_sub)
+                    .sort((a, b) => {
+                        const dateA = parseBirthDate(a.user?.birth_date);
+                        const dateB = parseBirthDate(b.user?.birth_date);
+                        
+                        // Если нет даты, идет в конец
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return 1;
+                        if (!dateB) return -1;
+                        
+                        return dateA - dateB; // Старшие сначала
+                    });
+                
+                // Вишлисты идут после пользователей (без сортировки)
+                const wishlists = result.filter(item => !item.type_sub);
+                
+                return [...usersAsc, ...wishlists];
+                
+            case 'birth_date_desc':
+                // Сначала сортируем пользователей по дате рождения по убыванию
+                const usersDesc = result
+                    .filter(item => item.type_sub)
+                    .sort((a, b) => {
+                        const dateA = parseBirthDate(a.user?.birth_date);
+                        const dateB = parseBirthDate(b.user?.birth_date);
+                        
+                        // Если нет даты, идет в конец
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return 1;
+                        if (!dateB) return -1;
+                        
+                        return dateB - dateA; // Младшие сначала
+                    });
+                
+                // Вишлисты идут после пользователей (без сортировки)
+                const wishlistsDesc = result.filter(item => !item.type_sub);
+                
+                return [...usersDesc, ...wishlistsDesc];
+                
+            default:
+                // 'default' - выводятся пользователи и вишлисты без упорядочивания
+                return result;
+        }
+    };
+
+    // Функция для парсинга даты рождения из формата "DD.MM.YYYY"
+    const parseBirthDate = (dateStr) => {
+        if (!dateStr) return null;
+        
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return null;
+        
+        const [day, month, year] = parts.map(Number);
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+        
+        return new Date(year, month - 1, day);
     };
 
     // Обработчик отписки
@@ -75,7 +154,6 @@
             return 'желаний';
         }
     };
-
 </script>
 
 <header class="app-header">
@@ -88,6 +166,70 @@
         label="Поиск" 
         placeholder="Введите имя пользователя или название вишлиста..."
     />
+
+    <!-- Панель сортировки -->
+    <div class="sort-panel">
+        <div class="sort-header">
+            <div class="sort-title">Сортировка</div>
+        </div>
+        
+        <div class="sort-options">
+            <label class="sort-option">
+                <input 
+                    type="radio" 
+                    name="sort" 
+                    value="default" 
+                    bind:group={sortBy}
+                    class="sort-radio"
+                />
+                <span class="sort-label">По умолчанию (без сортировки)</span>
+            </label>
+            
+            <label class="sort-option">
+                <input 
+                    type="radio" 
+                    name="sort" 
+                    value="users" 
+                    bind:group={sortBy}
+                    class="sort-radio"
+                />
+                <span class="sort-label">Только пользователи</span>
+            </label>
+            
+            <label class="sort-option">
+                <input 
+                    type="radio" 
+                    name="sort" 
+                    value="wishlists" 
+                    bind:group={sortBy}
+                    class="sort-radio"
+                />
+                <span class="sort-label">Только вишлисты</span>
+            </label>
+            
+            <label class="sort-option">
+                <input 
+                    type="radio" 
+                    name="sort" 
+                    value="birth_date_asc" 
+                    bind:group={sortBy}
+                    class="sort-radio"
+                />
+                <span class="sort-label">Дата рождения (по убыванию)</span>
+            </label>
+            
+            <label class="sort-option">
+                <input 
+                    type="radio" 
+                    name="sort" 
+                    value="birth_date_desc" 
+                    bind:group={sortBy}
+                    class="sort-radio"
+                />
+                <span class="sort-label">Дата рождения (по возрастанию)</span>
+            </label>
+        </div>
+    </div>
 </section>
 
 <section class="section-card">
@@ -95,9 +237,13 @@
         <p class="empty-note">
             У вас пока нет подписок. Вы можете подписаться на других пользователей или их вишлисты.
         </p>
+    {:else if sortedSubscriptions.length === 0}
+        <p class="empty-note">
+            По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска или сортировки.
+        </p>
     {:else}
         <div class="subscriptions-list">
-            {#each getFilteredSubscriptions() as subscription (subscription.id)}
+            {#each sortedSubscriptions as subscription (subscription.id)}
                 <div 
                     class="subscription-card"
                     on:click={() => handleOpenItem(subscription)}
@@ -333,12 +479,91 @@
         font-size: 16px;
     }
 
+        /* Панель сортировки */
+    .sort-panel {
+        margin-top: 16px;
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .sort-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .sort-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .subscriptions-counts {
+        display: flex;
+        gap: 8px;
+    }
+
+    .count-badge {
+        font-size: 12px;
+        padding: 4px 8px;
+        background: #e0e7ff;
+        color: #4f46e5;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    .sort-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sort-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .sort-option:hover {
+        background: #f3f4f6;
+    }
+
+    .sort-radio {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .sort-label {
+        font-size: 13px;
+        color: #4b5563;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .sort-radio:checked + .sort-label {
+        font-weight: 600;
+        color: #111827;
+    }
+
     /* Адаптивность */
     @media (max-width: 480px) {
         .subscription-card {
             flex-direction: column;
             align-items: stretch;
             gap: 16px;
+        }
+
+        .sort-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
         }
 
         .subscription-content {
