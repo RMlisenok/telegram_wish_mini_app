@@ -1,10 +1,32 @@
 <script>
     import Avatar from '$lib/components/ui/Avatar.svelte';
+    import TextField from '$lib/components/ui/TextField.svelte';
     import { subscriptionsStore } from '$lib/stores/data.js';
 
     // Иконки
     const ICON_WISHLIST = '/icons/maingift.svg';
     const ICON_ARROW = '/icons/arrow-right.png';
+
+    let searchQuery = '';
+
+    // Фильтрация подписок по поисковому запросу
+    const getFilteredSubscriptions = () => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return $subscriptionsStore;
+
+        return $subscriptionsStore.filter(item => {
+            if (item.type_sub) {
+                // Подписка на пользователя
+                const userName = item.user?.name?.toLowerCase() || '';
+                return userName.includes(query);
+            } else {
+                // Подписка на вишлист
+                const wishlistName = item.wishlist?.name?.toLowerCase() || '';
+                const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
+                return wishlistName.includes(query) || wishlistOwner.includes(query);
+            }
+        });
+    };
 
     // Обработчик отписки
     const handleUnsubscribe = (subscriptionId, event) => {
@@ -61,13 +83,21 @@
 </header>
 
 <section class="section-card">
+    <TextField 
+        bind:value={searchQuery} 
+        label="Поиск" 
+        placeholder="Введите имя пользователя или название вишлиста..."
+    />
+</section>
+
+<section class="section-card">
     {#if $subscriptionsStore.length === 0}
         <p class="empty-note">
             У вас пока нет подписок. Вы можете подписаться на других пользователей или их вишлисты.
         </p>
     {:else}
         <div class="subscriptions-list">
-            {#each $subscriptionsStore as subscription (subscription.id)}
+            {#each getFilteredSubscriptions() as subscription (subscription.id)}
                 <div 
                     class="subscription-card"
                     on:click={() => handleOpenItem(subscription)}
