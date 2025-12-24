@@ -168,7 +168,7 @@
                         <WishlistsScreen
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
-                            
+                            on:openEditWishlists={() => navigate('wishlistsEdit')}
                         />
                     <!-- 2008/3_Dass_24.12.2025 -->
                      {:else if currentScreen === 'wishlistsEdit'}
