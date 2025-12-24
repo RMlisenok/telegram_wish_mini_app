@@ -198,13 +198,10 @@
                                 navigate('wishlists');
                             }}
                         />
-<<<<<<< HEAD
-=======
                     <!-- 2010/1-5_locust_24.12.2025 -->
                      {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
                         />
->>>>>>> origin/front
                 {/if}
             </div>
             
