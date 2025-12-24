@@ -69,7 +69,10 @@
 
     const handleDelete = () => {
         console.log('Удаление желания:', selectedWish.id);
-        // TODO: Реализовать удаление
+        //2006_3_Dass_25.12.2025
+        if (!selectedWish) return;
+        $wishesStore = $wishesStore.filter(wish => wish.id !== selectedWish.id);
+        closeDetailModal();
     };
 
     // открытие вишлиста 2009/0_Dass_25.12.2025
