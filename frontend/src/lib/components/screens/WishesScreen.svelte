@@ -110,24 +110,42 @@
         showAddExistingModal = false;
         selectedWishesForAdding.clear();
     };
-    const toggleWishSelection = (wishId, event) => {
-        if (event) event.stopPropagation();
-        if (selectedWishesForAdding.has(wishId)) {
-            selectedWishesForAdding.delete(wishId);
-        } else {
-            selectedWishesForAdding.add(wishId);
-        }
-    };
+    
     $: availableWishes = $wishesStore.filter(wish => 
         !wish.wishlistIds?.includes(wishlistId)
     );
     // 2009_1_Dass_25.12.2025 <--
+
+    // 2009_2_Dass_25.12.2025 -->
+    const handleRemoveFromWishlist = (wishId) => {
+        if (!wishlistId) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (wish.id === wishId) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                const newWishlistIds = existingWishlistIds.filter(id => id !== wishlistId);
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        
+        // Закрываем модальное окно, если оно открыто
+        if (selectedWish && selectedWish.id === wishId) {
+            closeDetailModal();
+        }
+        
+        console.log('Желание удалено из вишлиста', wishId);
+    };
+    // 2009_2_Dass_25.12.2025 <--
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
 {#if wishlistId && currentWishlist}
     <!-- Шапка для режима просмотра вишлиста -->
-    <header class="app-header with-back">
+    <header class="app-header">
         <div class="h1">{currentWishlist.title}</div>
         <div class="wishlist-subtitle">
             {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
@@ -270,8 +288,16 @@
 
                 <!-- Кнопки действий -->
                 <div class="panel-actions">
-                    <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
-                    <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+                    {#if wishlistId}
+                        <!-- Если мы в режиме вишлиста, показываем кнопку удаления из вишлиста -->
+                        <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
+                            Удалить из вишлиста
+                        </Button>
+                    {:else}
+                        <!-- В обычном режиме показываем стандартные кнопки -->
+                        <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
+                        <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -794,6 +820,13 @@
         display: flex;
         justify-content: flex-end;
         gap: 12px;
+    }
+    .wishlist-subtitle
+    {
+        text-align: right;
+        font-size: 12px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        margin-top: 4px;
     }
 </style>
 
