@@ -2,6 +2,8 @@
 <script>
     import { wishesStore } from '$lib/stores/data.js';
     import { onMount } from 'svelte';
+    import TextField from '$lib/components/ui/TextField.svelte';
+    import Button from '../ui/Button.svelte';
     export let onGoBack;
     export let wishId;
     function goBack() {
@@ -10,20 +12,42 @@
         }
     }
 
-    let wishes = null;
-    let title = ''; 
-    let description = ''; 
-    let photoPreview = null; 
+    let error = '';
+    let title = '';
+    let photoFile = null;
+    let photoPreview = null;
+    let link = '';
+    let price = '';
+    let currency = '';
+    let description = '';
+    let selectedWishlists = [];
+
+    function clearError() {
+        error = ''; 
+    }
+
+    const currencies = [
+        { value: 'RUB', label: '₽' },
+        { value: 'BYN', label: 'Br' },
+        { value: 'USD', label: '$' },
+        { value: 'EUR', label: '€' },
+        { value: 'UAH', label: '₴' },
+        { value: 'KZT', label: '₸' }
+    ];
 
     onMount(() => {
         // Находим желание по ID
         if (wishId) {
-            wishes = $wishesStore.find(w => w.id === wishId);
-            if (wishes) {
+            const wish = $wishesStore.find(w => w.id === wishId);
+            if (wish) {
                 // Инициализируем значения формы
-                title = wishes.title || '';
-                description = wishes.description || '';
-                photoPreview = wishes.imageUrl || null;
+                title = wish.title || '';
+                description = wish.description || '';
+                link = wish.link || '';
+                price = wish.price ? wish.price.toString() : '';
+                currency = wish.currency || '';
+                photoPreview = wish.imageUrl || null;
+                selectedWishlists = wish.wishlistIds || [];
             }
         }
     });
@@ -38,7 +62,26 @@
         <div class="h1">Редактировать желание</div>
         <div class="header-placeholder"></div>
     </header>
-    
+    <div class="form-container">
+        <!-- Обязательное поле: Название -->
+        <div class="form-group">
+            <label for="title" class="form-label">
+                Название <span class="required">*</span>
+            </label>
+            <TextField
+                id="title"
+                type="text"
+                bind:value={title}
+                on:input={clearError}
+                {error}
+                placeholder="Например, Настольная лампа"
+                maxlength="100"
+                required
+            />
+            <div class="char-count">{title.length}/100</div>
+        </div>
+    </div>
+
 </div>
 
 <style>
@@ -89,6 +132,32 @@
 
     .header-placeholder {
         width: 44px;
+    }
+
+    .form-container {
+        padding: 0 16px 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--tg-theme-text-color, #1d1d1f);
+    }
+
+    .required {
+        color: #ff3b30;
+    }
+    .char-count {
+        text-align: right;
+        font-size: 12px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        margin-top: 4px;
     }
 
     
