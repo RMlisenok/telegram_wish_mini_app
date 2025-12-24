@@ -33,8 +33,13 @@
     // user vient du store
     $: user = $userStore;
 
-    function navigate(screen) {
+    function navigate(screen, params = {}) {
         currentScreen = screen;
+        if (params.wishlistId) {
+            currentWishlistId = params.wishlistId;
+        } else {
+            currentWishlistId = null; // Сбрасываем при переходе на другие экраны
+        }
     }
 
     function applyTheme() {
@@ -77,7 +82,8 @@
         };
     });
 
-
+    let currentWishlistId = null;
+    
 </script>
 
 {#if !user}
@@ -149,6 +155,7 @@
                         <QuestionnaireScreen {user} on:back={() => navigate('main')} />
                     {:else if currentScreen === 'wishes'}
                         <WishesScreen 
+                            wishlistId={currentWishlistId}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                         />
                     {:else if currentScreen === 'shareProfile'}
@@ -168,6 +175,7 @@
                         <WishlistsScreen
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
+                            on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
                         />
                     <!-- 2010/1-5_locust_24.12.2025 -->
                      {:else if currentScreen === 'subscriptions'}

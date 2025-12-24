@@ -3,6 +3,7 @@
     import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
 
     const iconGift = '/icons/gift3.png';
+    export let wishlistId = null; //2009/0_Dass_25.12.2025
 
     const formatPrice = (wish) => {
         if (wish.price == null || wish.price === '') return '';
@@ -71,20 +72,50 @@
         // TODO: Реализовать удаление
     };
 
+    // открытие вишлиста 2009/0_Dass_25.12.2025
+    $: filteredWishes = wishlistId 
+        ? $wishesStore.filter(wish => 
+            (wish.wishlistIds || []).includes(wishlistId)
+          )
+        : $wishesStore;
+
+    $: currentWishlist = wishlistId 
+        ? $wishlistsStore.find(wl => wl.id === wishlistId)
+        : null;
+
+
 </script>
 
-<header class="app-header">
-    <div class="h1">Все ваши желания</div>
-</header>
+<!--2009/0_Dass_25.12.2025-->
+{#if wishlistId && currentWishlist}
+    <!-- Шапка для режима просмотра вишлиста -->
+    <header class="app-header with-back">
+        <div class="h1">{currentWishlist.title}</div>
+        <div class="wishlist-subtitle">
+            {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
+            filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+        </div>
+    </header>
+{:else}
+    <!-- Стандартная шапка -->
+    <header class="app-header">
+        <div class="h1">Все ваши желания</div>
+    </header>
+{/if}
 
 <section class="section-card">
-    {#if $wishesStore.length === 0}
+    <!--2009/0_Dass_25.12.2025-->
+    {#if filteredWishes.length === 0}
         <p class="empty-note">
-            У вас пока нет желаний. Нажмите «Новое желание», чтобы добавить первое.
+            {#if wishlistId}
+                В этом вишлисте пока нет желаний.
+            {:else}
+                У вас пока нет желаний. Нажмите «Новое желание», чтобы добавить первое.
+            {/if}
         </p>
     {:else}
         <div class="wish-grid">
-            {#each $wishesStore as wish (wish.id)}
+            {#each filteredWishes as wish (wish.id)}
                 <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
                 <article 
                     class="wish-card" 
@@ -113,9 +144,12 @@
     {/if}
 </section>
 
-<div style="padding:0 16px 12px;">
-    <Button full on:click={openForm}>+ Новое желание</Button>
-</div>
+<!--2009/0_Dass_25.12.2025-->
+{#if !wishlistId}
+    <div style="padding:0 16px 12px;">
+        <Button full on:click={openForm}>+ Новое желание</Button>
+    </div>
+{/if}
 
 <!-- Модальное окно детального просмотра -->
 {#if showDetailModal && selectedWish}
