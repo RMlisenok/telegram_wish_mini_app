@@ -83,7 +83,45 @@
         ? $wishlistsStore.find(wl => wl.id === wishlistId)
         : null;
 
-
+    // 2009_1_Dass_25.12.2025 -->
+    let showAddExistingModal = false;
+    let selectedWishesForAdding = new Set();
+    const openAddExistingModal = () => {
+        selectedWishesForAdding = new Set();
+        showAddExistingModal = true;
+    };
+    const addSelectedWishesToWishlist = () => {
+        if (!wishlistId) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (selectedWishesForAdding.has(wish.id)) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                if (!existingWishlistIds.includes(wishlistId)) {
+                    return {
+                        ...wish,
+                        wishlistIds: [...existingWishlistIds, wishlistId]
+                    };
+                }
+            }
+            return wish;
+        });
+            
+        // Закрываем модальное окно
+        showAddExistingModal = false;
+        selectedWishesForAdding.clear();
+    };
+    const toggleWishSelection = (wishId, event) => {
+        if (event) event.stopPropagation();
+        if (selectedWishesForAdding.has(wishId)) {
+            selectedWishesForAdding.delete(wishId);
+        } else {
+            selectedWishesForAdding.add(wishId);
+        }
+    };
+    $: availableWishes = $wishesStore.filter(wish => 
+        !wish.wishlistIds?.includes(wishlistId)
+    );
+    // 2009_1_Dass_25.12.2025 <--
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -148,6 +186,13 @@
 {#if !wishlistId}
     <div style="padding:0 16px 12px;">
         <Button full on:click={openForm}>+ Новое желание</Button>
+    </div>
+<!--2009_1_Dass_25.12.2025-->
+{:else}
+    <div style="padding:0 16px 12px;">
+        <Button full on:click={openAddExistingModal}>
+            + Добавить существующее желание
+        </Button>
     </div>
 {/if}
 
@@ -228,6 +273,85 @@
                     <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
                     <Button kind="danger" on:click={handleDelete}>Удалить</Button>
                 </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!--2009_1_Dass_25.12.2025-->
+{#if showAddExistingModal}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={() => showAddExistingModal = false}>
+        <div class="modal-content" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>Выберите желания для добавления</h2>
+                <button class="modal-close" on:click={() => showAddExistingModal = false}>✕</button>
+            </div>
+            
+            <div class="modal-body">
+                {#if availableWishes.length === 0}
+                    <p class="empty-message">Нет доступных желаний для добавления</p>
+                {:else}
+                    <div class="wishes-selection-list">
+                        {#each availableWishes as wish (wish.id)}
+                            <label class="wish-selection-item {selectedWishesForAdding.has(wish.id) ? 'selected' : ''}">
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedWishesForAdding.has(wish.id)}
+                                    on:change={() => {
+                                        const newSet = new Set(selectedWishesForAdding);
+                                        if (selectedWishesForAdding.has(wish.id)) {
+                                            newSet.delete(wish.id);
+                                        } else {
+                                            newSet.add(wish.id);
+                                        }
+                                        selectedWishesForAdding = newSet;
+                                    }}
+                                    style="display: none;"
+                                />
+                                
+                                <div class="selection-checkbox">
+                                    {#if selectedWishesForAdding.has(wish.id)}
+                                        <div class="checkbox-checked">✓</div>
+                                    {:else}
+                                        <div class="checkbox-empty"></div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wish-selection-info">
+                                    <div class="wish-selection-title">{wish.title}</div>
+                                    {#if wish.price != null}
+                                        <div class="wish-selection-price">{formatPrice(wish)}</div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wish-selection-image">
+                                    {#if wish.imageUrl}
+                                        <img src={wish.imageUrl} alt={wish.title} />
+                                    {:else}
+                                        <img src={iconGift} alt="Подарок" class="placeholder" />
+                                    {/if}
+                                </div>
+                            </label>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+            
+            <div class="modal-footer">
+                <Button 
+                    kind="ghost" 
+                    on:click={() => showAddExistingModal = false}
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    on:click={addSelectedWishesToWishlist}
+                    disabled={selectedWishesForAdding.size === 0}
+                >
+                    Добавить выбранные ({selectedWishesForAdding.size})
+                </Button>
             </div>
         </div>
     </div>
