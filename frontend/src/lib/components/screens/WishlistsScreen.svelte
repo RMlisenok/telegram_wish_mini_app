@@ -22,6 +22,7 @@
     const handleEditWishlist = (wishlistId) => {
         console.log('Редактирование вишлиста:', wishlistId);
         // TODO: Реализовать редактирование вишлиста
+        dispatch('openEditWishlists', { id: wishlistId }) //2008_3_Dass_24.12.2025
     };
 
     const handleDeleteWishlist = (wishlistId) => {
