@@ -168,12 +168,17 @@
                         <WishlistsScreen
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
-                            on:openEditWishlists={() => navigate('wishlistsEdit')}
+                            on:openEditWishlists={(e) => {
+                                selectedWishlistId = e.detail.id;
+                                navigate('wishlistsEdit'); 
+                                }}
                         />
                     <!-- 2008/3_Dass_24.12.2025 -->
                      {:else if currentScreen === 'wishlistsEdit'}
                         <WishlistsScreenEdit
+                            wishlistId={selectedWishlistId}
                             onGoBack={() => {
+                                selectedWishlistId = null;
                                 navigate('wishlists');
                             }}
                         />

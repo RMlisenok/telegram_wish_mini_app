@@ -1,12 +1,22 @@
 <!-- 2008/3_Dass_24.12.2025 -->
 <script>
     export let onGoBack;
+    import { onMount } from 'svelte';
     function goBack() {
         if (onGoBack) {
             onGoBack();
         }
     }
- 
+    export let wishlistId;
+    import { wishlistsStore } from '$lib/stores/data.js';
+    let wishlist = null;
+
+    onMount(() => {
+        // Находим вишлист по ID
+        if (wishlistId) {
+            wishlist = $wishlistsStore.find(w => w.id === wishlistId);
+        }
+    });
 
 </script>
 
@@ -15,7 +25,11 @@
         <button class="back-btn" type="button" on:click={goBack}>
             ←
         </button>
-        <div class="h1">Редактировать вишлист</div>
+        <div class="h1">{#if wishlist}
+                Редактировать: {wishlist.title}
+            {:else}
+                Редактировать вишлист
+            {/if}</div>
         <div class="header-placeholder"></div>
     </header>
 
