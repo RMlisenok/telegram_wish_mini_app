@@ -6,6 +6,7 @@
     const dispatch = createEventDispatcher();
 
     const iconGift = '/icons/gift3.png';
+    const ICON_WARNING = '/icons/warning.png';
     export let wishlistId = null; //2009/0_Dass_25.12.2025
 
     const formatPrice = (wish) => {
@@ -75,8 +76,8 @@
         console.log('Удаление желания:', selectedWish.id);
         //2006_3_Dass_25.12.2025
         if (!selectedWish) return;
-        $wishesStore = $wishesStore.filter(wish => wish.id !== selectedWish.id);
-        closeDetailModal();
+        //2006_7_Dass_25.12.2025
+        showFullDeleteModal = true;
     };
 
     // открытие вишлиста 2009/0_Dass_25.12.2025
@@ -126,25 +127,14 @@
     // 2009_2_Dass_25.12.2025 -->
     const handleRemoveFromWishlist = (wishId) => {
         if (!wishlistId) return;
+        //2006_7_Dass_25.12.2025
+        deleteOption = 'fromwishlists';
         
-        $wishesStore = $wishesStore.map(wish => {
-            if (wish.id === wishId) {
-                const existingWishlistIds = wish.wishlistIds || [];
-                const newWishlistIds = existingWishlistIds.filter(id => id !== wishlistId);
-                return {
-                    ...wish,
-                    wishlistIds: newWishlistIds
-                };
-            }
-            return wish;
-        });
-        
-        // Закрываем модальное окно, если оно открыто
-        if (selectedWish && selectedWish.id === wishId) {
-            closeDetailModal();
+        const wish = $wishesStore.find(w => w.id === wishId);
+        if (wish) {
+            selectedWish = wish;
+            showFromWishlistDeleteModal = true;
         }
-        
-        console.log('Желание удалено из вишлиста', wishId);
     };
     // 2009_2_Dass_25.12.2025 <--
 
@@ -209,6 +199,52 @@
         !wishlistId || wl.id !== wishlistId
     );
     // 2009_3_Dass_25.12.2025 <--
+
+    //2006_7_Dass_25.12.2025 -->
+    let deleteOption = null;  
+    let showFullDeleteModal = false;
+    let showFromWishlistDeleteModal = false;  
+
+    const executeFullDelete = () => {
+        if (!selectedWish) return;
+        // Удалить полностью из всех вишлистов
+        $wishesStore = $wishesStore.filter(wish => wish.id !== selectedWish.id);
+        console.log('Желание полностью удалено:', selectedWish.id);
+        // Закрываем модальные окна
+        closeFullDeleteModal();
+        closeDetailModal();
+    };
+
+    const executeFromWishlistDelete = () => {
+        if (!selectedWish || !wishlistId) return;
+        // Удалить только из текущего вишлиста
+        $wishesStore = $wishesStore.map(wish => {
+            if (wish.id === selectedWish.id) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                const newWishlistIds = existingWishlistIds.filter(id => id !== wishlistId);
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        console.log('Желание удалено из вишлиста:', selectedWish.id);
+        // Закрываем модальные окна
+        closeFromWishlistDeleteModal();
+        closeDetailModal();
+    };
+
+    const closeFullDeleteModal = () => {
+        showFullDeleteModal = false;
+        selectedWish = null;
+    };
+
+    const closeFromWishlistDeleteModal = () => {
+        showFromWishlistDeleteModal = false;
+        selectedWish = null;
+    };
+    //2006_7_Dass_25.12.2025 <--
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -533,6 +569,80 @@
                 >
                     {actionType === 'copy' ? 'Копировать' : 'Переместить'} 
                     {targetWishlists.size > 0 && ` (${targetWishlists.size})`}
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!--2006_7_Dass_25.12.2025-->
+<!-- Модальное окно для полного удаления (из общего списка) -->
+{#if showFullDeleteModal && selectedWish}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={closeFullDeleteModal}>
+        <div class="confirm-delete-modal" on:click|stopPropagation>
+            <div class="confirm-icon">
+                <img src={ICON_WARNING} alt="Внимание" class="warning-icon" />
+            </div>
+            
+            <h2 class="confirm-title">Удалить желание полностью?</h2>
+            
+            <p class="confirm-message">
+                Вы собираетесь удалить желание "<strong>{selectedWish.title}</strong>".
+                Оно будет удалено из всех вишлистов и списка желаний.
+            </p>
+            
+            <div class="confirm-actions">
+                <Button 
+                    kind="ghost" 
+                    on:click={closeFullDeleteModal}
+                    style="flex: 1;"
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    kind="danger" 
+                    on:click={executeFullDelete}
+                    style="flex: 1;"
+                >
+                    Удалить полностью
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!-- Модальное окно для удаления из вишлиста -->
+{#if showFromWishlistDeleteModal && selectedWish}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={closeFromWishlistDeleteModal}>
+        <div class="confirm-delete-modal" on:click|stopPropagation>
+            <div class="confirm-icon">
+                <img src={ICON_WARNING} alt="Внимание" class="warning-icon" />
+            </div>
+            
+            <h2 class="confirm-title">Удалить из вишлиста?</h2>
+            
+            <p class="confirm-message">
+                Вы хотите удалить "<strong>{selectedWish.title}</strong>" только из этого вишлиста.
+            </p>
+            
+            <div class="confirm-actions">
+                <Button 
+                    kind="ghost" 
+                    on:click={closeFromWishlistDeleteModal}
+                    style="flex: 1;"
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    kind="danger" 
+                    on:click={executeFromWishlistDelete}
+                    style="flex: 1;"
+                >
+                    Удалить из вишлиста
                 </Button>
             </div>
         </div>
@@ -1065,5 +1175,55 @@
         margin: 10px;
         opacity: 0.7;
     }
+    /* Общие стили для обоих модальных окон удаления */
+    .confirm-delete-modal {
+        width: 90%;
+        max-width: 400px;
+        background: white;
+        border-radius: 24px;
+        padding: 32px 24px 24px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .confirm-delete-modal .confirm-icon {
+        margin: 0 auto 20px;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #EF4444;
+    }
+
+    .confirm-delete-modal .confirm-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 16px 0;
+    }
+
+    .confirm-delete-modal .confirm-message {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #6B7280;
+        margin: 0 0 20px 0;
+        padding: 0 4px;
+    }
+
+    .confirm-delete-modal .confirm-message strong {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .confirm-delete-modal .confirm-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 0 auto;
+        max-width: 300px;
+    }
+
+
 </style>
 

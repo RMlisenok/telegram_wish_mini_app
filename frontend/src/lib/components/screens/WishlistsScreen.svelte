@@ -10,6 +10,7 @@
     const ICON_TRASH = '/icons/trash.png';
     const ICON_GIFT = '/icons/maingift.svg';
     const ICON_ARROW = '/icons/arrow-right.png';
+    const ICON_WARNING = '/icons/warning.png';
     
     // Иконки приватности   
     const ICON_PUBLIC_FRIENDS = '/icons/view.png';
@@ -27,7 +28,15 @@
 
     const handleDeleteWishlist = (wishlistId) => {
         console.log('Удаление вишлиста:', wishlistId);
-        // TODO: Реализовать удаление вишлиста
+        //2008_4_Dass_25.12.2025
+        const wishlist = $wishlistsStore.find(wl => wl.id === wishlistId);
+        if (!wishlist) return;
+        
+        wishesInWishlist = getWishlistCount(wishlistId);
+        
+        wishlistToDelete = wishlistId;
+        wishlistToDeleteName = wishlist.title;
+        showDeleteWishlistModal = true;
     };
 
     const handleOpenWishlist = (wishlistId) => {
@@ -97,6 +106,43 @@
             name: wishlist.ownerName || 'Вы'
         };
     };
+
+    //2008_4_Dass_25.12.2025 -->
+    let showDeleteWishlistModal = false;
+    let wishlistToDelete = null;
+    let wishlistToDeleteName = '';
+    let wishesInWishlist = 0;
+
+    // функция подтверждения удаления вишлиста
+    const confirmDeleteWishlist = () => {
+        if (!wishlistToDelete) return;
+        // Удаляем этот wishlistId из всех желаний
+        $wishesStore = $wishesStore.map(wish => {
+            const wishlistIds = wish.wishlistIds || [];
+            if (wishlistIds.includes(wishlistToDelete)) {
+                const newWishlistIds = wishlistIds.filter(id => id !== wishlistToDelete);
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        
+        // удаляем сам вишлист
+        $wishlistsStore = $wishlistsStore.filter(wl => wl.id !== wishlistToDelete);
+        
+        cancelDeleteWishlist();
+        console.log('Вишлист удален:', wishlistToDelete);
+    };
+    //отмена удаления
+    const cancelDeleteWishlist = () => {
+        showDeleteWishlistModal = false;
+        wishlistToDelete = null;
+        wishlistToDeleteName = '';
+        wishesInWishlist = 0;
+    };
+    //2008_4_Dass_25.12.2025 <--
 </script>
 
 <header class="app-header">
@@ -198,6 +244,48 @@
         </div>
     {/if}
 </section>
+
+{#if showDeleteWishlistModal}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={cancelDeleteWishlist}>
+        <div class="confirm-modal" on:click|stopPropagation>
+            <div class="confirm-icon">
+                <img src={ICON_WARNING} alt="Внимание" class="warning-icon" />
+            </div>
+            
+            <h2 class="confirm-title">Удалить вишлист?</h2>
+            
+            <div class="confirm-details">
+                <p><strong>"{wishlistToDeleteName}"</strong></p>
+                <p class="wishlist-stats">
+                    В этом вишлисте <strong>{wishesInWishlist} {getWishesWord(wishesInWishlist)}</strong>
+                </p>
+            </div>
+            
+            <p class="confirm-message">
+                Все желания останутся и будут доступны в списке "Все ваши желания". 
+            </p>
+            
+            <div class="confirm-actions">
+                <Button 
+                    kind="ghost" 
+                    on:click={cancelDeleteWishlist}
+                    style="flex: 1;"
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    kind="danger" 
+                    on:click={confirmDeleteWishlist}
+                    style="flex: 1;"
+                >
+                    Удалить
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}
 
 <div style="padding:0 16px 12px;">
     <Button full on:click={openCreateWishlists}>+ Создать вишлист</Button>
@@ -404,4 +492,98 @@
         }
     }
 
+    /* Стили для модального окна подтверждения удаления вишлиста */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    .confirm-modal {
+        width: 90%;
+        max-width: 400px;
+        background: white;
+        border-radius: 24px;
+        padding: 32px 24px 24px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .confirm-icon {
+        margin: 0 auto 20px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .confirm-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 16px 0;
+    }
+
+    .confirm-details {
+        background: #F9FAFB;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 0 0 20px 0;
+        border: 1px solid #E5E7EB;
+    }
+
+    .confirm-details p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #4B5563;
+    }
+
+    .confirm-details strong {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .wishlist-stats {
+        color: #059669 !important;
+        font-weight: 500;
+    }
+
+    .confirm-message {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #6B7280;
+        margin: 0 0 24px 0;
+        padding: 0 4px;
+    }
+
+    .confirm-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        gap: 12px;
+        max-width: 300px;
+        margin: 0 auto;
+    }
 </style>
