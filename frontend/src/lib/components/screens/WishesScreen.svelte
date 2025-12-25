@@ -6,6 +6,7 @@
     const dispatch = createEventDispatcher();
 
     const iconGift = '/icons/gift3.png';
+    export let wishlistId = null; //2009/0_Dass_25.12.2025
 
     const formatPrice = (wish) => {
         if (wish.price == null || wish.price === '') return '';
@@ -72,23 +73,174 @@
 
     const handleDelete = () => {
         console.log('Удаление желания:', selectedWish.id);
-        // TODO: Реализовать удаление
+        //2006_3_Dass_25.12.2025
+        if (!selectedWish) return;
+        $wishesStore = $wishesStore.filter(wish => wish.id !== selectedWish.id);
+        closeDetailModal();
     };
 
+    // открытие вишлиста 2009/0_Dass_25.12.2025
+    $: filteredWishes = wishlistId 
+        ? $wishesStore.filter(wish => 
+            (wish.wishlistIds || []).includes(wishlistId)
+          )
+        : $wishesStore;
+
+    $: currentWishlist = wishlistId 
+        ? $wishlistsStore.find(wl => wl.id === wishlistId)
+        : null;
+
+    // 2009_1_Dass_25.12.2025 -->
+    let showAddExistingModal = false;
+    let selectedWishesForAdding = new Set();
+    const openAddExistingModal = () => {
+        selectedWishesForAdding = new Set();
+        showAddExistingModal = true;
+    };
+    const addSelectedWishesToWishlist = () => {
+        if (!wishlistId) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (selectedWishesForAdding.has(wish.id)) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                if (!existingWishlistIds.includes(wishlistId)) {
+                    return {
+                        ...wish,
+                        wishlistIds: [...existingWishlistIds, wishlistId]
+                    };
+                }
+            }
+            return wish;
+        });
+            
+        // Закрываем модальное окно
+        showAddExistingModal = false;
+        selectedWishesForAdding.clear();
+    };
+    
+    $: availableWishes = $wishesStore.filter(wish => 
+        !wish.wishlistIds?.includes(wishlistId)
+    );
+    // 2009_1_Dass_25.12.2025 <--
+
+    // 2009_2_Dass_25.12.2025 -->
+    const handleRemoveFromWishlist = (wishId) => {
+        if (!wishlistId) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (wish.id === wishId) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                const newWishlistIds = existingWishlistIds.filter(id => id !== wishlistId);
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        
+        // Закрываем модальное окно, если оно открыто
+        if (selectedWish && selectedWish.id === wishId) {
+            closeDetailModal();
+        }
+        
+        console.log('Желание удалено из вишлиста', wishId);
+    };
+    // 2009_2_Dass_25.12.2025 <--
+
+    // 2009_3_Dass_25.12.2025 -->
+    let showCopyMoveModal = false;
+    let actionType = 'copy'; // 'copy' или 'move'
+    let targetWishlists = new Set(); // Выбранные вишлисты для копирования/перемещения
+    let wishToCopyMove = null;
+
+    const openCopyMoveModal = (wishId, type) => {
+        wishToCopyMove = wishId;
+        actionType = type;
+        targetWishlists = new Set();
+        showCopyMoveModal = true;
+    };
+    //выполнить перемещение/копирование
+    const executeCopyMove = () => {
+        if (!wishToCopyMove || targetWishlists.size === 0) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (wish.id === wishToCopyMove) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                let newWishlistIds = [...existingWishlistIds];
+                // Добавляем выбранные вишлисты
+                targetWishlists.forEach(wishlistId => {
+                    if (!newWishlistIds.includes(wishlistId)) {
+                        newWishlistIds.push(wishlistId);
+                    }
+                });
+                // Если это перемещение, удаляем текущий вишлист
+                if (actionType === 'move' && wishlistId) {
+                    newWishlistIds = newWishlistIds.filter(id => id !== wishlistId);
+                }
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        
+        // Закрываем модальные окна
+        closeCopyMoveModal();
+        closeDetailModal();
+    };
+    const closeCopyMoveModal = () => {
+        showCopyMoveModal = false;
+        wishToCopyMove = null;
+        targetWishlists = new Set();
+    };
+    //переключить выбор вишлистов
+    const toggleWishlistSelection = (wishlistId) => {
+        const newSet = new Set(targetWishlists);
+        if (newSet.has(wishlistId)) {
+            newSet.delete(wishlistId);
+        } else {
+            newSet.add(wishlistId);
+        }
+        targetWishlists = newSet;
+    };
+    $: availableWishlists = $wishlistsStore.filter(wl => 
+        !wishlistId || wl.id !== wishlistId
+    );
+    // 2009_3_Dass_25.12.2025 <--
 </script>
 
-<header class="app-header">
-    <div class="h1">Все ваши желания</div>
-</header>
+<!--2009/0_Dass_25.12.2025-->
+{#if wishlistId && currentWishlist}
+    <!-- Шапка для режима просмотра вишлиста -->
+    <header class="app-header">
+        <div class="h1">{currentWishlist.title}</div>
+        <div class="wishlist-subtitle">
+            {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
+            filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+        </div>
+    </header>
+{:else}
+    <!-- Стандартная шапка -->
+    <header class="app-header">
+        <div class="h1">Все ваши желания</div>
+    </header>
+{/if}
 
 <section class="section-card">
-    {#if $wishesStore.length === 0}
+    <!--2009/0_Dass_25.12.2025-->
+    {#if filteredWishes.length === 0}
         <p class="empty-note">
-            У вас пока нет желаний. Нажмите «Новое желание», чтобы добавить первое.
+            {#if wishlistId}
+                В этом вишлисте пока нет желаний.
+            {:else}
+                У вас пока нет желаний. Нажмите «Новое желание», чтобы добавить первое.
+            {/if}
         </p>
     {:else}
         <div class="wish-grid">
-            {#each $wishesStore as wish (wish.id)}
+            {#each filteredWishes as wish (wish.id)}
                 <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
                 <article 
                     class="wish-card" 
@@ -117,9 +269,19 @@
     {/if}
 </section>
 
-<div style="padding:0 16px 12px;">
-    <Button full on:click={openForm}>+ Новое желание</Button>
-</div>
+<!--2009/0_Dass_25.12.2025-->
+{#if !wishlistId}
+    <div style="padding:0 16px 12px;">
+        <Button full on:click={openForm}>+ Новое желание</Button>
+    </div>
+<!--2009_1_Dass_25.12.2025-->
+{:else}
+    <div style="padding:0 16px 12px;">
+        <Button full on:click={openAddExistingModal}>
+            + Добавить существующее желание
+        </Button>
+    </div>
+{/if}
 
 <!-- Модальное окно детального просмотра -->
 {#if showDetailModal && selectedWish}
@@ -195,9 +357,183 @@
 
                 <!-- Кнопки действий -->
                 <div class="panel-actions">
-                    <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
-                    <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+                    {#if wishlistId}
+                        <!-- Если мы в режиме вишлиста -->
+                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
+                            Копировать в...
+                        </Button>
+                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
+                            Переместить в...
+                        </Button>
+                        <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
+                            Удалить из вишлиста
+                        </Button>
+                    {:else}
+                        <!-- В обычном режиме показываем стандартные кнопки -->
+                        <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
+                        <Button kind="danger" on:click={handleDelete}>Удалить</Button>
+                    {/if}
                 </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!--2009_1_Dass_25.12.2025-->
+{#if showAddExistingModal}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={() => showAddExistingModal = false}>
+        <div class="modal-content" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>Выберите желания для добавления</h2>
+                <button class="modal-close" on:click={() => showAddExistingModal = false}>✕</button>
+            </div>
+            
+            <div class="modal-body">
+                {#if availableWishes.length === 0}
+                    <p class="empty-message">Нет доступных желаний для добавления</p>
+                {:else}
+                    <div class="wishes-selection-list">
+                        {#each availableWishes as wish (wish.id)}
+                            <label class="wish-selection-item {selectedWishesForAdding.has(wish.id) ? 'selected' : ''}">
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedWishesForAdding.has(wish.id)}
+                                    on:change={() => {
+                                        const newSet = new Set(selectedWishesForAdding);
+                                        if (selectedWishesForAdding.has(wish.id)) {
+                                            newSet.delete(wish.id);
+                                        } else {
+                                            newSet.add(wish.id);
+                                        }
+                                        selectedWishesForAdding = newSet;
+                                    }}
+                                    style="display: none;"
+                                />
+                                
+                                <div class="selection-checkbox">
+                                    {#if selectedWishesForAdding.has(wish.id)}
+                                        <div class="checkbox-checked">✓</div>
+                                    {:else}
+                                        <div class="checkbox-empty"></div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wish-selection-info">
+                                    <div class="wish-selection-title">{wish.title}</div>
+                                    {#if wish.price != null}
+                                        <div class="wish-selection-price">{formatPrice(wish)}</div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wish-selection-image">
+                                    {#if wish.imageUrl}
+                                        <img src={wish.imageUrl} alt={wish.title} />
+                                    {:else}
+                                        <img src={iconGift} alt="Подарок" class="placeholder" />
+                                    {/if}
+                                </div>
+                            </label>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+            
+            <div class="modal-footer">
+                <Button 
+                    kind="ghost" 
+                    on:click={() => showAddExistingModal = false}
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    on:click={addSelectedWishesToWishlist}
+                    disabled={selectedWishesForAdding.size === 0}
+                >
+                    Добавить выбранные ({selectedWishesForAdding.size})
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!--2009_3_Dass_25.12.2025-->
+<!-- Модальное окно копирования/перемещения -->
+{#if showCopyMoveModal}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={closeCopyMoveModal}>
+        <div class="modal-content copy-move-modal" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>{actionType === 'copy' ? 'Копировать в' : 'Переместить в'}</h2>
+                <button class="modal-close" on:click={closeCopyMoveModal}>✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <p class="modal-description">
+                    {actionType === 'copy' 
+                        ? 'Выберите один или несколько вишлистов, в которые хотите скопировать это желание.'
+                        : 'Выберите один или несколько вишлистов, в которые хотите переместить это желание.'}
+                    {actionType === 'move' && wishlistId && 
+                        ' Текущий вишлист будет удален из списка.'}
+                </p>
+                
+                {#if availableWishlists.length === 0}
+                    <p class="empty-message">
+                        Нет доступных вишлистов для {actionType === 'copy' ? 'копирования' : 'перемещения'}
+                    </p>
+                {:else}
+                    <div class="wishlists-selection-list">
+                        {#each availableWishlists as wishlist (wishlist.id)}
+                            <div 
+                                class="wishlist-selection-item {targetWishlists.has(wishlist.id) ? 'selected' : ''}"
+                                on:click={() => toggleWishlistSelection(wishlist.id)}
+                            >
+                                <div class="selection-checkbox">
+                                    {#if targetWishlists.has(wishlist.id)}
+                                        <div class="checkbox-checked">✓</div>
+                                    {:else}
+                                        <div class="checkbox-empty"></div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wishlist-selection-info">
+                                    <div class="wishlist-selection-title">{wishlist.title}</div>
+                                    <div class="wishlist-selection-count">
+                                        {$wishesStore.filter(w => 
+                                            (w.wishlistIds || []).includes(wishlist.id)
+                                        ).length} желаний
+                                    </div>
+                                </div>
+                                
+                                <div class="wishlist-selection-cover">
+                                    {#if wishlist.rUrl}
+                                        <img src={wishlist.rUrl} alt={wishlist.title} />
+                                    {:else}
+                                        <img src={iconGift} alt="Вишлист" class="placeholder" />
+                                    {/if}
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+            
+            <div class="modal-footer">
+                <Button 
+                    kind="ghost" 
+                    on:click={closeCopyMoveModal}
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    on:click={executeCopyMove}
+                    disabled={targetWishlists.size === 0}
+                >
+                    {actionType === 'copy' ? 'Копировать' : 'Переместить'} 
+                    {targetWishlists.size > 0 && ` (${targetWishlists.size})`}
+                </Button>
             </div>
         </div>
     </div>
@@ -452,6 +788,282 @@
         cursor: pointer;
         transition: background-color 0.2s;
         z-index: 10;
+    }
+    /*Стили для модального окна добавления желаний */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001; /* Выше чем detail-backdrop */
+        padding: 20px;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 24px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 24px 24px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6b7280;
+        padding: 4px;
+        line-height: 1;
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 24px;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #6b7280;
+        padding: 40px 0;
+    }
+
+    .wishes-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .wish-selection-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .wish-selection-item:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .wish-selection-item.selected {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .selection-checkbox {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .checkbox-empty {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 6px;
+    }
+
+    .checkbox-checked {
+        width: 20px;
+        height: 20px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .checkbox-empty {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 6px;
+        background: white;
+    }
+
+    .wish-selection-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .wish-selection-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .wish-selection-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+    }
+
+    .wish-selection-price {
+        font-size: 13px;
+        color: #059669;
+        font-weight: 500;
+    }
+
+    .wish-selection-image {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f9fafb;
+    }
+
+    .wish-selection-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .wish-selection-image .placeholder {
+        object-fit: contain;
+        width: 30px;
+        height: 30px;
+        margin: 10px;
+        opacity: 0.7;
+    }
+
+    .modal-footer {
+        padding: 16px 24px 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+    .wishlist-subtitle
+    {
+        text-align: right;
+        font-size: 12px;
+        color: var(--tg-theme-hint-color, #8e8e93);
+        margin-top: 4px;
+    }  
+    .copy-move-modal {
+        max-width: 500px;
+    }
+
+    .modal-description {
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+        padding: 0 4px;
+    }
+
+    .wishlists-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .wishlist-selection-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .wishlist-selection-item:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .wishlist-selection-item.selected {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .wishlist-selection-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .wishlist-selection-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111827;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .wishlist-selection-count {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .wishlist-selection-cover {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f9fafb;
+    }
+
+    .wishlist-selection-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .wishlist-selection-cover .placeholder {
+        object-fit: contain;
+        width: 30px;
+        height: 30px;
+        margin: 10px;
+        opacity: 0.7;
     }
 </style>
 

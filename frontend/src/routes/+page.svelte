@@ -36,8 +36,13 @@
     // user vient du store
     $: user = $userStore;
 
-    function navigate(screen) {
+    function navigate(screen, params = {}) {
         currentScreen = screen;
+        if (params.wishlistId) {
+            currentWishlistId = params.wishlistId;
+        } else {
+            currentWishlistId = null; // Сбрасываем при переходе на другие экраны
+        }
     }
 
     function applyTheme() {
@@ -80,6 +85,8 @@
         };
     });
 
+    let currentWishlistId = null;
+    
     let selectedWishlistId = null;
     let selectedWishId = null; //2006/2_Dass_24.12.2025
 </script>
@@ -153,6 +160,7 @@
                         <QuestionnaireScreen {user} on:back={() => navigate('main')} />
                     {:else if currentScreen === 'wishes'}
                         <WishesScreen 
+                            wishlistId={currentWishlistId}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                             on:openEditWishes={(e) => {
                                 selectedWishId = e.detail.id;
@@ -185,6 +193,7 @@
                         <WishlistsScreen
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
+                            on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
                             on:openEditWishlists={(e) => {
                                 selectedWishlistId = e.detail.id;
                                 navigate('wishlistsEdit'); 
