@@ -4,6 +4,7 @@
     import { subscribersStore } from '$lib/stores/data.js';
 
     const ICON_ARROW = '/icons/arrow-right.png';
+    const ICON_CHECK = '/icons/check.png';
 
     let searchQuery = '';
 
@@ -21,6 +22,22 @@
 
         return result;
     })();
+
+    // Обработчик подписки/отписки
+    const handleToggleSubscription = (subscriberId) => {
+        subscribersStore.update(list => {
+            return list.map(subscriber => {
+                if (subscriber.id === subscriberId) {
+                    const newSubscriptionStatus = !subscriber.am_i_subscribed_to_them;
+                    return {
+                        ...subscriber,
+                        am_i_subscribed_to_them: newSubscriptionStatus
+                    };
+                }
+                return subscriber;
+            });
+        });
+    };
 
     // Получение инициалов для аватара
     const getInitials = (name) => {
@@ -96,6 +113,20 @@
 
                     <!-- Кнопки управления -->
                     <div class="subscriber-controls">
+                        <!-- Кнопка подписки/отписки -->
+                        <button
+                            class="control-button {subscriber.am_i_subscribed_to_them ? 'subscribed-btn' : 'subscribe-btn'}"
+                            on:click|stopPropagation={() => handleToggleSubscription(subscriber.id)}
+                            aria-label="{subscriber.am_i_subscribed_to_them ? 'Отписаться' : 'Подписаться'}"
+                        >
+                            {#if subscriber.am_i_subscribed_to_them}
+                                <img src={ICON_CHECK} alt="✓" class="control-icon" />
+                                <span>Вы подписаны</span>
+                            {:else}
+                                <span>Подписаться</span>
+                            {/if}
+                        </button>
+
                         <!-- Стрелка для перехода -->
                         <button
                             class="control-button arrow-button"
@@ -207,6 +238,30 @@
     .arrow-button img {
         width: 20px;
         height: 20px;
+        object-fit: contain;
+    }
+
+    .subscribe-btn {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .subscribe-btn:hover {
+        background: #bfdbfe;
+    }
+
+    .subscribed-btn {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .subscribed-btn:hover {
+        background: #bbf7d0;
+    }
+
+    .control-icon {
+        width: 16px;
+        height: 16px;
         object-fit: contain;
     }
 
