@@ -1,54 +1,31 @@
-from pydantic import BaseModel, ConfigDict, Field, validator
-from typing import Optional
-from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import Optional, List
+from app.schemas.wishlist import TypePrivacyEnum
 
 
-class SubscriptionBase(BaseModel):
-    type_sub: bool = Field(
-        default=True,
-        description="True - for user subscribe, Fasle - for wishlist"
-    )
-    target_user_id: Optional[int] = None
-    target_wishlist_id: Optional[int] = None
-
-    @validator("target_user_id", "target_wishlist_id")
-    def validate_targets(cls, v, values, **kwargs):
-        field_name = kwargs["field"].name
-        type_sub = values.get("type_sub", True)
-        if type_sub:
-            if field_name == "target_user_id" and v is None:
-                raise ValueError("target_user_id must be add ot subscribe")
-            if field_name == "target_wishlist_id" and v is not None:
-                raise ValueError("target_wishlist_id must be None to user_sub")
-        else:
-            if field_name == "target_wishlist_id" and v is None:
-                raise ValueError("target_wishlist_id must be add ot subscribe")
-            if field_name == "target_user_id" and v is not None:
-                raise ValueError("target_wishlist_id must be None to user_sub")
-
-
-class SubscriptionCreate(SubscriptionBase):
-    subscriber_id: Optional[int] = None
-
-
-class SubscriptionUpdate(BaseModel):
-    pass
-
-
-class SubscriptionResponse(SubscriptionBase):
+class UserSubscription(BaseModel):
     id: int
-    subscriber_id: int
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class SubscriptionWithDetailsResponse(SubscriptionResponse):
-    subscriber_name: Optional[str] = None
-    target_user_name: Optional[str] = None
-    target_wishlist_title: Optional[str] = None
+    name: str
+    photo: Optional[str] = None
+    user_id: int
 
 
-# class SubscriptionStatusResponse(BaseModel):
-#     is_subscribed: bool
-#     subscription_id: Optional[int] = None
+class WishlistSubscription(BaseModel):
+    id: int  # ID вишлиста
+    name: str
+    description: Optional[str] = None
+    photo: Optional[str] = None
+    type_privacy: TypePrivacyEnum
+
+
+class SubscriptionsResponse(BaseModel):
+    subscriptions: List[dict]
+    total: int
+
+
+class SubscribeToUserRequest(BaseModel):
+    target_user_id: int = Field(..., description="ID пользователя")
+
+
+class SubscribeToWishlistRequest(BaseModel):
+    target_wishlist_id: int = Field(..., description="ID вишлиста")
