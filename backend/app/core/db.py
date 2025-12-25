@@ -3,9 +3,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from typing import AsyncGenerator
 from fastapi import HTTPException, status
-
+from sqlalchemy.exc import SQLAlchemyError
 from app.core.base import Base
 from app.core.config import settings
+
 
 async_engine = create_async_engine(
     url=settings.DATABASE_URL_asyncpg,
@@ -26,11 +27,21 @@ async def get_db() -> AsyncGenerator:
         try:
             yield session
             await session.commit()
-        except Exception as e:
+        except SQLAlchemyError as e:
             await session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f'Error database: {str(e)}'
+                detail=f'Database error: {str(e)}'
+            )
+        except HTTPException:
+            await session.rollback()
+            raise
+        except Exception as e:
+            await session.rollback()
+            print(f"Exception e: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Internal server error'
             )
         finally:
             await session.close()

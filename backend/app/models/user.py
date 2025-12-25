@@ -93,3 +93,15 @@ class User(Base):
         back_populates="blocked",
         cascade="all, delete-orphan"
     )
+
+    my_subscriptions: Mapped[List["Subscription"]] = relationship(
+        "Subscription",
+        foreign_keys="[Subscription.subscriber_id]",
+        back_populates="subscriber",
+        cascade="all, delete-orphan"
+    )
+    subscribers_to_me: Mapped[List["Subscription"]] = relationship(
+        "Subscription",
+        foreign_keys="[Subscription.target_user_id]",
+        back_populates="target_user"
+    )
