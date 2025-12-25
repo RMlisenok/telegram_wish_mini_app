@@ -112,7 +112,7 @@ class SubscriptionRepository:
         query = select(func.count()).where(and_(*conditions))
         result = await self.session.execute(query)
         return result.scalar_one()
-    
+
     async def delete_for_subscription_id(
         self,
         subscription_id: int
@@ -137,95 +137,3 @@ class SubscriptionRepository:
         query = select().where(Subscription.id == subscribe_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
-
-    # async def get_user_subscribers(
-    #     self,
-    #     target_user_id: int,
-    #     limit: int = 100
-    # ) -> Tuple[List[Subscription], int]:
-    #     query = (
-    #         select(Subscription)
-    #         .where(
-    #             and_(
-    #                 Subscription.type_sub == True,
-    #                 Subscription.target_user_id == target_user_id
-    #             )
-    #         )
-    #         .options(
-    #             joinedload(Subscription.subscriber)
-    #         )
-    #         .order_by(Subscription.created_at.desc())
-    #     )
-
-    #     count_query = (
-    #         select(func.count())
-    #         .where(
-    #             and_(
-    #                 Subscription.type_sub == True,
-    #                 Subscription.target_user_id == target_user_id
-    #             )
-    #         )
-    #     )
-
-    #     count_result = await self.session.execute(count_query)
-    #     total = count_result.scalar_one_or_none()
-
-    #     query = query.limit(limit)
-    #     result = await self.session.execute(query)
-    #     subscriptions = list(result.scalars().all())
-
-    #     return subscriptions, total
-
-    # async def get_wishlist_subscribers(
-    #     self,
-    #     wishlist_id: int,
-    #     limit: int = 100
-    # ) -> Tuple[List[Subscription], int]:
-        
-    #     query = (
-    #         select(Subscription)
-    #         .where(
-    #             and_(
-    #                 Subscription.type_sub == False,
-    #                 Subscription.target_wishlist_id == wishlist_id
-    #             )
-    #         )
-    #         .options(
-    #             joinedload(Subscription.subscriber)
-    #         )
-    #         .order_by(Subscription.created_at.desc())
-    #     )
-
-    #     count_query = (
-    #         select(func.count())
-    #         .where(
-    #             and_(
-    #                 Subscription.type_sub == False,
-    #                 Subscription.target_wishlist_id == wishlist_id
-    #             )
-    #         )
-    #     )
-
-    #     count_result = await self.session.execute(count_query)
-    #     total = count_result.scalar_one_or_none()
-
-    #     query = query.limit(limit)
-    #     result = await self.session.execute(query)
-    #     subscriptions = list(result.scalars().all())
-
-    #     return subscriptions, total
-
-    # async def is_subscribed(
-    #     self,
-    #     subscriber_id: int,
-    #     type_sub= bool,
-    #     target_user_id: Optional[int] = None,
-    #     target_wishlist_id: Optional[int] = None
-    # ) -> bool:
-    #     subscription = await self.get_subscription(
-    #         subscriber_id=subscriber_id,
-    #         type_sub=type_sub,
-    #         target_user_id=target_user_id,
-    #         target_wishlist_id=target_wishlist_id
-    #     )
-    #     return subscription is not None
