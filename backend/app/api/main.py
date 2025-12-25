@@ -12,6 +12,7 @@ from app.core.db import init_database, drop_tables
 from app.api.routers.auth import router as auth_routers
 from app.api.routers.user import router as user_routers
 from app.api.routers.questionnaire import router as questionnaire_routers
+from app.core.init_data import init_tags
 
 # Настройка логов
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_database()
+    await init_tags()
     yield
     print('Stop work and clean tables')
     await drop_tables()
@@ -41,9 +43,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
-
-
-
 
 @app.get("/")
 async def root():

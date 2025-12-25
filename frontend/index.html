@@ -1,209 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Telegram Mini App - Анкета</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подари мне - Анкета</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .state { display: none; }
-        .show { display: block; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: #0088cc; color: white; margin-top: 10px; }
-        .tag-item { display: flex; gap: 5px; margin-bottom: 5px; }
-        .tag-item input:first-child { flex: 1; }
-        .tag-item input:last-child { flex: 2; }
-        .error { color: red; font-size: 14px; }
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-button-color: #3390ec;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-hint-color: #707579;
+            --tg-theme-text-color: #000000;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        .description { color: var(--tg-theme-hint-color); font-size: 14px; margin-bottom: 20px; }
+
+        .section {
+            background: rgba(0,0,0,0.03);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-title { font-weight: bold; margin-bottom: 10px; display: block; }
+
+        .tag-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-remove {
+            position: absolute;
+            right: -5px;
+            top: -5px;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .btn-add {
+            background: none;
+            color: var(--tg-theme-button-color);
+            border: 1px dashed var(--tg-theme-button-color);
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #loader { text-align: center; padding: 50px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="loading" class="state show">Загрузка...</div>
 
-        <div id="main-app" class="state">
-            <h1>🎁 Моя Анкета</h1>
+<div id="loader">Загрузка данных...</div>
 
-            <div id="display-section" style="display: none;">
-                <h3>Ваши предпочтения:</h3>
-                <div id="current-data"></div>
-                <button onclick="showEditForm()">✏️ Редактировать</button>
-            </div>
+<div id="app" class="hidden">
+    <h1>Твоя анкета</h1>
+    <p class="description">Расскажи о своих интересах, чтобы друзьям было проще выбрать подарок.</p>
 
-            <div id="form-section">
-                <h3>Заполните анкету</h3>
-                <p style="font-size: 12px; color: #666;">Укажите минимум 3 интереса и 1 вещь, которую не стоит дарить.</p>
+    <datalist id="list-interests"></datalist>
+    <datalist id="list-avoid"></datalist>
 
-                <div class="form-group">
-                    <label>🌟 Интересы (минимум 3)</label>
-                    <div id="interests-list">
-                        </div>
-                    <button type="button" onclick="addField('interests-list')">+ Добавить интерес</button>
-                </div>
-
-                <div class="form-group">
-                    <label>❌ Не дарить (минимум 1)</label>
-                    <div id="avoid-list">
-                        </div>
-                    <button type="button" onclick="addField('avoid-list')">+ Добавить исключение</button>
-                </div>
-
-                <button id="save-btn" onclick="handleSave()" style="width: 100%; background: #28a745;">💾 Сохранить анкету</button>
-            </div>
-        </div>
+    <div class="section">
+        <span class="section-title">🌟 Что я люблю (минимум 3)</span>
+        <div id="interests-container"></div>
+        <button class="btn-add" onclick="addTagRow('interests-container', 'list-interests')">+ Добавить интерес</button>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        const API_BASE = "https://api.podarimne.ru/v1"; // Из api.yaml
-        let userToken = localStorage.getItem('auth_token');
-        let isUpdate = false;
+    <div class="section">
+        <span class="section-title">❌ Что мне не дарить (минимум 1)</span>
+        <div id="avoid-container"></div>
+        <button class="btn-add" onclick="addTagRow('avoid-container', 'list-avoid')">+ Добавить ограничение</button>
+    </div>
 
-        async function init() {
-            tg.expand();
-            if (!userToken) {
-                await authenticate();
-            }
-            await loadQuestionnaire();
+    <button class="main-button" onclick="saveQuestionnaire()">Сохранить анкету</button>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    const API_URL = '/api/v1/questionnaire';
+    let authToken = localStorage.getItem('auth_token');
+
+    // Инициализация
+    async function init() {
+        tg.expand();
+        try {
+            await loadAvailableTags();
+            await loadUserQuestionnaire();
+        } catch (e) {
+            console.error("Ошибка при загрузке:", e);
+        } finally {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
         }
+    }
 
-        // Авторизация согласно AuthRequest в YAML
-        async function authenticate() {
-            try {
-                const response = await fetch(`${API_BASE}/auth/telegram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        initData: tg.initData,
-                        user: tg.initDataUnsafe.user
-                    })
-                });
-                const data = await response.json();
-                if (data.token) {
-                    userToken = data.token;
-                    localStorage.setItem('auth_token', userToken);
-                }
-            } catch (e) {
-                alert("Ошибка авторизации");
-            }
-        }
-
-        function addField(containerId, tag = '', details = '') {
-            const container = document.getElementById(containerId);
-            const div = document.createElement('div');
-            div.className = 'tag-item';
-            div.innerHTML = `
-                <input type="text" placeholder="Тег (напр. Кино)" value="${tag}" maxlength="25">
-                <input type="text" placeholder="Детали (напр. Люблю Marvel)" value="${details}" maxlength="100">
-                <button onclick="this.parentElement.remove()" style="background:red">×</button>
-            `;
-            container.appendChild(div);
-        }
-
-        async function loadQuestionnaire() {
-            document.getElementById('loading').classList.add('show');
-            try {
-                const response = await fetch(`${API_BASE}/questionnaire`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (response.status === 200) {
-                    const data = await response.json();
-                    renderDisplay(data);
-                    fillForm(data);
-                    isUpdate = true;
-                } else {
-                    // Если 404, показываем пустую форму
-                    isUpdate = false;
-                    setupEmptyForm();
-                }
-            } catch (e) {
-                setupEmptyForm();
-            }
-            document.getElementById('loading').classList.remove('show');
-            document.getElementById('main-app').classList.add('show');
-        }
-
-        function setupEmptyForm() {
-            document.getElementById('form-section').style.display = 'block';
-            for(let i=0; i<3; i++) addField('interests-list');
-            addField('avoid-list');
-        }
-
-        function fillForm(data) {
-            document.getElementById('interests-list').innerHTML = '';
-            document.getElementById('avoid-list').innerHTML = '';
-            data.interests.forEach(item => addField('interests-list', item.tag, item.details));
-            data.avoid_gifts.forEach(item => addField('avoid-list', item.tag, item.details));
-        }
-
-        function renderDisplay(data) {
-            const display = document.getElementById('current-data');
-            let html = '<h4>Интересы:</h4><ul>';
-            data.interests.forEach(i => html += `<li><b>${i.tag}</b>: ${i.details || ''}</li>`);
-            html += '</ul><h4>Не дарить:</h4><ul>';
-            data.avoid_gifts.forEach(i => html += `<li><b>${i.tag}</b>: ${i.details || ''}</li>`);
-            html += '</ul>';
-            display.innerHTML = html;
-            document.getElementById('display-section').style.display = 'block';
-            document.getElementById('form-section').style.display = 'none';
-        }
-
-        function showEditForm() {
-            document.getElementById('display-section').style.display = 'none';
-            document.getElementById('form-section').style.display = 'block';
-        }
-
-        async function handleSave() {
-            const interests = collectData('interests-list');
-            const avoid_gifts = collectData('avoid-list');
-
-            // Валидация согласно схеме YAML (minItems)
-            if (interests.length < 3) return alert("Нужно минимум 3 интереса");
-            if (avoid_gifts.length < 1) return alert("Укажите хотя бы один нежелательный подарок");
-
-            const payload = { interests, avoid_gifts };
-            const method = isUpdate ? 'PUT' : 'POST'; // YAML поддерживает оба метода
-
-            try {
-                const response = await fetch(`${API_BASE}/questionnaire`, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${userToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    tg.showAlert("Анкета сохранена!");
-                    loadQuestionnaire();
-                } else {
-                    const err = await response.json();
-                    alert("Ошибка: " + (err.detail || "Проверьте данные"));
-                }
-            } catch (e) {
-                alert("Ошибка сети");
-            }
-        }
-
-        function collectData(containerId) {
-            const items = [];
-            document.querySelectorAll(`#${containerId} .tag-item`).forEach(div => {
-                const inputs = div.querySelectorAll('input');
-                if (inputs[0].value.trim()) {
-                    items.push({
-                        tag: inputs[0].value.trim(),
-                        details: inputs[1].value.trim() || null
-                    });
-                }
+    // Загрузка тегов из справочника tags_forms
+    async function loadAvailableTags() {
+        const fetchTags = async (isInterest) => {
+            const res = await fetch(`${API_URL}/tags/available?is_interest=${isInterest}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
             });
-            return items;
+            return res.ok ? await res.json() : [];
+        };
+
+        const [interests, avoid] = await Promise.all([fetchTags(true), fetchTags(false)]);
+
+        const populateList = (id, tags) => {
+            const list = document.getElementById(id);
+            list.innerHTML = tags.map(t => `<option value="${t.tag_value}">`).join('');
+        };
+
+        populateList('list-interests', interests);
+        populateList('list-avoid', avoid);
+    }
+
+    // Загрузка существующей анкеты
+    async function loadUserQuestionnaire() {
+        const res = await fetch(API_URL, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            data.interests.forEach(item => addTagRow('interests-container', 'list-interests', item.tag, item.details));
+            data.avoid_gifts.forEach(item => addTagRow('avoid-container', 'list-avoid', item.tag, item.details));
+        } else {
+            // Если анкеты нет, создаем пустые поля
+            for(let i=0; i<3; i++) addTagRow('interests-container', 'list-interests');
+            addTagRow('avoid-container', 'list-avoid');
+        }
+    }
+
+    // Добавление строки тега
+    function addTagRow(containerId, listId, tagValue = '', detailValue = '') {
+        const container = document.getElementById(containerId);
+        const row = document.createElement('div');
+        row.className = 'tag-row';
+        row.innerHTML = `
+            <button class="btn-remove" onclick="this.parentElement.remove()">×</button>
+            <input type="text" class="tag-input" list="${listId}" placeholder="Название (напр. Кино)" value="${tagValue}">
+            <input type="text" class="detail-input" placeholder="Детали (какой жанр?)" value="${detailValue || ''}">
+        `;
+        container.appendChild(row);
+    }
+
+    // Сбор данных и сохранение (POST)
+    async function saveQuestionnaire() {
+        const collect = (containerId) => {
+            return Array.from(document.getElementById(containerId).querySelectorAll('.tag-row')).map(row => ({
+                tag: row.querySelector('.tag-input').value.trim(),
+                details: row.querySelector('.detail-input').value.trim() || null
+            })).filter(item => item.tag !== ""); // Убираем пустые
+        };
+
+        const payload = {
+            interests: collect('interests-container'),
+            avoid_gifts: collect('avoid-container')
+        };
+
+        // Валидация
+        if (payload.interests.length < 3) {
+            tg.showAlert("Нужно выбрать хотя бы 3 интереса!");
+            return;
+        }
+        if (payload.avoid_gifts.length < 1) {
+            tg.showAlert("Укажите хотя бы одну вещь, которую не стоит дарить.");
+            return;
         }
 
-        init();
-    </script>
+        tg.MainButton.showProgress();
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                tg.showAlert("Анкета успешно сохранена!");
+                tg.close();
+            } else {
+                const error = await res.json();
+                tg.showAlert("Ошибка: " + JSON.stringify(error.detail));
+            }
+        } catch (e) {
+            tg.showAlert("Сервер недоступен. Попробуйте позже.");
+        } finally {
+            tg.MainButton.hideProgress();
+        }
+    }
+
+    init();
+</script>
+
 </body>
 </html>

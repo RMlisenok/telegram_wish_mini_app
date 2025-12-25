@@ -37,9 +37,7 @@ async def save_questionnaire(
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    """
-    Сохранить или полностью обновить анкету пользователя.
-    """
+
     service = QuestionnaireService(db)
     return await service.update_questionnaire(user_id, data)
 
@@ -48,9 +46,7 @@ async def get_user_questionnaire(
     user_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Получить анкету другого пользователя (для алгоритма рекомендаций другу).
-    """
+
     service = QuestionnaireService(db)
     questionnaire = await service.get_user_questionnaire(user_id)
     if not questionnaire:
@@ -65,8 +61,5 @@ async def get_available_tags(
     is_interest: bool = True,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Получить список всех доступных тегов из tags_forms для выбора в приложении.
-    """
     service = QuestionnaireService(db)
-    return await service.get_all_tags(is_interest)
+    return await service.get_all_tags(is_interest=is_interest)
