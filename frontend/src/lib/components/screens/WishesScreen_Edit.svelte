@@ -1,17 +1,17 @@
-<!-- 2005_Dass_21.12.2025 -->
+<!-- 2006/2_Dass_24.12.2025 -->
 <script>
-    import TextField from '$lib/components/ui/TextField.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
     import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
+    import { onMount } from 'svelte';
+    import TextField from '$lib/components/ui/TextField.svelte';
+    import Button from '../ui/Button.svelte';
     export let onGoBack;
+    export let wishId;
     function goBack() {
         if (onGoBack) {
             onGoBack();
         }
     }
-    function clearError() {
-        error = ''; 
-    }
+
     let error = '';
     let title = '';
     let photoFile = null;
@@ -22,6 +22,10 @@
     let description = '';
     let selectedWishlists = [];
 
+    function clearError() {
+        error = ''; 
+    }
+
     const currencies = [
         { value: 'RUB', label: '₽' },
         { value: 'BYN', label: 'Br' },
@@ -30,6 +34,23 @@
         { value: 'UAH', label: '₴' },
         { value: 'KZT', label: '₸' }
     ];
+
+    onMount(() => {
+        // Находим желание по ID
+        if (wishId) {
+            const wish = $wishesStore.find(w => w.id === wishId);
+            if (wish) {
+                // Инициализируем значения формы
+                title = wish.title || '';
+                description = wish.description || '';
+                link = wish.link || '';
+                price = wish.price ? wish.price.toString() : '';
+                currency = wish.currency || '';
+                photoPreview = wish.imageUrl || null;
+                selectedWishlists = wish.wishlistIds || [];
+            }
+        }
+    });
 
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
@@ -60,20 +81,28 @@
         error = '';
         
         // Создание объекта желания
-        const newWish = {
-            title: title.trim(),
-            description: description.trim(),
-            price: price ? parseFloat(price) : null,
-            currency: currency || null,
-            link: link.trim(),
-            photo: photoPreview,
-            wishlistIds: selectedWishlists.map(id => parseInt(id))
-        };
-        wishesStore.update(wishes => [...wishes, newWish]);
+        wishesStore.update(wishes => {
+            return wishes.map(wish => {
+                if (wish.id === wishId) {
+                    return {
+                        ...wish,
+                        title: title.trim(),
+                        description: description.trim(),
+                        price: price ? parseFloat(price) : null,
+                        currency: currency || null,
+                        link: link.trim(),
+                        imageUrl: photoPreview || wish.imageUrl,
+                        wishlistIds: selectedWishlists.map(id => parseInt(id))
+                    };
+                }
+                return wish;
+            });
+        });
         
         // Возвращаемся назад
         goBack();
     }
+    
 </script>
 
 <div class="screen">
@@ -81,7 +110,7 @@
         <button class="back-btn" type="button" on:click={goBack}>
             ←
         </button>
-        <div class="h1">Создать желание</div>
+        <div class="h1">Редактировать желание</div>
         <div class="header-placeholder"></div>
     </header>
     <div class="form-container">
@@ -112,8 +141,8 @@
                     <div class="photo-preview">
                         <img src={photoPreview} alt="Preview" />
                         <Button type="button" kind="ghost" on:click={removePhoto}>
-                        <img src="/icons/delete.png" alt="" class="remove-photo-btn" />
-                        <span>Удалить</span>
+                            <img src="/icons/delete.png" alt="" class="remove-photo-btn" />
+                            <span>Удалить</span>
                         </Button>
                     </div>
                 {:else}
@@ -132,6 +161,7 @@
                 {/if}
             </div>
         </div>
+        
         <!-- Ссылка -->
         <div class="form-group">
             <label for="link" class="form-label">
@@ -180,6 +210,7 @@
                 </select>
             </div>
         </div>
+        
         <!-- Описание -->
         <div class="form-group">
             <label for="description" class="form-label">
@@ -195,6 +226,7 @@
             ></textarea>
             <div class="char-count">{description.length}/500</div>
         </div>
+        
         <!-- Выбор вишлистов -->
         <div class="form-group">
             <div class="form-label">
@@ -254,10 +286,12 @@
                 full
                 on:click={saveWish}
             >
-                Сохранить
+                Сохранить изменения
             </Button>
         </div>
     </div>
+
+
 </div>
 
 <style>

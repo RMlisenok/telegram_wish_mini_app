@@ -15,6 +15,8 @@
 
     import WishesScreenCreate from '$lib/components/screens/WishesScreen_Create.svelte'; //2005_Dass_21.12.2025
     import WishlistsScreenCreate from '$lib/components/screens/WishlistsScreen_Create.svelte'; //2008/2_Dass_21.12.2025
+    import WishlistsScreenEdit from '$lib/components/screens/WishlistsScreen_Edit.svelte'; //2008/3_Dass_22.12.2025
+    import WishesScreenEdit from '$lib/components/screens/WishesScreen_Edit.svelte'; //2006/2_Dass_24.12.2025
 
     import QuestionnaireScreen from '$lib/components/screens/QuestionnaireScreen.svelte';
 
@@ -84,6 +86,8 @@
 
     let currentWishlistId = null;
     
+    let selectedWishlistId = null;
+    let selectedWishId = null; //2006/2_Dass_24.12.2025
 </script>
 
 {#if !user}
@@ -157,6 +161,10 @@
                         <WishesScreen 
                             wishlistId={currentWishlistId}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
+                            on:openEditWishes={(e) => {
+                                selectedWishId = e.detail.id;
+                                navigate('wishesEdit'); 
+                                }}
                         />
                     {:else if currentScreen === 'shareProfile'}
                         <ShareProfileScreen {user} on:back={() => navigate('main') }/>
@@ -164,6 +172,15 @@
                     {:else if currentScreen === 'wishesCreate'}
                         <WishesScreenCreate
                             onGoBack={() => navigate('wishes')}
+                        />
+                    <!-- 2006/2_Dass_24.12.2025 -->
+                     {:else if currentScreen === 'wishesEdit'}
+                        <WishesScreenEdit
+                            wishId={selectedWishId}
+                            onGoBack={() => {
+                                selectedWishId = null;
+                                navigate('wishes');
+                            }}
                         />
                     <!-- 2008/2_Dass_21.12.2025 -->
                      {:else if currentScreen === 'wishlistsCreate'}
@@ -176,6 +193,19 @@
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
                             on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
+                            on:openEditWishlists={(e) => {
+                                selectedWishlistId = e.detail.id;
+                                navigate('wishlistsEdit'); 
+                                }}
+                        />
+                    <!-- 2008/3_Dass_24.12.2025 -->
+                     {:else if currentScreen === 'wishlistsEdit'}
+                        <WishlistsScreenEdit
+                            wishlistId={selectedWishlistId}
+                            onGoBack={() => {
+                                selectedWishlistId = null;
+                                navigate('wishlists');
+                            }}
                         />
                     <!-- 2010/1-5_locust_24.12.2025 -->
                      {:else if currentScreen === 'subscriptions'}
