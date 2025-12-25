@@ -23,6 +23,82 @@
         return result;
     })();
 
+    // Определение статуса блокировки
+    const getBlockStatus = (subscriber) => {
+        const hasProfileAccess = subscriber.can_view_profile;
+        const hasWishlistsAccess = subscriber.can_view_wishlists;
+        
+        if (!hasProfileAccess && !hasWishlistsAccess) {
+            return 'blocked'; // Полностью заблокирован
+        } else if (!hasProfileAccess || !hasWishlistsAccess) {
+            return 'partial'; // Частично заблокирован
+        } else {
+            return 'unblocked'; // Не заблокирован
+        }
+    };
+
+    // Получение текста статуса блокировки
+    const getBlockStatusText = (subscriber) => {
+        const status = getBlockStatus(subscriber);
+        switch (status) {
+            case 'blocked':
+                return 'Полная блокировка';
+            case 'partial':
+                if (!subscriber.can_view_profile && subscriber.can_view_wishlists) {
+                    return 'Только профиль заблокирован';
+                } else if (subscriber.can_view_profile && !subscriber.can_view_wishlists) {
+                    return 'Только вишлисты заблокированы';
+                }
+                return 'Частичная блокировка';
+            case 'unblocked':
+                return 'Полный доступ ко всему';
+            default:
+                return '';
+        }
+    };
+
+    // Обработчик изменения прав доступа к профилю
+    const handleToggleProfileAccess = (subscriberId, event) => {
+        if (event) event.stopPropagation();
+        
+        subscribersStore.update(list => {
+            return list.map(subscriber => {
+                if (subscriber.id === subscriberId) {
+                    const newProfileAccess = !subscriber.can_view_profile;
+                    // Обновляем общий статус блокировки
+                    const newBlockedStatus = !newProfileAccess && !subscriber.can_view_wishlists;
+                    return {
+                        ...subscriber,
+                        can_view_profile: newProfileAccess,
+                        is_blocked: newBlockedStatus
+                    };
+                }
+                return subscriber;
+            });
+        });
+    };
+
+    // Обработчик изменения прав доступа к вишлистам
+    const handleToggleWishlistsAccess = (subscriberId, event) => {
+        if (event) event.stopPropagation();
+        
+        subscribersStore.update(list => {
+            return list.map(subscriber => {
+                if (subscriber.id === subscriberId) {
+                    const newWishlistsAccess = !subscriber.can_view_wishlists;
+                    // Обновляем общий статус блокировки
+                    const newBlockedStatus = !subscriber.can_view_profile && !newWishlistsAccess;
+                    return {
+                        ...subscriber,
+                        can_view_wishlists: newWishlistsAccess,
+                        is_blocked: newBlockedStatus
+                    };
+                }
+                return subscriber;
+            });
+        });
+    };
+
     // Обработчик подписки/отписки
     const handleToggleSubscription = (subscriberId) => {
         subscribersStore.update(list => {
@@ -127,6 +203,34 @@
                             {/if}
                         </button>
 
+                        <!-- Чекбоксы управления доступом -->
+                        <div class="access-controls">
+                            <label class="access-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={subscriber.can_view_profile}
+                                    on:click={(e) => handleToggleProfileAccess(subscriber.id, e)}
+                                    class="access-input"
+                                />
+                                <span class="access-label">Доступ к профилю</span>
+                            </label>
+                            
+                            <label class="access-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={subscriber.can_view_wishlists}
+                                    on:click={(e) => handleToggleWishlistsAccess(subscriber.id, e)}
+                                    class="access-input"
+                                />
+                                <span class="access-label">Доступ к вишлистам</span>
+                            </label>
+
+                            <!-- Надпись со статусом блокировки -->
+                            <div class="block-status {getBlockStatus(subscriber)}">
+                                {getBlockStatusText(subscriber)}
+                            </div>
+                        </div>
+
                         <!-- Стрелка для перехода -->
                         <button
                             class="control-button arrow-button"
@@ -210,8 +314,10 @@
     /* Управление подписчиками */
     .subscriber-controls {
         display: flex;
-        gap: 8px;
-        align-items: center;
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-end;
+        min-width: 280px;
     }
 
     .control-button {
@@ -221,6 +327,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 8px;
+        white-space: nowrap;
     }
 
     .arrow-button {
@@ -241,6 +353,7 @@
         object-fit: contain;
     }
 
+    /* Кнопки подписки */
     .subscribe-btn {
         background: #dbeafe;
         color: #1d4ed8;
@@ -265,6 +378,65 @@
         object-fit: contain;
     }
 
+    /* Управление доступом */
+    .access-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: #f9fafb;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        width: 100%;
+    }
+
+    .access-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #4b5563;
+    }
+
+    .access-input {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .access-label {
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    /* Статус блокировки */
+    .block-status {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 6px 10px;
+        border-radius: 6px;
+        text-align: center;
+        margin-top: 4px;
+    }
+
+    .block-status.blocked {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .block-status.partial {
+        background: #fef3c7;
+        color: #d97706;
+        border: 1px solid #fde68a;
+    }
+
+    .block-status.unblocked {
+        background: #d1fae5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+
     .empty-note {
         text-align: center;
         padding: 40px 16px;
@@ -273,14 +445,13 @@
     }
 
     /* Адаптивность */
-    @media (max-width: 768px) {
+    @media (min-width: 769px) {
         .subscriber-controls {
-            flex-direction: column;
-            align-items: stretch;
+            min-width: 250px;
         }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
         .subscriber-card {
             flex-direction: column;
             align-items: stretch;
@@ -291,21 +462,106 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
+            width: 100%;
+        }
+        
+        .subscriber-info {
+            width: 100%;
         }
         
         .subscriber-name {
             flex-direction: column;
             align-items: flex-start;
-            gap: 4px;
+            gap: 8px;
         }
 
         .subscriber-controls {
-            flex-direction: row;
-            justify-content: flex-end;
+            min-width: auto;
             width: 100%;
-            margin-top: 12px;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 12px;
+            align-items: stretch;
+            gap: 16px;
+            position: relative;
+        }
+
+        .subscribe-btn,
+        .subscribed-btn {
+            align-self: flex-start;
+            width: auto;
+            min-width: 120px;
+        }
+
+        .access-controls {
+            padding: 10px;
+            align-self: flex-start;
+            width: auto;
+            min-width: 120px;
+        }
+
+        .block-status {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+
+        .arrow-button {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            margin-top: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .subscriber-card {
+            padding: 12px;
+        }
+        
+        .subscriber-content {
+            gap: 10px;
+        }
+
+        .subscriber-name {
+            font-size: 16px;
+        }
+
+        .subscriber-meta {
+            font-size: 12px;
+        }
+
+        .control-button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .subscribe-btn,
+        .subscribed-btn {
+            min-width: 110px;
+        }
+
+        .access-controls {
+            padding: 8px;
+            gap: 6px;
+            min-width: 110px;
+        }
+
+        .arrow-button {
+            width: 30px;
+            height: 30px;
+        }
+
+        .arrow-button img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .access-checkbox {
+            font-size: 12px;
+        }
+
+        .block-status {
+            font-size: 10px;
+            padding: 3px 6px;
         }
     }
 </style>
