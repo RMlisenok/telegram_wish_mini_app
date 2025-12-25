@@ -143,6 +143,68 @@
         console.log('Желание удалено из вишлиста', wishId);
     };
     // 2009_2_Dass_25.12.2025 <--
+
+    // 2009_3_Dass_25.12.2025 -->
+    let showCopyMoveModal = false;
+    let actionType = 'copy'; // 'copy' или 'move'
+    let targetWishlists = new Set(); // Выбранные вишлисты для копирования/перемещения
+    let wishToCopyMove = null;
+
+    const openCopyMoveModal = (wishId, type) => {
+        wishToCopyMove = wishId;
+        actionType = type;
+        targetWishlists = new Set();
+        showCopyMoveModal = true;
+    };
+    //выполнить перемещение/копирование
+    const executeCopyMove = () => {
+        if (!wishToCopyMove || targetWishlists.size === 0) return;
+        
+        $wishesStore = $wishesStore.map(wish => {
+            if (wish.id === wishToCopyMove) {
+                const existingWishlistIds = wish.wishlistIds || [];
+                let newWishlistIds = [...existingWishlistIds];
+                // Добавляем выбранные вишлисты
+                targetWishlists.forEach(wishlistId => {
+                    if (!newWishlistIds.includes(wishlistId)) {
+                        newWishlistIds.push(wishlistId);
+                    }
+                });
+                // Если это перемещение, удаляем текущий вишлист
+                if (actionType === 'move' && wishlistId) {
+                    newWishlistIds = newWishlistIds.filter(id => id !== wishlistId);
+                }
+                return {
+                    ...wish,
+                    wishlistIds: newWishlistIds
+                };
+            }
+            return wish;
+        });
+        
+        // Закрываем модальные окна
+        closeCopyMoveModal();
+        closeDetailModal();
+    };
+    const closeCopyMoveModal = () => {
+        showCopyMoveModal = false;
+        wishToCopyMove = null;
+        targetWishlists = new Set();
+    };
+    //переключить выбор вишлистов
+    const toggleWishlistSelection = (wishlistId) => {
+        const newSet = new Set(targetWishlists);
+        if (newSet.has(wishlistId)) {
+            newSet.delete(wishlistId);
+        } else {
+            newSet.add(wishlistId);
+        }
+        targetWishlists = newSet;
+    };
+    $: availableWishlists = $wishlistsStore.filter(wl => 
+        !wishlistId || wl.id !== wishlistId
+    );
+    // 2009_3_Dass_25.12.2025 <--
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -292,7 +354,13 @@
                 <!-- Кнопки действий -->
                 <div class="panel-actions">
                     {#if wishlistId}
-                        <!-- Если мы в режиме вишлиста, показываем кнопку удаления из вишлиста -->
+                        <!-- Если мы в режиме вишлиста -->
+                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
+                            Копировать в...
+                        </Button>
+                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
+                            Переместить в...
+                        </Button>
                         <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
                             Удалить из вишлиста
                         </Button>
@@ -380,6 +448,87 @@
                     disabled={selectedWishesForAdding.size === 0}
                 >
                     Добавить выбранные ({selectedWishesForAdding.size})
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!--2009_3_Dass_25.12.2025-->
+<!-- Модальное окно копирования/перемещения -->
+{#if showCopyMoveModal}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="modal-backdrop" on:click={closeCopyMoveModal}>
+        <div class="modal-content copy-move-modal" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>{actionType === 'copy' ? 'Копировать в' : 'Переместить в'}</h2>
+                <button class="modal-close" on:click={closeCopyMoveModal}>✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <p class="modal-description">
+                    {actionType === 'copy' 
+                        ? 'Выберите один или несколько вишлистов, в которые хотите скопировать это желание.'
+                        : 'Выберите один или несколько вишлистов, в которые хотите переместить это желание.'}
+                    {actionType === 'move' && wishlistId && 
+                        ' Текущий вишлист будет удален из списка.'}
+                </p>
+                
+                {#if availableWishlists.length === 0}
+                    <p class="empty-message">
+                        Нет доступных вишлистов для {actionType === 'copy' ? 'копирования' : 'перемещения'}
+                    </p>
+                {:else}
+                    <div class="wishlists-selection-list">
+                        {#each availableWishlists as wishlist (wishlist.id)}
+                            <div 
+                                class="wishlist-selection-item {targetWishlists.has(wishlist.id) ? 'selected' : ''}"
+                                on:click={() => toggleWishlistSelection(wishlist.id)}
+                            >
+                                <div class="selection-checkbox">
+                                    {#if targetWishlists.has(wishlist.id)}
+                                        <div class="checkbox-checked">✓</div>
+                                    {:else}
+                                        <div class="checkbox-empty"></div>
+                                    {/if}
+                                </div>
+                                
+                                <div class="wishlist-selection-info">
+                                    <div class="wishlist-selection-title">{wishlist.title}</div>
+                                    <div class="wishlist-selection-count">
+                                        {$wishesStore.filter(w => 
+                                            (w.wishlistIds || []).includes(wishlist.id)
+                                        ).length} желаний
+                                    </div>
+                                </div>
+                                
+                                <div class="wishlist-selection-cover">
+                                    {#if wishlist.rUrl}
+                                        <img src={wishlist.rUrl} alt={wishlist.title} />
+                                    {:else}
+                                        <img src={iconGift} alt="Вишлист" class="placeholder" />
+                                    {/if}
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+            
+            <div class="modal-footer">
+                <Button 
+                    kind="ghost" 
+                    on:click={closeCopyMoveModal}
+                >
+                    Отмена
+                </Button>
+                <Button 
+                    on:click={executeCopyMove}
+                    disabled={targetWishlists.size === 0}
+                >
+                    {actionType === 'copy' ? 'Копировать' : 'Переместить'} 
+                    {targetWishlists.size > 0 && ` (${targetWishlists.size})`}
                 </Button>
             </div>
         </div>
