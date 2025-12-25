@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import String, Date, Boolean, Enum, Text, TIMESTAMP, BigInteger
 from sqlalchemy.sql import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
 from app.core.base import Base
@@ -19,11 +19,11 @@ class TextSizeEnum(enum.Enum):
     large = 'large'
 
 
-
 class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(
+        BigInteger,
         primary_key=True
     )
     telegram_id: Mapped[int] = mapped_column(
@@ -36,7 +36,7 @@ class User(Base):
         String(100),
         nullable=False
     )
-    birth_date: Mapped[Date] = mapped_column(
+    birth_date: Mapped[Optional[Date]] = mapped_column(
         Date,
         nullable=True
     )
@@ -64,4 +64,19 @@ class User(Base):
         TIMESTAMP,
         server_default=func.now(),
         onupdate=func.now()
+    )
+
+    wishes: Mapped[List["Wish"]] = relationship(
+        "Wish",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+    wishlists: Mapped[List["Wishlist"]] = relationship(
+        "Wishlist",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+    reserved_wishes: Mapped[List["WishReservation"]] = relationship(
+        "WishReservation",
+        back_populates="reserved_by"
     )
