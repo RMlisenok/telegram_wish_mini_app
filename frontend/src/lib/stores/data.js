@@ -253,7 +253,114 @@ export const subscriptionsStore = writable([
 
 // Подписчики (кто подписан на меня)
 export const subscribersStore = writable([
-    
+    {
+        id: 'subscriber-1',
+        user_id: 5,
+        name: 'Дмитрий Смирнов',
+        photo: '/icons/avatar-dmitry.jpg',
+        birth_date: '18.05.1990',
+        is_blocked: false,
+        subscription_date: '15.12.2023',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: true // Вы подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-2',
+        user_id: 6,
+        name: 'Ольга Иванова',
+        photo: '/icons/avatar-olga.jpg',
+        birth_date: '03.11.1994',
+        is_blocked: false,
+        subscription_date: '20.01.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: false // Вы НЕ подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-3',
+        user_id: 7,
+        name: 'Сергей Павлов',
+        photo: '/icons/avatar-sergey.jpg',
+        birth_date: '29.08.1988',
+        is_blocked: false,
+        subscription_date: '05.02.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: true // Вы подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-4',
+        user_id: 8,
+        name: 'Наталья Ковалёва',
+        photo: '',
+        birth_date: '14.07.1996',
+        is_blocked: true, // Заблокированный пользователь
+        subscription_date: '10.11.2023',
+        can_view_profile: false, // Не может просматривать профиль
+        can_view_wishlists: false, // Не может просматривать вишлисты
+        am_i_subscribed_to_them: false
+    },
+    {
+        id: 'subscriber-5',
+        user_id: 9,
+        name: 'Андрей Фёдоров',
+        photo: '',
+        birth_date: '22.03.1991',
+        is_blocked: false,
+        subscription_date: '28.02.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: false // Вы НЕ подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-6',
+        user_id: 10,
+        name: 'Екатерина Николаева',
+        photo: '/icons/avatar-maria.jpg',
+        birth_date: '09.09.1993',
+        is_blocked: false,
+        subscription_date: '12.03.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: true // Вы подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-7',
+        user_id: 11,
+        name: 'Максим Орлов',
+        photo: '/icons/avatar-maxim.jpg',
+        birth_date: '17.12.1989',
+        is_blocked: false,
+        subscription_date: '01.04.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: false // Вы НЕ подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-8',
+        user_id: 12,
+        name: 'Виктория Захарова',
+        photo: '',
+        birth_date: '06.04.1995',
+        is_blocked: false,
+        subscription_date: '25.03.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: true // Вы подписаны на этого пользователя
+    },
+    {
+        id: 'subscriber-9',
+        user_id: 13,
+        name: 'Артём Белов',
+        photo: '/icons/McLaren_750S_Spider_IMG_2435.jpg',
+        birth_date: '30.10.1992',
+        is_blocked: false,
+        subscription_date: '08.01.2024',
+        can_view_profile: true,
+        can_view_wishlists: true,
+        am_i_subscribed_to_them: false // Вы НЕ подписаны на этого пользователя
+    }
 ]);
 
 // Настройки уведомлений 2002_4_Dass_20.12.2025

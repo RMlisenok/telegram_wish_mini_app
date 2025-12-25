@@ -23,6 +23,7 @@
     import WishesScreen from '$lib/components/screens/WishesScreen.svelte';
     import WishlistsScreen from '$lib/components/screens/WishlistsScreen.svelte'; //2008/1_locust_21.12.2025
     import SubscriptionsScreen from '$lib/components/screens/SubscriptionsScreen.svelte'; //2010/1-5_locust_24.12.2025
+    import SubscribersScreen from '$lib/components/screens/SubscribersScreen.svelte'; //2011/1_locust_25.12.2025
 
     import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
 
@@ -210,6 +211,10 @@
                     <!-- 2010/1-5_locust_24.12.2025 -->
                      {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
+                        />
+                    <!-- 2011/1_locust_25.12.2025 -->
+                     {:else if currentScreen === 'subscribers'}
+                        <SubscribersScreen
                         />
                 {/if}
             </div>
