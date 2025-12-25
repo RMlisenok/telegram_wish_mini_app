@@ -79,5 +79,5 @@ class WishlistRepository:
             await self.session.delete(wishlist)
             return True
         except Exception as e:
-            print(f"Error deleting wishlist: {e}")
+            print(f"Error deleting wishlist: {str(e)}")
             return False
