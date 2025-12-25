@@ -201,7 +201,6 @@
     // 2009_3_Dass_25.12.2025 <--
 
     //2006_7_Dass_25.12.2025 -->
-    let showDeleteConfirmModal = false;
     let deleteOption = null;  
     let showFullDeleteModal = false;
     let showFromWishlistDeleteModal = false;  
@@ -1176,5 +1175,55 @@
         margin: 10px;
         opacity: 0.7;
     }
+    /* Общие стили для обоих модальных окон удаления */
+    .confirm-delete-modal {
+        width: 90%;
+        max-width: 400px;
+        background: white;
+        border-radius: 24px;
+        padding: 32px 24px 24px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .confirm-delete-modal .confirm-icon {
+        margin: 0 auto 20px;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #EF4444;
+    }
+
+    .confirm-delete-modal .confirm-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 16px 0;
+    }
+
+    .confirm-delete-modal .confirm-message {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #6B7280;
+        margin: 0 0 20px 0;
+        padding: 0 4px;
+    }
+
+    .confirm-delete-modal .confirm-message strong {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .confirm-delete-modal .confirm-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 0 auto;
+        max-width: 300px;
+    }
+
+
 </style>
 
