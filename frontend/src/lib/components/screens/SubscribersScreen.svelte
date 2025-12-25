@@ -1,8 +1,26 @@
 <script>
     import Avatar from '$lib/components/ui/Avatar.svelte';
+    import TextField from '$lib/components/ui/TextField.svelte';
     import { subscribersStore } from '$lib/stores/data.js';
 
     const ICON_ARROW = '/icons/arrow-right.png';
+
+    let searchQuery = '';
+
+    // Фильтрация подписчиков по поисковому запросу
+    $: filteredSubscribers = (() => {
+        let result = $subscribersStore;
+        const query = searchQuery.trim().toLowerCase();
+
+        if (query) {
+            result = result.filter(subscriber => {
+                const userName = subscriber?.name?.toLowerCase() || '';
+                return userName.includes(query);
+            });
+        }
+
+        return result;
+    })();
 
     // Получение инициалов для аватара
     const getInitials = (name) => {
@@ -30,13 +48,25 @@
 </header>
 
 <section class="section-card">
+    <TextField 
+        bind:value={searchQuery} 
+        label="Поиск" 
+        placeholder="Введите имя пользователя..."
+    />
+</section>
+
+<section class="section-card">
     {#if $subscribersStore.length === 0}
         <p class="empty-note">
             У вас пока нет подписчиков.
         </p>
+    {:else if filteredSubscribers.length === 0}
+        <p class="empty-note">
+            По вашему запросу ничего не найдено. Попробуйте изменить поисковый запрос.
+        </p>
     {:else}
         <div class="subscribers-list">
-            {#each $subscribersStore as subscriber (subscriber.id)}
+            {#each filteredSubscribers as subscriber (subscriber.id)}
                 <div 
                     class="subscriber-card"
                     on:click={() => handleOpenProfile(subscriber)}
