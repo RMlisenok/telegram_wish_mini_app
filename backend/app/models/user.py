@@ -105,3 +105,17 @@ class User(Base):
         foreign_keys="[Subscription.target_user_id]",
         back_populates="target_user"
     )
+    access_requests_made: Mapped[List["AccessRequest"]] = relationship(
+        "AccessRequest",
+        foreign_keys="[AccessRequest.requester_id]",
+        back_populates="requester",
+        cascade="all, delete-orphan"
+    )
+    access_requests_received: Mapped[List["AccessRequest"]] = relationship(
+        "AccessRequest",
+        foreign_keys="[AccessRequest.wishlist_id]",
+        secondary="wishlists",
+        primaryjoin="User.id == Wishlist.user_id",
+        secondaryjoin="Wishlist.id == AccessRequest.wishlist_id",
+        viewonly=True
+    )
