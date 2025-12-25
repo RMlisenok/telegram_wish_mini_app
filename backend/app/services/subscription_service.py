@@ -48,7 +48,7 @@ class SubscriptionService:
         }
         subscription = await self.rep_subs.create(subscription_data)
         return subscription is not None
-    
+
     async def subscribe_to_wishlist(
         self,
         user_id: int,
@@ -64,14 +64,14 @@ class SubscriptionService:
         existing = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
             type_sub=False,
-            target_user_id=target_wishlist_id
+            target_wishlist_id=target_wishlist_id
         )
         if existing:
             return False
         
         subscription_data = {
             "subscriber_id": user_id,
-            "type_sub": True,
+            "type_sub": False,
             "target_wishlist_id": target_wishlist_id
         }
         subscription = await self.rep_subs.create(subscription_data)

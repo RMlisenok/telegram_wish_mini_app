@@ -44,12 +44,12 @@ class Subscription(Base):
     )
 
     subscriber: Mapped[Optional["User"]] = relationship(
-        "Users",
+        "User",
         foreign_keys=[subscriber_id],
         back_populates="my_subscriptions"
     )
     target_user: Mapped[Optional["User"]] = relationship(
-        "Users",
+        "User",
         foreign_keys=[target_user_id],
         back_populates="subscribers_to_me"
     )

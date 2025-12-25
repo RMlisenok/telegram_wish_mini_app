@@ -65,7 +65,7 @@ class SubscriptionRepository:
             )
             if not subscription:
                 return False
-            await self.session.delet(subscription)
+            await self.session.delete(subscription)
             return True
         except Exception as e:
             print(F"Error deleting subscription: {str(e)}")
