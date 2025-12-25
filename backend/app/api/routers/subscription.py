@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
+from app.core.dependencies import get_current_user_id
 from app.services.subscription_service import SubscriptionService
 from app.schemas.subscription import (
     SubscribeToUserRequest,
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 @router.post("/users")
 async def subscribe_to_user(
     request: SubscribeToUserRequest,
-    current_user_id: int,
+    current_user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
@@ -35,7 +36,7 @@ async def subscribe_to_user(
 @router.post("/wishlists")
 async def subscribe_to_wishlist(
     request: SubscribeToWishlistRequest,
-    current_user_id: int,
+    current_user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
@@ -54,7 +55,7 @@ async def subscribe_to_wishlist(
 @router.delete("/users/{target_user_id}")
 async def unsubscribe_from_user(
     target_user_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
@@ -73,7 +74,7 @@ async def unsubscribe_from_user(
 @router.delete("/wishlists/{target_wishlist_id}")
 async def unsubscribe_from_wishlist(
     wishlist_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
@@ -91,7 +92,7 @@ async def unsubscribe_from_wishlist(
 
 @router.get("/my", response_model=SubscriptionsResponse)
 async def get_my_subscriptions(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
@@ -101,7 +102,7 @@ async def get_my_subscriptions(
 
 @router.get("/my/users", response_model=SubscriptionsResponse)
 async def get_my_user_subscriptions(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
@@ -111,7 +112,7 @@ async def get_my_user_subscriptions(
 
 @router.get("/my/wishlists", response_model=SubscriptionsResponse)
 async def get_my_wishlist_subscriptions(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
@@ -122,7 +123,7 @@ async def get_my_wishlist_subscriptions(
 @router.get("/users/{user_id}", response_model=SubscriptionsResponse)
 async def get_user_subscriptions(
     user_id: int,
-    current_user_id: int,
+    current_user_id: int = Depends(get_current_user_id),
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
@@ -143,7 +144,7 @@ async def get_user_subscriptions(
 @router.get("/check/user/{user_id}")
 async def check_user_subscription(
     user_id: int,
-    current_user_id: int,
+    current_user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
@@ -157,7 +158,7 @@ async def check_user_subscription(
 @router.get("/check/wishlist/{wishlist_id}")
 async def check_wishlist_subscription(
     wishlist_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
