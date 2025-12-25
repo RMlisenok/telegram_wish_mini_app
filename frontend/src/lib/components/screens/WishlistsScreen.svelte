@@ -33,6 +33,7 @@
     const handleOpenWishlist = (wishlistId) => {
         console.log('Открытие вишлиста:', wishlistId);
         // TODO: Реализовать переход в вишлист
+        dispatch('openWishlistDetail', { wishlistId }); //2009/0_Dass_25.12.2025
     };
 
     const handleOpenOwnerProfile = (ownerId) => {
