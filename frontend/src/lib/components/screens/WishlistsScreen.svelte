@@ -10,6 +10,7 @@
     const ICON_TRASH = '/icons/trash.png';
     const ICON_GIFT = '/icons/maingift.svg';
     const ICON_ARROW = '/icons/arrow-right.png';
+    const ICON_WARNING = '/icons/warning.png';
     
     // Иконки приватности   
     const ICON_PUBLIC_FRIENDS = '/icons/view.png';
@@ -249,11 +250,8 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="modal-backdrop" on:click={cancelDeleteWishlist}>
         <div class="confirm-modal" on:click|stopPropagation>
-            <div class="confirm-icon warning">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 9V12M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z" 
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="confirm-icon">
+                <img src={ICON_WARNING} alt="Внимание" class="warning-icon" />
             </div>
             
             <h2 class="confirm-title">Удалить вишлист?</h2>
@@ -266,8 +264,7 @@
             </div>
             
             <p class="confirm-message">
-                Все желания останутся в системе и будут доступны в списке "Все ваши желания". 
-                Будут удалены только связи с этим вишлистом.
+                Все желания останутся и будут доступны в списке "Все ваши желания". 
             </p>
             
             <div class="confirm-actions">
@@ -542,11 +539,6 @@
         justify-content: center;
     }
 
-    .confirm-icon.warning {
-        background: #FEF3C7;
-        color: #D97706;
-    }
-
     .confirm-title {
         font-size: 20px;
         font-weight: 600;
@@ -589,6 +581,9 @@
     .confirm-actions {
         display: flex;
         gap: 12px;
+        justify-content: center;
+        gap: 12px;
+        max-width: 300px;
+        margin: 0 auto;
     }
-
 </style>
