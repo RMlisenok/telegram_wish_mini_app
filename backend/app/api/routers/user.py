@@ -78,7 +78,7 @@ async def create_test_user(
 @router.put("/me")
 async def update_current_user(
     user_data: UserUpdate,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ) -> UserResponse:
     service = UserService(db)
@@ -133,8 +133,8 @@ async def get_user_by_id(
 
 @router.post("/block/{blocked_id}")
 async def block_user(
-    blocker_id: int,
     blocked_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     if blocker_id == blocked_id:
@@ -154,8 +154,8 @@ async def block_user(
 
 @router.delete("/block/{blocked_id}")
 async def unblock_user(
-    blocker_id: int,
     blocked_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
@@ -170,8 +170,8 @@ async def unblock_user(
 
 @router.get("/block/status/{user_id}")
 async def check_block_status(
-    user_id: int,
     blocker_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
@@ -181,7 +181,7 @@ async def check_block_status(
 
 @router.get("/block/list")
 async def get_blocked_user_list(
-    blocker_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
