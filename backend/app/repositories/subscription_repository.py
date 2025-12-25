@@ -15,32 +15,40 @@ class SubscriptionRepository:
 
     async def create(
         self,
-        subscription_data: SubscriptionCreate,
+        subscription_data: dict,
     ) -> Optional[Subscription]:
-        if subscription_data.type_sub:
-                existing = await self.get_subscription(
-                subscriber_id=subscription_data.subscriber_id,
-                type_sub=subscription_data.type_sub,
-                target_user_id=subscription_data.target_user_id,
-            )
-        else:
-                existing = await self.get_subscription(
-                subscriber_id=subscription_data.subscriber_id,
-                type_sub=subscription_data.type_sub,
-                target_wishlist_id=subscription_data.target_wishlist_id,
-            )
-
-        if existing:
-            return existing
         try:
-            subscription = Subscription(**subscription_data.model_dump())
+            subscription = Subscription(**subscription_data)
             self.session.add(subscription)
             await self.session.commit()
             await self.session.refresh(subscription)
             return subscription
-        except Exception as e:
+        except Exception:
             self.session.rollback()
             return None
+
+    async def get_subscription(
+        self,
+        subscriber_id: int,
+        type_sub: bool,
+        target_user_id: Optional[int] = None,
+        target_wishlist_id: Optional[int] = None
+    ) -> Optional[Subscription]:
+        conditions = [
+            Subscription.subscriber_id == subscriber_id,
+            Subscription.type_sub == type_sub
+        ]
+        if type_sub:
+            if target_user_id is None:
+                return None
+            conditions.append(Subscription.target_user_id == target_user_id)
+        else:
+            if target_wishlist_id is None:
+                return None
+            conditions.append(Subscription.target_wishlist_id == target_wishlist_id)
+        query = select(Subscription).where(and_(*conditions))
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
 
     async def delete_for_subscription_id(
         self,
@@ -62,7 +70,7 @@ class SubscriptionRepository:
     async def delete_by_target(
         self,
         subscriber_id: int,
-        type_sub: bool = True,
+        type_sub: bool,
         target_user_id: Optional[int] = None,
         target_wishlist_id: Optional[int] = None
     ) -> bool:
@@ -81,24 +89,6 @@ class SubscriptionRepository:
             print(F"Error deleting subscription: {str(e)}")
             return False
 
-    async def get_subscription(
-        self,
-        subscriber_id: int,
-        type_sub: bool = True,
-        target_user_id: Optional[int] = None,
-        target_wishlist_id: Optional[int] = None
-    ) -> Optional[Subscription]:
-        conditions = [
-            Subscription.subscriber_id == subscriber_id,
-            Subscription.type_sub == type_sub
-        ]
-        if type_sub:
-            conditions.append(Subscription.target_user_id == target_user_id)
-        else:
-            conditions.append(Subscription.target_wishlist_id == target_wishlist_id)
-        query = select(Subscription).where(and_(*conditions))
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
 
     async def get_subscribe_id(
         self,
@@ -111,30 +101,27 @@ class SubscriptionRepository:
     async def get_user_subscription(
         self,
         subscriber_id: int,
-        limit: int = 100
-    ) -> Tuple[List[Subscription], int]:
+        limit: int = 100,
+        only_users: bool = False,
+        only_wishlists: bool = False,
+    ) -> List[Subscription]:
         query = (
             select(Subscription)
             .where(Subscription.subscriber_id == subscriber_id)
-            .options(
-                joinedload(Subscription.target_user),
-                joinedload(Subscription.target_wishlist)
-            )
-            .order_by(Subscription.created_at.desc())
         )
-        count_query = (
-            select(func.count())
-            .where(Subscription.subscriber_id == subscriber_id)
+
+        if only_users:
+            query = query.where(Subscription.type_sub == True)
+        elif only_wishlists:
+            query = query.where(Subscription.type_sub == False)
+        query = query.options(
+            joinedload(Subscription.target_user),
+            joinedload(Subscription.target_wishlist)
         )
-        count_result = await self.session.execute(count_query)
-        total = count_result.scalar_one_or_none()
-        
-        
+        query = query.order_by(Subscription.created_at.desc())
         query = query.limit(limit)
         result = await self.session.execute(query)
-        subscriptions = list(result.scalars().all())
-
-        return subscriptions, total
+        return list(result.scalars().all())
 
     async def get_user_subscribers(
         self,
