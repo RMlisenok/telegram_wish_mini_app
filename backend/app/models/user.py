@@ -80,3 +80,16 @@ class User(Base):
         "WishReservation",
         back_populates="reserved_by"
     )
+
+    blocked_users: Mapped[List["BlockedUser"]] = relationship(
+        "BlockedUser",
+        foreign_keys="[BlockedUser.blocker_id]",
+        back_populates="blocker",
+        cascade="all, delete-orphan"
+    )
+    blocked_by_users: Mapped[List["BlockedUser"]] = relationship(
+        "BlockedUser",
+        foreign_keys="[BlockedUser.blocked_id]",
+        back_populates="blocked",
+        cascade="all, delete-orphan"
+    )

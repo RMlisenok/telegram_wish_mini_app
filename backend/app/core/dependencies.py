@@ -14,6 +14,21 @@ logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 
+async def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db)
+) -> int:
+    token = credentials.credentials
+    payload = verify_jwt_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Token"
+        )
+    user_id = int(payload.get("sub"))
+    return user_id
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db)
