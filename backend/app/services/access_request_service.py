@@ -82,6 +82,28 @@ class AccessRequestService():
             raise ValueError("Error for update status")
         return await self.get_request_with_details(access_request.id)
 
+    async def delete_request(
+        self,
+        request_id: int,
+        user_id: int
+    ) -> bool:
+        access_request = await self.rep_access.get_request_id(request_id)
+        if not access_request:
+            return False        
+        wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
+        if not wishlist:
+            return False
+        can_delete = (
+            access_request.requester_id == user_id or
+            wishlist.user_id == user_id
+        )
+        if not can_delete:
+            raise ValueError("Not have permission to delete this request")
+        if access_request.status != AccessRequestStatus.PENDING:
+            raise ValueError("Delete error, this request arleady handler")
+        return await self.rep_access.delete(request_id)
+
+
     async def get_request_with_details(
         self,
         request_id: int
