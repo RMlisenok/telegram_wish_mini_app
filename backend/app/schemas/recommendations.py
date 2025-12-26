@@ -1,8 +1,10 @@
+from pydantic import BaseModel
 
-
-class RecommendationItem(BaseModel):
+class GiftResponse(BaseModel):
     title: str
     description: str
-    price: Optional[float] = None
     url: str
     category: str
+
+    class Config:
+        from_attributes = True

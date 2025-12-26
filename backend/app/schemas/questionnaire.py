@@ -28,7 +28,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 
 class TagItem(BaseModel):
-    tag: str = Field(..., description="Текст тега (напр. 'Спорт')")
+    tag: str = Field(..., description="Например 'Спорт')")
     details: Optional[str] = Field(None, description="Дополнительные детали")
 
 class QuestionnaireCreate(BaseModel):

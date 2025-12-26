@@ -1,18 +1,44 @@
+import random
+from sqlalchemy import select, and_, not_
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.recommendations import GiftSuggestion
+from app.models.questionnaire import UserForm
+
 
 class RecommendationService:
-    async def get_recommendations(self, target_user_id: int):
+    @staticmethod
+    async def get_recommendations(session: AsyncSession, target_user_id: int):
+        stmt = select(UserForm).where(UserForm.user_id == target_user_id)
+        result = await session.execute(stmt)
+        user_forms = result.scalars().all()
 
-        questionnaire = await self.repo.get_user_questionnaire(target_user_id)
+        if not user_forms:
+            return []
 
-        if not questionnaire or not questionnaire.interests:
-            return await self.get_universal_recommendations()  # Сценарий 2 (FS-10.4)
+        interests = [f.tag_value for f in user_forms if f.type_tags is True]
+        avoid = [f.tag_value for f in user_forms if f.type_tags is False]
 
-        interest_tags = [item.tag for item in questionnaire.interests]
-        avoid_tags = [item.tag for item in questionnaire.avoid_gifts]
-
-        recommendations = await self.market_api.search(
-            include=interest_tags,
-            exclude=avoid_tags,
-            limit=5
+        query = select(GiftSuggestion).where(
+            and_(
+                GiftSuggestion.tag_value.in_(interests),
+                not_(GiftSuggestion.tag_value.in_(avoid))
+            )
         )
-        return recommendations
+
+        result = await session.execute(query)
+        recommended_gifts = list(result.scalars().all())
+
+        if len(recommended_gifts) < 5:
+            already_selected_ids = [g.id for g in recommended_gifts]
+            fallback_query = select(GiftSuggestion).where(
+                and_(
+                    not_(GiftSuggestion.tag_value.in_(avoid)),
+                    not_(GiftSuggestion.id.in_(already_selected_ids))
+                )
+            ).limit(5 - len(recommended_gifts))
+
+            fallback_result = await session.execute(fallback_query)
+            recommended_gifts.extend(fallback_result.scalars().all())
+
+        random.shuffle(recommended_gifts)
+        return recommended_gifts[:5]
