@@ -3,7 +3,10 @@
 
     import StartScreen from '$lib/components/screens/StartScreen.svelte';
     import MainScreen from '$lib/components/screens/MainScreen.svelte';
-    
+    import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
+    import OtherProfileScreen from '$lib/components/screens/OtherProfileScreen.svelte';
+
+
     //Dass_18.12.2025 -->
     import SettingsScreen from '$lib/components/screens/settings/SettingsScreen.svelte'; 
     import SettingsScreenEditProfile from '$lib/components/screens/settings/SettingsScreen_EditProfile.svelte';
@@ -25,16 +28,59 @@
     import SubscriptionsScreen from '$lib/components/screens/SubscriptionsScreen.svelte'; //2010/1-5_locust_24.12.2025
     import SubscribersScreen from '$lib/components/screens/SubscribersScreen.svelte'; //2011/1_locust_25.12.2025
 
-    import ShareProfileScreen from '$lib/components/screens/ShareProfileScreen.svelte';
+    // Lyse Modifications
+
+    import { userStore,otherProfilesMock } from '$lib/stores/data.js';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 
 
-    import { userStore } from '$lib/stores/data.js';
 
     let currentScreen = 'start';
-    // let viewedProfile = null;
+
+    let viewedProfile = null;
+    let screenStack = [];
 
     // user vient du store
     $: user = $userStore;
+
+    function pushNavigate(screen, params = {}) {
+        // sauvegarde l'écran actuel pour permettre "retour"
+        screenStack = [...screenStack, currentScreen];
+        navigate(screen, params);
+    }
+
+    function goBack() {
+        const prev = screenStack[screenStack.length - 1];
+        screenStack = screenStack.slice(0, -1);
+        currentScreen = prev ?? 'main';
+    }
+
+    function openOtherProfile(profile) {
+        viewedProfile = profile;
+        pushNavigate('otherProfile');
+    }
+
+    // Option si tes screens envoient seulement un id (profileId)
+    // et que tu n'as pas encore de store global de profiles
+
+    function openOtherProfileById(profileId) {
+        const key = String(profileId);
+        viewedProfile = otherProfilesMock[key] ?? {
+            id: profileId,
+            fullName: '—',
+            birthDate: '—',
+            avatarUrl: '',
+            publicWishlists: [],
+            subscriptions: [],
+            isSubscribed: false,
+            questionnaire: { interests: [], noGifts: [] }
+        };
+        pushNavigate('otherProfile');
+    }
+
+
+
 
     function navigate(screen, params = {}) {
         currentScreen = screen;
@@ -89,6 +135,10 @@
     
     let selectedWishlistId = null;
     let selectedWishId = null; //2006/2_Dass_24.12.2025
+
+
+
+
 </script>
 
 {#if !user}
@@ -208,14 +258,60 @@
                                 navigate('wishlists');
                             }}
                         />
-                    <!-- 2010/1-5_locust_24.12.2025 -->
+                    <!-- 2010/1-5_locust_24.12.2025/ Lyse Modifications -->
                      {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
+
+                                on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
                         />
-                    <!-- 2011/1_locust_25.12.2025 -->
+                    <!-- 2011/1_locust_25.12.2025/ Lyse Modifications -->
                      {:else if currentScreen === 'subscribers'}
                         <SubscribersScreen
+
+                                on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
                         />
+
+
+                    <!--    OtherProfileScreen       -->
+
+                {:else if currentScreen === 'otherProfile'}
+
+                    <OtherProfileScreen
+                            profile={viewedProfile}
+                            on:back={goBack}
+                            on:toggle-subscribe={(e) => {
+    const { profileId, value } = e.detail;
+
+    // 1) Mettre à jour l'objet affiché (sinon l'UI ne change jamais)
+    viewedProfile = { ...viewedProfile, isSubscribed: value };
+
+    // 2) (optionnel) Si tu as un mock global, mets-le à jour aussi
+    const key = String(profileId);
+    if (otherProfilesMock?.[key]) {
+      otherProfilesMock[key] = { ...otherProfilesMock[key], isSubscribed: value };
+    }
+
+    // 3) (plus tard) ici tu peux appeler ton API/store si besoin
+    // await apiToggleSubscribe(profileId, value);
+  }}
+                            on:show-all-wishlists={() => pushNavigate('wishlists')}
+                            on:show-all-subscriptions={() => pushNavigate('subscriptions')}
+                    />
+
+
+                    <!--                    <OtherProfileScreen-->
+<!--                            profile={viewedProfile}-->
+<!--                            on:back={goBack}-->
+<!--                            on:toggle-subscribe={(e) => {-->
+<!--            // tu gardes ta logique actuelle (store / api)-->
+<!--            console.log('toggle-subscribe', e.detail);-->
+<!--        }}-->
+<!--                            on:show-all-wishlists={() => pushNavigate('wishlists')}-->
+<!--                            on:show-all-subscriptions={() => pushNavigate('subscriptions')}-->
+<!--                    />-->
+
+
+
                 {/if}
             </div>
             
@@ -273,6 +369,13 @@
                     <span>Настройки</span>
                     <span class="tab-dot"></span>
                 </button>
+
+
+
+                <button on:click={(e) => dispatch('click', e)}>
+                    <slot />
+                </button>
+
             </nav>
         </div>
     {/if}
