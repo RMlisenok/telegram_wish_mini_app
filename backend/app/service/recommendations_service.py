@@ -42,3 +42,22 @@ class RecommendationService:
 
         random.shuffle(recommended_gifts)
         return recommended_gifts[:5]
+
+    async def generate_and_send_via_bot(db_factory, requester_id: int, target_id: int, bot):
+        async with db_factory() as session:
+            gifts = await RecommendationService.get_recommendations(session, target_id)
+
+            if not gifts:
+                await bot.send_message(requester_id, "К сожалению, не удалось подобрать подарки. Возможно, анкета друга не заполнена.")
+                return
+
+            message_text = f"🎁 <b>Подборка идей для подарка:</b>\n\n"
+
+            for i, gift in enumerate(gifts, 1):
+                message_text += f"{i}. <b>{gift.title}</b>\n"
+                message_text += f"📝 {gift.description}\n"
+                message_text += f"🔗 <a href='{gift.url}'>Посмотреть товар</a>\n\n"
+
+            message_text += "<i>Нажмите 'Обновить', если хотите другие варианты.</i>"
+
+            await bot.send_message(requester_id, message_text, parse_mode="HTML", disable_web_page_preview=False)
