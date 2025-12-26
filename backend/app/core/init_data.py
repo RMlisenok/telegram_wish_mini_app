@@ -22,7 +22,7 @@ AVOID_TAGS = [
 async def init_tags(session: AsyncSession):
     check = await session.execute(select(TagForm).limit(1))
     if check.scalars().first():
-        return  # База уже заполнена
+        return
 
     for t in INTEREST_TAGS:
         session.add(TagForm(tag_value=t, type_tags=True))
