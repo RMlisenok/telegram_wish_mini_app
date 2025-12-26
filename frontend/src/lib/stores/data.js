@@ -146,54 +146,54 @@ export const wishlistsStore = writable([
 
 // Подписки (на кого я подписан)
 export const subscriptionsStore = writable([
-{
-        id: 'sub-1',
-        subscriber_id: 'demo-user-1',
-        type_sub: true,
-        user: {
-            user_id: 1,
-            name: 'Иван Петров',
-            photo: '/icons/avatar4.svg',
-            birth_date: '15.07.1995'
-        },
-        wishlist: null
-    },
-    {
-        id: 'sub-2',
-        subscriber_id: 'demo-user-1',
-        type_sub: true,
-        user: {
-            user_id: 2,
-            name: 'Мария Сидорова',
-            photo: '/icons/avatar3.svg',
-            birth_date: '22.11.1992'
-        },
-        wishlist: null
-    },
-    {
-        id: 'sub-3',
-        subscriber_id: 'demo-user-1',
-        type_sub: true,
-        user: {
-            user_id: 3,
-            name: 'Алексей Козлов',
-            photo: '/icons/avatar2.svg',
-            birth_date: '03.09.1989'
-        },
-        wishlist: null
-    },
-    {
-        id: 'sub-4',
-        subscriber_id: 'demo-user-1',
-        type_sub: true,
-        user: {
-            user_id: 4,
-            name: 'Елена Васнецова',
-            photo: '/icons/avatar1.svg',
-            birth_date: '28.02.1997'
-        },
-        wishlist: null
-    },
+// {
+//         id: 'sub-1',
+//         subscriber_id: 'demo-user-1',
+//         type_sub: true,
+//         user: {
+//             user_id: 1,
+//             name: 'Иван Петров',
+//             photo: '/icons/avatar4.svg',
+//             birth_date: '15.07.1995'
+//         },
+//         wishlist: null
+//     },
+//     {
+//         id: 'sub-2',
+//         subscriber_id: 'demo-user-1',
+//         type_sub: true,
+//         user: {
+//             user_id: 2,
+//             name: 'Мария Сидорова',
+//             photo: '/icons/avatar3.svg',
+//             birth_date: '22.11.1992'
+//         },
+//         wishlist: null
+//     },
+//     {
+//         id: 'sub-3',
+//         subscriber_id: 'demo-user-1',
+//         type_sub: true,
+//         user: {
+//             user_id: 3,
+//             name: 'Алексей Козлов',
+//             photo: '/icons/avatar2.svg',
+//             birth_date: '03.09.1989'
+//         },
+//         wishlist: null
+//     },
+//     {
+//         id: 'sub-4',
+//         subscriber_id: 'demo-user-1',
+//         type_sub: true,
+//         user: {
+//             user_id: 4,
+//             name: 'Елена Васнецова',
+//             photo: '/icons/avatar1.svg',
+//             birth_date: '28.02.1997'
+//         },
+//         wishlist: null
+//     },
     {
         id: 'sub-5',
         subscriber_id: 'demo-user-1',
@@ -269,7 +269,7 @@ export const subscribersStore = writable([
         id: 'subscriber-2',
         user_id: 6,
         name: 'Ольга Иванова',
-        photo: '/icons/avatar3.sgg',
+        photo: '/icons/avatar3.svg',
         birth_date: '03.11.1994',
         is_blocked: false,
         subscription_date: '20.01.2024',
