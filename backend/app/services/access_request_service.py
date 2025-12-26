@@ -8,6 +8,7 @@ from app.repositories.wishlist_repository import WishlistRepository
 from app.schemas.access_request import (
     AccessRequestCreate,
     AccessRequestResponse,
+    AccessRequestsResponse,
     AccessRequestWithDetails,
     UpdateAccessRequest
 )
@@ -103,6 +104,59 @@ class AccessRequestService():
             raise ValueError("Delete error, this request arleady handler")
         return await self.rep_access.delete(request_id)
 
+    async def get_my_request(
+        self,
+        user_id: int,
+        status: Optional[AccessRequestStatus] = None,
+        limit: int = 100
+    ) -> AccessRequestResponse:
+        requests = await self.rep_access.get_for_requester_with_details(
+            requester_id=user_id,
+            status=status,
+            limit=limit
+        )
+        request_list = []
+        for req in requests:
+            request_list.append(await self.format_request_response(req))
+        total = len(request_list)
+
+        return AccessRequestsResponse(
+            requests=request_list,
+            total=total
+        )
+
+    async def get_requsts_for_my_wishlists(
+        self,
+        user_id: int,
+        status: Optional[AccessRequestStatus],
+        limit: int = 100
+    ) -> AccessRequestRepository:
+        requests = await self.rep_access.get_for_wishlist_owner_with_details(
+            owner_id=user_id,
+            status=status,
+            limit=limit
+        )
+        request_list = []
+        for req in requests:
+            request_list.append(await self.format_request_response(req))
+        total = len(request_list)
+        return AccessRequestsResponse(
+            requests=request_list,
+            total=total
+        )
+
+    async def check_access(
+        self,
+        wishlist_id: int,
+        user_id: int
+    ) -> bool:
+        wishlist = await self.rep_wishlist.get(wishlist_id)
+        if wishlist and wishlist.user_id == user_id:
+            return True
+        return await self.rep_access.has_access(
+            wishlist_id,
+            user_id
+        )
 
     async def get_request_with_details(
         self,
