@@ -93,7 +93,7 @@
             </div>
         {:else}
             <div class="wishlist-list">
-                {#each $wishlistsStore.slice(0, 2) as wl}
+                {#each $wishlistsStore.slice(0, 3) as wl}
                     <button class="wishlist-row" type="button" on:click={openWishlists}>
                         <div class="wishlist-cover-small">
                             {#if wl.coverUrl}
