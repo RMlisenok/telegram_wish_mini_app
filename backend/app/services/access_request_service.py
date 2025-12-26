@@ -104,12 +104,12 @@ class AccessRequestService():
             raise ValueError("Delete error, this request arleady handler")
         return await self.rep_access.delete(request_id)
 
-    async def get_my_request(
+    async def get_my_requests(
         self,
         user_id: int,
         status: Optional[AccessRequestStatus] = None,
         limit: int = 100
-    ) -> AccessRequestResponse:
+    ) -> AccessRequestsResponse:
         requests = await self.rep_access.get_for_requester_with_details(
             requester_id=user_id,
             status=status,

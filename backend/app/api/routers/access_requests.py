@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.models.access_request import AccessRequest
+from app.models.access_request import AccessRequest, AccessRequestStatus
 from app.services.access_request_service import AccessRequestService
 from app.schemas.access_request import (
     AccessRequestCreate,
@@ -108,3 +108,47 @@ async def delete_access_request(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+
+@router.get("/my/requests",
+            response_model=AccessRequestResponse)
+async def get_my_access_requests(
+    user_id: int,
+    status_req: Optional[AccessRequestStatus] = None,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    service = AccessRequestService(db)
+    try:
+        return await service.get_my_requests(
+            user_id,
+            status_req,
+            limit
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Cannot get request"
+        )
+
+
+@router.get("/my/wishlists",
+            response_model=AccessRequestsResponse)
+async def get_requests_for_my_wishlists(
+    user_id: int,
+    status_req: Optional[AccessRequestStatus] = None,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    service = AccessRequestService(db)
+    try:
+        return await service.get_requsts_for_my_wishlists(
+            user_id,
+            status_req,
+            limit
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Cannot get request"
+        )    
