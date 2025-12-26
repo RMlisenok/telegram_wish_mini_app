@@ -6,7 +6,7 @@ export const userStore = writable({
     id: 'demo-user-1',
     fullName: 'Анна Подаркова',
     birthDate: '12.03.1998',
-    avatarUrl: '',
+    avatarUrl: '/icons/avatar1.svg',
     showSubscriptions: true,
     ui: {
         textSize: 'medium',
@@ -119,7 +119,7 @@ export const wishlistsStore = writable([
         description: 'Идеи подарков на 8-ого ммарта',
         privacy: 'private',
         count: 10,
-        rUrl: '/icons/2018_McLaren_720S.jpg',
+
     },
 
     {
@@ -153,7 +153,7 @@ export const subscriptionsStore = writable([
         user: {
             user_id: 1,
             name: 'Иван Петров',
-            photo: '',
+            photo: '/icons/avatar4.svg',
             birth_date: '15.07.1995'
         },
         wishlist: null
@@ -165,7 +165,7 @@ export const subscriptionsStore = writable([
         user: {
             user_id: 2,
             name: 'Мария Сидорова',
-            photo: '/icons/avatar-maria.jpg',
+            photo: '/icons/avatar3.svg',
             birth_date: '22.11.1992'
         },
         wishlist: null
@@ -177,7 +177,7 @@ export const subscriptionsStore = writable([
         user: {
             user_id: 3,
             name: 'Алексей Козлов',
-            photo: '/icons/avatar-alex.jpg',
+            photo: '/icons/avatar2.svg',
             birth_date: '03.09.1989'
         },
         wishlist: null
@@ -189,7 +189,7 @@ export const subscriptionsStore = writable([
         user: {
             user_id: 4,
             name: 'Елена Васнецова',
-            photo: '',
+            photo: '/icons/avatar1.svg',
             birth_date: '28.02.1997'
         },
         wishlist: null
@@ -202,7 +202,7 @@ export const subscriptionsStore = writable([
         wishlist: {
             wishlist_id: 1,
             name: 'Идеи для отпуска',
-            photo: '/icons/vacation.jpg',
+            photo: '/icons/card.svg',
             user_name: 'Дмитрий Волков',
             number_of_wishes: 7
         }
@@ -228,7 +228,7 @@ export const subscriptionsStore = writable([
         wishlist: {
             wishlist_id: 1,
             name: 'Книжный клуб',
-            photo: '/icons/books.png',
+            photo: '/icons/book.svg',
             user_name: 'Читательское сообщество',
             number_of_wishes: 24
         }
@@ -241,7 +241,7 @@ export const subscriptionsStore = writable([
         wishlist: {
             wishlist_id: 1,
             name: 'Кулинарные рецепты',
-            photo: '/icons/cooking.jpg',
+            photo: '/icons/cooking.png',
             user_name: 'Шеф-повар Антон',
             number_of_wishes: 15
         }
@@ -257,7 +257,7 @@ export const subscribersStore = writable([
         id: 'subscriber-1',
         user_id: 5,
         name: 'Дмитрий Смирнов',
-        photo: '/icons/avatar-dmitry.jpg',
+        photo: '/icons/avatar5.svg',
         birth_date: '18.05.1990',
         is_blocked: false,
         subscription_date: '15.12.2023',
@@ -269,7 +269,7 @@ export const subscribersStore = writable([
         id: 'subscriber-2',
         user_id: 6,
         name: 'Ольга Иванова',
-        photo: '/icons/avatar-olga.jpg',
+        photo: '/icons/avatar3.sgg',
         birth_date: '03.11.1994',
         is_blocked: false,
         subscription_date: '20.01.2024',
@@ -281,7 +281,7 @@ export const subscribersStore = writable([
         id: 'subscriber-3',
         user_id: 7,
         name: 'Сергей Павлов',
-        photo: '/icons/avatar-sergey.jpg',
+        photo: '/icons/avatar2.svg',
         birth_date: '29.08.1988',
         is_blocked: false,
         subscription_date: '05.02.2024',
@@ -317,7 +317,7 @@ export const subscribersStore = writable([
         id: 'subscriber-6',
         user_id: 10,
         name: 'Екатерина Николаева',
-        photo: '/icons/avatar-maria.jpg',
+        photo: '/icons/avatar1.svg',
         birth_date: '09.09.1993',
         is_blocked: false,
         subscription_date: '12.03.2024',
@@ -353,7 +353,7 @@ export const subscribersStore = writable([
         id: 'subscriber-9',
         user_id: 13,
         name: 'Артём Белов',
-        photo: '/icons/McLaren_750S_Spider_IMG_2435.jpg',
+        photo: '/icons/avatar5.svg',
         birth_date: '30.10.1992',
         is_blocked: false,
         subscription_date: '08.01.2024',
@@ -403,4 +403,69 @@ export const makeProfileShareUrl = (userId, fullName = '') => {
     return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
         text
     )}`;
+};
+
+
+
+export const otherProfilesMock = {
+    "1": {
+        id: 1,
+        fullName: 'Иван Петров',
+        birthDate: '15.07.1995',
+        avatarUrl: '/icons/avatar4.svg',
+        isSubscribed: true,
+        publicWishlists: [
+            { id: 'wl-1-1', title: 'День рождения', visibility: 'public', wishesCount: 4, iconUrl: '/icons/gift3.png' },
+            { id: 'wl-1-2', title: 'Новый год', visibility: 'public', wishesCount: 2, iconUrl: '/icons/gift3.png' }
+        ],
+        subscriptions: [
+            { id: 'sub-u-2', fullName: 'Мария Сидорова', birthDate: '22.11.1992', wishlistTitle: 'Путешествия', avatarUrl: '/icons/logo-user.svg' }
+        ],
+        questionnaire: {
+            interests: ['Гаджеты', 'Книги', 'Путешествия'],
+            noGifts: ['Алкоголь', 'Мягкие игрушки']
+        }
+    },
+
+    "2": {
+        id: 2,
+        fullName: 'Мария Сидорова',
+        birthDate: '22.11.1992',
+        avatarUrl: '/icons/avatar3.svg',
+        isSubscribed: false,
+        publicWishlists: [
+            { id: 'wl-2-1', title: '8 марта', visibility: 'public', wishesCount: 6, iconUrl: '/icons/card.svg' }
+        ],
+        subscriptions: [
+            { id: 'sub-u-1', fullName: 'Иван Петров', birthDate: '15.07.1995', wishlistTitle: 'День рождения', avatarUrl: '/icons/logo-user.svg' }
+        ],
+        questionnaire: {
+            interests: ['Украшения', 'Косметика', 'Сертификаты'],
+            noGifts: ['Сладкое', 'Парфюм']
+        }
+    },
+
+    "3": {
+        id: 3,
+        fullName: 'Алексей Козлов',
+        birthDate: '03.09.1989',
+        avatarUrl: 'avatar2.svg',
+        isSubscribed: false,
+        publicWishlists: [],
+        subscriptions: [],
+        questionnaire: { interests: ['Техника', 'Спорт'], noGifts: [] }
+    },
+
+    "4": {
+        id: 4,
+        fullName: 'Елена Васнецова',
+        birthDate: '28.02.1997',
+        avatarUrl: 'avatar1.svg',
+        isSubscribed: false,
+        publicWishlists: [
+            { id: 'wl-4-1', title: 'Мечты', visibility: 'public', wishesCount: 1, iconUrl: '/icons/card.svg' }
+        ],
+        subscriptions: [],
+        questionnaire: { interests: [], noGifts: ['Домашние животные'] }
+    }
 };
