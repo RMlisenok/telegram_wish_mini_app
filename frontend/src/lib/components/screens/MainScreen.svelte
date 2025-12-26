@@ -39,6 +39,19 @@
     $: n_sub = $subscriptionsStore.length;
     $: n_subi = $subscribersStore.length;
 
+    $: sortedSubscribers = $subscribersStore
+        .slice()
+        .sort((a, b) => {
+            const parseDate = (dateStr) => {
+                const [day, month, year] = dateStr.split('.').map(Number);
+                return new Date(year, month - 1, day);
+            };
+            
+            return parseDate(b.subscription_date) - parseDate(a.subscription_date);
+        });
+
+    $: latestSubscribers = sortedSubscribers.slice(0, 2);
+
     const getWishlistCount = (wishlistId) =>
         $wishesStore.filter((w) => (w.wishlistIds || []).includes(wishlistId)).length;
 
@@ -159,20 +172,46 @@
                                 class="subs-row"
                                 on:click={openSubscriptions}
                         >
-                            <Avatar
-                                    size={52}
-                                    src={sub.avatarUrl}
-                                    initials={getInitials(sub.fullName)}
-                            />
+                            {#if sub.type_sub}
+                                <!-- Подписка на пользователя -->
+                                <Avatar
+                                        size={52}
+                                        src={sub.user.photo}
+                                        initials={getInitials(sub.user.name)}
+                                />
+                                <div class="subs-main">
+                                    <div class="subs-name" title={sub.user.name}>{sub.user.name}</div>
+                                    <div class="subs-meta">
+                                        <span>{sub.user.birth_date}</span>
+                                        {#if sub.wishlist}
+                                            <span> · {sub.wishlist.name}</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                            {:else}
+                            <!-- Подписка на вишлист -->
+                            <div class="wishlist-cover-small">
+                                {#if sub.wishlist.photo}
+                                    <img src={sub.wishlist.photo} alt={sub.wishlist.name} />
+                                {:else}
+                                    <img src={ICON_GIFT} alt="Подарок"/>
+                                {/if}
+                            </div>
                             <div class="subs-main">
-                                <div class="subs-name" title={sub.fullName}>{sub.fullName}</div>
+                                <div class="subs-name" title={sub.wishlist.name}>{sub.wishlist.name}</div>
                                 <div class="subs-meta">
-                                    <span>{sub.birthDate}</span>
-                                    {#if sub.wishlistTitle}
-                                        <span> · {sub.wishlistTitle}</span>
+                                    <span>{sub.wishlist.user_name}</span>
+                                    {#if sub.wishlist.number_of_wishes}
+                                        <span> · {sub.wishlist.number_of_wishes} жел.</span>
                                     {/if}
                                 </div>
                             </div>
+                        {/if}
+                        <img 
+                            class="wishlist-arrow" 
+                            src={ICON_ARROW_RIGHT} 
+                            alt="Перейти" 
+                        />
                         </button>
                     {/each}
                 </div>
@@ -194,7 +233,7 @@
             <div class="empty-note">У вас пока нет подписчиков.</div>
         {:else}
             <div class="subs-list">
-                {#each $subscribersStore.slice(0, 2) as sub}
+                {#each latestSubscribers as sub}
                     <button
                             type="button"
                             class="subs-row"
@@ -202,18 +241,20 @@
                     >
                         <Avatar
                                 size={52}
-                                src={sub.avatarUrl}
-                                initials={getInitials(sub.fullName)}
+                                src={sub.photo}
+                                initials={getInitials(sub.name)}
                         />
                         <div class="subs-main">
-                            <div class="subs-name" title={sub.fullName}>{sub.fullName}</div>
+                            <div class="subs-name" title={sub.name}>{sub.name}</div>
                             <div class="subs-meta">
-                                <span>{sub.birthDate}</span>
-                                {#if sub.wishlistTitle}
-                                    <span> · {sub.wishlistTitle}</span>
-                                {/if}
+                                <span>{sub.birth_date}</span>
                             </div>
                         </div>
+                        <img 
+                        class="wishlist-arrow" 
+                        src={ICON_ARROW_RIGHT} 
+                        alt="Перейти" 
+                        />
                     </button>
                 {/each}
             </div>
