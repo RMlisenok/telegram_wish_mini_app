@@ -26,6 +26,7 @@
     const openCreateWishlists = () => dispatch('openCreateWishlists');
 
     const ICON_GIFT = '/icons/maingift.svg';
+    const ICON_ARROW_RIGHT = '/icons/arrow-right.png';
 
     const getInitials = (name) => {
         if (!name) return '??';
@@ -125,6 +126,11 @@
                                 <span> · {getWishlistCount(wl.id)} жел.</span>
                             </div>
                         </div>
+                        <img 
+                            class="wishlist-arrow" 
+                            src={ICON_ARROW_RIGHT} 
+                            alt="Перейти" 
+                        />
                     </button>
                 {/each}
             </div>
@@ -403,5 +409,12 @@
         margin-top: 2px;
     }
 
+    .wishlist-arrow {
+        width: 16px;
+        height: 16px;
+        opacity: 0.5;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
 
 </style>
