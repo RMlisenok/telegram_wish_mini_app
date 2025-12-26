@@ -152,3 +152,22 @@ async def get_requests_for_my_wishlists(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Cannot get request"
         )    
+
+
+@router.get("/check/{wishlist_id/access")
+async def check_access(
+    wishlist_id: int,
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    service = AccessRequestService(db)
+    try:
+        ges_access = await service.check_access(
+            wishlist_id,
+            user_id
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Cannot check access"
+        )
