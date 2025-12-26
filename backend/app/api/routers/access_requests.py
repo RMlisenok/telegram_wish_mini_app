@@ -13,7 +13,7 @@ from app.schemas.access_request import (
     UpdateAccessRequest
 )
 
-router = APIRouter(prefix="access-requests", tags=["access-requests"])
+router = APIRouter(prefix="/access-requests", tags=["access-requests"])
 
 
 @router.post("/",
@@ -41,7 +41,7 @@ async def create_access_request(
 
 
 @router.get("/{request_id}",
-            response_model=AccessRequestWithDetails):
+            response_model=AccessRequestWithDetails)
 async def get_access_request(
     request_id: int,
     user_id: int,
@@ -162,10 +162,11 @@ async def check_access(
 ):
     service = AccessRequestService(db)
     try:
-        ges_access = await service.check_access(
+        has_access = await service.check_access(
             wishlist_id,
             user_id
         )
+        return {"has_access": has_access}
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
