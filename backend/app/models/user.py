@@ -113,9 +113,9 @@ class User(Base):
     )
     access_requests_received: Mapped[List["AccessRequest"]] = relationship(
         "AccessRequest",
-        foreign_keys="[AccessRequest.wishlist_id]",
         secondary="wishlists",
         primaryjoin="User.id == Wishlist.user_id",
         secondaryjoin="Wishlist.id == AccessRequest.wishlist_id",
-        viewonly=True
+        viewonly=True,
+        lazy="select"
     )

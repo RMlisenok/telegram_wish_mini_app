@@ -1,10 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import (
-    String,
-    Date,
-    Boolean,
     Enum,
-    Text,
     TIMESTAMP,
     BigInteger,
     ForeignKey
