@@ -12,9 +12,10 @@
     let showSubscriptions = $userStore.showSubscriptions;
 
     function saveSettings() {
-        userStore.set({
-            showSubscriptions,
-        });
+        userStore.update(current => ({
+            ...current,
+            showSubscriptions: showSubscriptions
+        }));
         console.log('Сохранение настроек:', { showSubscriptions });
         // Здесь будет запрос к API для сохранения настройки
         goBack();
