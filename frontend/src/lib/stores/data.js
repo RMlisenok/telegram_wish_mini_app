@@ -379,19 +379,19 @@ export const questionnaireStore = writable({
 
 // --- FPS: partage profil via Telegram Mini App Direct Link ---
 
-export const BOT_USERNAME = 'padari_minyebot';
+export const BOT_USERNAME = 'testworkwishbot';
 
-// IMPORTANT (FPS):
-// WEBAPP_SHORT_NAME doit être EXACTEMENT le slug du Direct Link créé dans BotFather.
-// Ex: si BotFather te montre: t.me/padari_minyebot/app  -> alors c'est "app"
-export const WEBAPP_SHORT_NAME = 'directlink';
+// // IMPORTANT (FPS):
+// // WEBAPP_SHORT_NAME doit être EXACTEMENT le slug du Direct Link créé dans BotFather.
+// // Ex: si BotFather te montre: t.me/padari_minyebot/app  -> alors c'est "app"
+// export const WEBAPP_SHORT_NAME = 'directlink';
 
-export const APP_NAME = 'Подари мне';
+export const APP_NAME = 'test work wish';
 
 // URL Telegram officielle qui donne la "carte" (preview bot + bouton Lancer)
 // startapp contient la valeur que tu lis via tg.initDataUnsafe.start_param
 export const makeProfileTgUrl = (userId) =>
-    `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}?startapp=${encodeURIComponent(
+    `https://t.me/${BOT_USERNAME}/?startapp=${encodeURIComponent(
         `profile_${userId}`
     )}`;
 
