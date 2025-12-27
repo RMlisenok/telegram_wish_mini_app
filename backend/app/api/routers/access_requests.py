@@ -17,7 +17,7 @@ router = APIRouter(prefix="/access-requests", tags=["access-requests"])
 
 
 @router.post("/",
-             response_model=AccessRequestWithDetails,
+             response_model=AccessRequestResponse,
              status_code=status.HTTP_201_CREATED)
 async def create_access_request(
     request_data: AccessRequestCreate,
@@ -111,7 +111,7 @@ async def delete_access_request(
 
 
 @router.get("/my/requests",
-            response_model=AccessRequestResponse)
+            response_model=AccessRequestsResponse)
 async def get_my_access_requests(
     user_id: int,
     status_req: Optional[AccessRequestStatus] = None,
@@ -125,10 +125,10 @@ async def get_my_access_requests(
             status_req,
             limit
         )
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Cannot get request"
+            detail=f"Cannot get request: {str(e)}"
         )
 
 
@@ -142,7 +142,7 @@ async def get_requests_for_my_wishlists(
 ):
     service = AccessRequestService(db)
     try:
-        return await service.get_requsts_for_my_wishlists(
+        return await service.get_requests_for_my_wishlists(
             user_id,
             status_req,
             limit
