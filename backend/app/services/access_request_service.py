@@ -1,6 +1,7 @@
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.wishlist import TypePrivacyEnum
 from app.models.access_request import AccessRequestStatus, AccessRequest
 from app.repositories.access_request_repository import AccessRequestRepository
 from app.repositories.user_repository import UserRepository
@@ -25,13 +26,13 @@ class AccessRequestService():
         self,
         user_id: int,
         request_data: AccessRequestCreate
-    ) -> Optional[AccessRequestWithDetails]:
+    ) -> Optional[AccessRequestResponse]:
         wishlist = await self.rep_wishlist.get(request_data.wishlist_id)
         if not wishlist:
             raise ValueError("Wishlist not found")
         if wishlist.user_id == user_id:
             raise ValueError("You cannot request access to your wishlist")
-        if wishlist.typeprivacy == "public":
+        if wishlist.typeprivacy == TypePrivacyEnum.public:
             raise ValueError("Wishlist is public, request not needed")
         has_access = await self.rep_access.has_access(
             wishlist_id=request_data.wishlist_id,
@@ -45,7 +46,8 @@ class AccessRequestService():
         )
         if not access_request:
             raise ValueError("Dont created access")
-        return await self.get_request_with_details(access_request.id)
+        # return  AccessRequestResponse.model_validate(access_request)
+        return AccessRequestResponse.model_validate(access_request)
 
     async def get_request(
         self,
@@ -76,7 +78,7 @@ class AccessRequestService():
 
         success = await self.rep_access.update_status(
             request_id=access_request.id,
-            status=update_data
+            status=update_data.status
         )
 
         if not success:
@@ -90,7 +92,7 @@ class AccessRequestService():
     ) -> bool:
         access_request = await self.rep_access.get_request_id(request_id)
         if not access_request:
-            return False        
+            return False
         wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
         if not wishlist:
             return False
@@ -125,12 +127,12 @@ class AccessRequestService():
             total=total
         )
 
-    async def get_requsts_for_my_wishlists(
+    async def get_requests_for_my_wishlists(
         self,
         user_id: int,
         status: Optional[AccessRequestStatus],
         limit: int = 100
-    ) -> AccessRequestRepository:
+    ) -> AccessRequestsResponse:
         requests = await self.rep_access.get_for_wishlist_owner_with_details(
             owner_id=user_id,
             status=status,
@@ -153,6 +155,8 @@ class AccessRequestService():
         wishlist = await self.rep_wishlist.get(wishlist_id)
         if wishlist and wishlist.user_id == user_id:
             return True
+        if wishlist.typeprivacy == TypePrivacyEnum.public:
+            return True
         return await self.rep_access.has_access(
             wishlist_id,
             user_id
@@ -167,39 +171,50 @@ class AccessRequestService():
         )
         if not access_request:
             return None
-
         return await self.format_request_response(access_request)
 
     async def format_request_response(
         self,
         access_request: AccessRequest
     ) -> AccessRequestWithDetails:
-        wishlist = access_request.wishlist if hasattr(
-            access_request,
-            "wishlist"
-        ) else None
-        requester = access_request.requester if hasattr(
-            access_request,
-            "requester"
-        ) else None
 
-        owner_id = None
-        owner_name = None
-        if wishlist:
-            owner_id = wishlist.user_id
-            if hasattr(wishlist, "owner") and wishlist.owner:
-                owner_name = wishlist.owner.name
+        wishlist_id = access_request.wishlist_id
+        requester_id = access_request.requester_id
+
+        wishlist = await self.rep_wishlist.get(wishlist_id)
+        requester = await self.rep_user.get_user_by_id(requester_id)
+
+        owner_id = wishlist.user_id if wishlist else None
+        owner = await self.rep_user.get_user_by_id(owner_id) if owner_id else None
+
         return AccessRequestWithDetails(
             id=access_request.id,
-            wishlist_id=access_request.wishlist_id,
-            requester_id=access_request.requester_id,
+            wishlist_id=wishlist_id,
+            requester_id=requester_id,
             status=access_request.status,
             created_at=access_request.created_at,
             processed_at=access_request.processed_at,
             wishlist_name=wishlist.name if wishlist else None,
             wishlist_photo=wishlist.photo if wishlist else None,
             requester_name=requester.name if requester else None,
-            requester_photo=requester.name if requester else None,
+            requester_photo=requester.photo if requester else None,
             owner_id=owner_id,
-            owner_name=owner_name
+            owner_name=owner.name if owner else None
         )
+
+    async def can_view_request(
+        self,
+        access_request,
+        user_id: int
+    ) -> bool:
+        if access_request.requester_id == user_id:
+            return True
+
+        wishlist = access_request.wishlist if hasattr(access_request, 'wishlist') else None
+        if not wishlist:
+            wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
+
+        if wishlist and wishlist.user_id == user_id:
+            return True
+
+        return False

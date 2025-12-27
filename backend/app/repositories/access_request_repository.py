@@ -24,7 +24,7 @@ class AccessRequestRepository():
                 requester_id
             )
             if existing:
-                return existing
+                return None
 
             access_request = AccessRequest(
                 wishlist_id=wishlist_id,
@@ -47,7 +47,6 @@ class AccessRequestRepository():
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-
     async def update_status(
         self,
         request_id: int,
@@ -68,7 +67,7 @@ class AccessRequestRepository():
                 await self.session.refresh(request)
             return True
         except Exception as e:
-            self.session.rollback()
+            await self.session.rollback()
             print(f"Error uodating request: {e}")
             return False
 
@@ -77,10 +76,11 @@ class AccessRequestRepository():
         request_id: int
     ) -> bool:
         try:
-            request = self.get_request_id(request_id)
+            request = await self.get_request_id(request_id)
             if not request:
                 return False
             await self.session.delete(request)
+            await self.session.commit()
             return True
         except Exception as e:
             await self.session.rollback()
@@ -159,7 +159,6 @@ class AccessRequestRepository():
         query = query.order_by(desc(AccessRequest.created_at)).limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
-        
 
     async def get_request(
         self,
