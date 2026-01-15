@@ -20,6 +20,37 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
 
 
+@router.post("/test")
+async def auth_test(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    user_service = UserService(db)
+    user = await user_service.get_user_by_telegram_id(user_data.telegram_id)
+    if not user:
+        user = await user_service.create_user(user_data)
+    token_data = {
+        "sub": str(user.id),
+        "tg_id": user.telegram_id,
+        "name": user.name
+    }
+
+    try:
+        token = create_jwt_token(token_data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error create token: {str(e)}"
+        )
+
+    return {
+        'success': True,
+        'token': token,
+        'token_type': 'bearer',
+        'user': user
+    }
+
+
 @router.post('/telegram')
 async def auth_telegram(
     auth_data: dict,

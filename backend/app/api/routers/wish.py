@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.core.db import get_db
 from app.models.wish import Wish
+from app.core.dependencies import get_current_user_id
 from app.services.wish_service import WishService
 from app.schemas.wish import WishCreate, WishResponse, WishShort, WishUpdate
 
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/wishes", tags=["wishes"])
 
 @router.get("/", response_model=List[WishShort])
 async def get_wishes(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     limit: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
@@ -39,8 +40,8 @@ async def get_wish(
              response_model=WishResponse,
              status_code=status.HTTP_201_CREATED)
 async def create_wish(
-    user_id: int,
     wish_data: WishCreate,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = WishService(db)
