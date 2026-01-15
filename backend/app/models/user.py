@@ -1,0 +1,107 @@
+from typing import Optional, List
+from sqlalchemy import String, Date, Boolean, Enum, Text, TIMESTAMP, BigInteger
+from sqlalchemy.sql import func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+import enum
+
+from app.core.base import Base
+
+
+class ThemeEnum(enum.Enum):
+    light = 'light'
+    dark = 'dark'
+    system = 'system'
+
+
+class TextSizeEnum(enum.Enum):
+    small = 'small'
+    medium = 'medium'
+    large = 'large'
+
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id: Mapped[int] = mapped_column(
+        BigInteger,
+        primary_key=True
+    )
+    telegram_id: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        unique=True,
+        index=True
+    )
+    name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+    birth_date: Mapped[Optional[Date]] = mapped_column(
+        Date,
+        nullable=True
+    )
+    photo: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True
+    )
+    theme: Mapped[ThemeEnum] = mapped_column(
+        Enum(ThemeEnum),
+        default=ThemeEnum.light
+    )
+    text_size: Mapped[TextSizeEnum] = mapped_column(
+        Enum(TextSizeEnum),
+        default=TextSizeEnum.medium
+    )
+    show_sub: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False
+    )
+    created_at: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now()
+    )
+    updated_at: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    wishes: Mapped[List["Wish"]] = relationship(
+        "Wish",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+    wishlists: Mapped[List["Wishlist"]] = relationship(
+        "Wishlist",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+    reserved_wishes: Mapped[List["WishReservation"]] = relationship(
+        "WishReservation",
+        back_populates="reserved_by"
+    )
+
+    blocked_users: Mapped[List["BlockedUser"]] = relationship(
+        "BlockedUser",
+        foreign_keys="[BlockedUser.blocker_id]",
+        back_populates="blocker",
+        cascade="all, delete-orphan"
+    )
+    blocked_by_users: Mapped[List["BlockedUser"]] = relationship(
+        "BlockedUser",
+        foreign_keys="[BlockedUser.blocked_id]",
+        back_populates="blocked",
+        cascade="all, delete-orphan"
+    )
+
+    my_subscriptions: Mapped[List["Subscription"]] = relationship(
+        "Subscription",
+        foreign_keys="[Subscription.subscriber_id]",
+        back_populates="subscriber",
+        cascade="all, delete-orphan"
+    )
+    subscribers_to_me: Mapped[List["Subscription"]] = relationship(
+        "Subscription",
+        foreign_keys="[Subscription.target_user_id]",
+        back_populates="target_user"
+    )

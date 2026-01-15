@@ -32,7 +32,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      # - ./nginx/nginx-temp.conf:/etc/nginx/nginx-temp.conf
+      - ./nginx/nginx-temp.conf:/etc/nginx/nginx-temp.conf
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
