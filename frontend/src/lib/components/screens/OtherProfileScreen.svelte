@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import Avatar from '$lib/components/ui/Avatar.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
+    import Avatar from '../ui/Avatar.svelte';
+    import Button from '../ui/Button.svelte';
 
     export let profile;
 
