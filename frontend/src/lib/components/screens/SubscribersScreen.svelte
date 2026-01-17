@@ -3,6 +3,12 @@
     import TextField from '../ui/TextField.svelte';
     import { subscribersStore } from '../../stores/data.js';
 
+    //  Lyse Modifications
+
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+
+
     const ICON_ARROW = '/icons/arrow-right.png';
     const ICON_CHECK = '/icons/check.png';
 
@@ -124,6 +130,11 @@
 
     // Обработчик открытия профиля подписчика
     const handleOpenProfile = (subscriber) => {
+
+        // Lyse Modifications
+
+        dispatch('open-profile', { profileId: subscriber.user_id });
+
         console.log('Открытие профиля подписчика:', subscriber.user_id);
         // TODO: Реализовать переход к профилю подписчика
     };

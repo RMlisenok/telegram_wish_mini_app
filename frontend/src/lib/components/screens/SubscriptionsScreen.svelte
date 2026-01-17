@@ -3,6 +3,12 @@
     import TextField from '../ui/TextField.svelte';
     import { subscriptionsStore } from '../../stores/data.js';
 
+    // Lyse Modifications
+
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+
+
     // Иконки
     const ICON_WISHLIST = '/icons/maingift.svg';
     const ICON_ARROW = '/icons/arrow-right.png';
@@ -120,6 +126,11 @@
     // Обработчик открытия профиля/вишлиста
     const handleOpenItem = (subscription) => {
         if (subscription.type_sub) {
+
+            // Lyse Modification
+
+            dispatch('open-profile', { profileId: subscription.user?.user_id });
+
             console.log('Открытие профиля пользователя:', subscription.user?.user_id);
             // TODO: Реализовать переход к профилю пользователя
         } else {
