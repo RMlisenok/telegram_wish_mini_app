@@ -6,7 +6,7 @@
     // Импорты экранов
     import MainScreen from './lib/components/screens/MainScreen.svelte';
     import ShareProfileScreen from './lib/components/screens/ShareProfileScreen.svelte';
-    //import OtherProfileScreen from './lib/components/screens/OtherProfileScreen.svelte';
+    import OtherProfileScreen from './lib/components/screens/OtherProfileScreen.svelte';
     
     import SettingsScreen from './lib/components/screens/settings/SettingsScreen.svelte'; 
     import SettingsScreenEditProfile from './lib/components/screens/settings/SettingsScreen_EditProfile.svelte';
