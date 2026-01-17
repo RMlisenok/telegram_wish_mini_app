@@ -10,7 +10,7 @@
         }
     }
     export let wishlistId;
-    import { wishlistsStore } from '$lib/stores/data.js';
+    import { wishlistsStore } from '../../stores/data.js';
     let wishlist = null;
     let title = '';
     let description = '';
