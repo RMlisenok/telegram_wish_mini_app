@@ -1,8 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import StartGiftIcon from '/static/icons/gift.svg';
-
+    // import StartGiftIcon from '/static/icons/gift.svg';
     const dispatch = createEventDispatcher();
 
     const handleStart = () => {
@@ -12,7 +11,8 @@
 
 <div class="start-root">
     <div class="start-content">
-        <img src={StartGiftIcon} alt="Подарок" class="gift-img" />
+        <img src="../../../../static/icons/gift.svg" alt="Подарок" class="gift-img" />
+                <!-- <img src={StartGiftIcon} alt="Подарок" class="gift-img" /> -->
 
         <h1 class="title">Подари мне</h1>
         <p class="subtitle">Делись желаниями и дари подарки друзьям!</p>
