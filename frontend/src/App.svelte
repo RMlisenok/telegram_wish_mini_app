@@ -300,7 +300,7 @@
                         class={`tab-item ${currentScreen === 'main' ? 'active' : ''}`}
                         on:click={() => navigate('main')}
                     >
-                        <img class="tab-icon" src="/icons/tab-home.png" alt="" />
+                        <img class="tab-icon" src="../../../../static/icons/tab-home.png" alt="" />
                         <span>Главная</span>
                         <span class="tab-dot"></span>
                     </button>
@@ -310,7 +310,7 @@
                         class={`tab-item ${currentScreen === 'wishes' ? 'active' : ''}`}
                         on:click={() => navigate('wishes')}
                     >
-                        <img class="tab-icon" src="/icons/tab-gift.png" alt="" />
+                        <img class="tab-icon" src="../../../../static/icons/tab-gift.png" alt="" />
                         <span>Желания</span>
                         <span class="tab-dot"></span>
                     </button>
@@ -320,7 +320,7 @@
                         class={`tab-item ${currentScreen === 'wishlists' ? 'active' : ''}`}
                         on:click={() => navigate('wishlists')}
                     >
-                        <img class="tab-icon" src="/icons/tab-list.png" alt="" />
+                        <img class="tab-icon" src="../../../../static/icons/tab-list.png" alt="" />
                         <span>Вишлисты</span>
                         <span class="tab-dot"></span>
                     </button>
@@ -330,7 +330,7 @@
                         class={`tab-item ${currentScreen === 'subscriptions' ? 'active' : ''}`}
                         on:click={() => navigate('subscriptions')}
                     >
-                        <img class="tab-icon" src="/icons/tab-eye.png" alt="" />
+                        <img class="tab-icon" src="../../../../static/icons/tab-eye.png" alt="" />
                         <span>Подписки</span>
                         <span class="tab-dot"></span>
                     </button>
@@ -340,7 +340,7 @@
                         class={`tab-item ${currentScreen === 'settings' ? 'active' : ''}`}
                         on:click={() => navigate('settings')}
                     >
-                        <img class="tab-icon" src="/icons/tab-settings.png" alt="" />
+                        <img class="tab-icon" src="../../../../static/icons/tab-settings.png" alt="" />
                         <span>Настройки</span>
                         <span class="tab-dot"></span>
                     </button>
