@@ -9,8 +9,8 @@
     const dispatch = createEventDispatcher();
 
 
-    const ICON_ARROW = '/icons/arrow-right.png';
-    const ICON_CHECK = '/icons/check.png';
+    const ICON_ARROW = '../../../../static/icons/arrow-right.png';
+    const ICON_CHECK = '../../../../static/icons/check.png';
 
     let searchQuery = '';
 

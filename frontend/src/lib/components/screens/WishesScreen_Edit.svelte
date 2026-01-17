@@ -141,7 +141,7 @@
                     <div class="photo-preview">
                         <img src={photoPreview} alt="Preview" />
                         <Button type="button" kind="ghost" on:click={removePhoto}>
-                            <img src="/icons/delete.png" alt="" class="remove-photo-btn" />
+                            <img src="../../../../static/icons/delete.png" alt="" class="remove-photo-btn" />
                             <span>Удалить</span>
                         </Button>
                     </div>
@@ -154,7 +154,7 @@
                             class="photo-upload-input"
                         />
                         <div class="photo-upload-placeholder">
-                            <img src="/icons/add.png" alt="" class="upload-icon">
+                            <img src="../../../../static/icons/add.png" alt="" class="upload-icon">
                             <div class="upload-text">Добавить фото</div>
                         </div>
                     </label>

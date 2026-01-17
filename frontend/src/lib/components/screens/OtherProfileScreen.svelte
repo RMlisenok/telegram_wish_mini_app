@@ -62,7 +62,7 @@
             <div class="profile-actions">
                 <Button kind="ghost" on:click={toggleSubscribe}>
                     <img
-                            src={isSubscribed ? '/icons/bell-on.png' : '/icons/bell-off.png'}
+                            src={isSubscribed ? '../../../../static/icons/bell-on.png' : '../../../../static/icons/bell-off.png'}
                             alt=""
                             class="icon-16"
                             loading="lazy"
@@ -78,7 +78,7 @@
 <section class="section-card">
     <div class="section-header">
         <div class="section-title-with-icon">
-            <img src="/icons/gift-check.png" alt="" class="section-icon" loading="lazy" />
+            <img src="../../../../static/icons/gift-check.png" alt="" class="section-icon" loading="lazy" />
             <div class="section-title-main">
                 <span>ВИШЛИСТЫ · {publicWishlists.length}</span>
 
@@ -108,7 +108,7 @@
                 <article class="wishlist-row">
                     <div class="wishlist-icon">
                         <img
-                                src={wl.iconUrl ?? '/icons/gift-check.png'}
+                                src={wl.iconUrl ?? '../../../../static/icons/gift-check.png'}
                                 alt={wl.title}
                                 loading="lazy"
                         />
@@ -132,7 +132,7 @@
 <section class="section-card">
     <div class="section-header">
         <div class="section-title-with-icon">
-            <img src="/icons/follow.png" alt="" class="section-icon" loading="lazy" />
+            <img src="../../../../static/icons/follow.png" alt="" class="section-icon" loading="lazy" />
             <div class="section-title-main">
                 <span>ПОДПИСКИ · {subscriptions.length}</span>
 

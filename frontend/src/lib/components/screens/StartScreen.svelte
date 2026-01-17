@@ -11,7 +11,7 @@
 
 <div class="start-root">
     <div class="start-content">
-        <img src="/icons/gift.svg" alt="Подарок" class="gift-img" />
+        <img src="../../../../static/icons/gift.svg" alt="Подарок" class="gift-img" />
 
         <h1 class="title">Подари мне</h1>
         <p class="subtitle">Делись желаниями и дари подарки друзьям!</p>

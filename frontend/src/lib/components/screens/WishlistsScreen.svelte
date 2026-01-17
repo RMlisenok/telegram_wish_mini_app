@@ -6,15 +6,15 @@
     const dispatch = createEventDispatcher();
 
     // Иконки
-    const ICON_EDIT = '/icons/edit.png';
-    const ICON_TRASH = '/icons/trash.png';
-    const ICON_GIFT = '/icons/maingift.svg';
-    const ICON_ARROW = '/icons/arrow-right.png';
-    const ICON_WARNING = '/icons/warning.png';
+    const ICON_EDIT = '../../../../static/icons/edit.png';
+    const ICON_TRASH = '../../../../static/icons/trash.png';
+    const ICON_GIFT = '../../../../static/icons/maingift.svg';
+    const ICON_ARROW = '../../../../static/icons/arrow-right.png';
+    const ICON_WARNING = '../../../../static/icons/warning.png';
     
     // Иконки приватности   
-    const ICON_PUBLIC_FRIENDS = '/icons/view.png';
-    const ICON_PRIVATE = '/icons/unview.png';
+    const ICON_PUBLIC_FRIENDS = '../../../../static/icons/view.png';
+    const ICON_PRIVATE = '../../../../static/icons/unview.png';
 
     const openCreateWishlists = () => {
         dispatch('openCreateWishlists');

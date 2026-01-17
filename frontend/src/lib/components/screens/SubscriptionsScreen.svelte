@@ -10,8 +10,8 @@
 
 
     // Иконки
-    const ICON_WISHLIST = '/icons/maingift.svg';
-    const ICON_ARROW = '/icons/arrow-right.png';
+    const ICON_WISHLIST = '../../../../static/icons/maingift.svg';
+    const ICON_ARROW = '../../../../static/icons/arrow-right.png';
 
     let searchQuery = '';
     let sortBy = 'default'; // 'default', 'users', 'wishlists', 'birth_date_asc', 'birth_date_desc'

@@ -134,13 +134,13 @@
                 
                 <div class="avatar-actions">
                     <Button kind="ghost" on:click={uploadPhoto}>
-                        <img src="/icons/add.png" alt="" class="btn-icon" />
+                        <img src="../../../../static/icons/add.png" alt="" class="btn-icon" />
                         <span>Загрузить фото</span>
                     </Button>
                     
                     {#if tempAvatarUrl}
                         <Button kind="ghost" on:click={removePhoto}>
-                            <img src="/icons/delete.png" alt="" class="btn-icon" />
+                            <img src="../../../../static/icons/delete.png" alt="" class="btn-icon" />
                             <span>Удалить</span>
                         </Button>
                     {/if}

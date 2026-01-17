@@ -25,8 +25,8 @@
     const openShareProfile = () => dispatch('openShareProfile');
     const openCreateWishlists = () => dispatch('openCreateWishlists');
 
-    const ICON_GIFT = '/icons/maingift.svg';
-    const ICON_ARROW_RIGHT = '/icons/arrow-right.png';
+    const ICON_GIFT = '../../../../static/icons/maingift.svg';
+    const ICON_ARROW_RIGHT = '../../../../static/icons/arrow-right.png';
 
     const getInitials = (name) => {
         if (!name) return '??';
@@ -63,7 +63,7 @@
     <header class="app-header">
         <div class="h1">Профиль</div>
         <button class="icon-btn" type="button" on:click={openSettings}>
-            <img src="/icons/tab-settings.png" alt="" />
+            <img src="../../../../static/icons/tab-settings.png" alt="" />
         </button>
     </header>
 
@@ -76,12 +76,12 @@
                 <div class="profile-birth">{user.birthDate}</div>
                 <div class="profile-actions">
                     <Button kind="ghost" on:click={openShareProfile}>
-                        <img src="/icons/share.png" alt="" class="btn-icon" />
+                        <img src="../../../../static/icons/share.png" alt="" class="btn-icon" />
                         <span>Поделиться профилем</span>
                     </Button>
 
                     <Button kind="ghost" on:click={openQuestionnaire}>
-                        <img src="/icons/edit.png" alt="" class="btn-icon" />
+                        <img src="../../../../static/icons/edit.png" alt="" class="btn-icon" />
                         <span>Посмотреть анкету</span>
                     </Button>
                 </div>
@@ -124,8 +124,8 @@
                 <img
                         class="privacy-icon"
                         src={wl.privacy === 'public'
-                    ? '/icons/view.png'
-                    : '/icons/unview.png'}
+                    ? '../../../../static/icons/view.png'
+                    : '../../../../static/icons/unview.png'}
                         alt=""
                 />
                 <span>

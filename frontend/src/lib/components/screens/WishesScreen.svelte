@@ -5,8 +5,8 @@
 
     const dispatch = createEventDispatcher();
 
-    const iconGift = '/icons/gift3.png';
-    const ICON_WARNING = '/icons/warning.png';
+    const iconGift = '../../../../static/icons/gift3.png';
+    const ICON_WARNING = '../../../../static/icons/warning.png';
     export let wishlistId = null; //2009/0_Dass_25.12.2025
 
     const formatPrice = (wish) => {
