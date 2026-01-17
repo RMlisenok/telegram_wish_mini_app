@@ -1,7 +1,7 @@
 <script>
-    import Avatar from '$lib/components/ui/Avatar.svelte';
-    import TextField from '$lib/components/ui/TextField.svelte';
-    import { subscriptionsStore } from '$lib/stores/data.js';
+    import Avatar from '../ui/Avatar.svelte';
+    import TextField from '../ui/TextField.svelte';
+    import { subscriptionsStore } from '../../stores/data.js';
 
     // Иконки
     const ICON_WISHLIST = '/icons/maingift.svg';

@@ -1,14 +1,14 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import Avatar from '$lib/components/ui/Avatar.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
+    import Avatar from '../ui/Avatar.svelte';
+    import Button from '../ui/Button.svelte';
 
     import {
         wishlistsStore,
         wishesStore,
         subscriptionsStore,
         subscribersStore
-    } from '$lib/stores/data.js';
+    } from '../../stores/data.js';
 
 
 

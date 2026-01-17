@@ -1,7 +1,7 @@
 <script>
-    import Avatar from '$lib/components/ui/Avatar.svelte';
-    import TextField from '$lib/components/ui/TextField.svelte';
-    import { subscribersStore } from '$lib/stores/data.js';
+    import Avatar from '../ui/Avatar.svelte';
+    import TextField from '../ui/TextField.svelte';
+    import { subscribersStore } from '../../stores/data.js';
 
     const ICON_ARROW = '/icons/arrow-right.png';
     const ICON_CHECK = '/icons/check.png';

@@ -1,7 +1,7 @@
 <!-- 2002_2_Dass_18.12.2025 -->
 <script>
-    import Button from '$lib/components/ui/Button.svelte';
-    import { userStore } from '$lib/stores/data';
+    import Button from '../../ui/Button.svelte';
+    import { userStore } from '../../../stores/data';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {

@@ -1,9 +1,9 @@
 <script>
     import {onMount} from 'svelte';
-    import Tag from '$lib/components/ui/Tag.svelte';
-    import TextField from '$lib/components/ui/TextField.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import {questionnaireStore} from '$lib/stores/data.js';
+    import Tag from '../ui/Tag.svelte';
+    import TextField from '../ui/TextField.svelte';
+    import Button from '../ui/Button.svelte';
+    import {questionnaireStore} from '../../stores/data.js';
     import { createEventDispatcher } from 'svelte';
 
     const dispatch = createEventDispatcher();

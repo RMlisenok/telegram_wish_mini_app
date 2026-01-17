@@ -1,10 +1,10 @@
 <!-- 2002_1_Dass_16.12.2025 -->
  <script>
-    import Avatar from '$lib/components/ui/Avatar.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import TextField from '$lib/components/ui/TextField.svelte';
+    import Avatar from '../../ui/Avatar.svelte';
+    import Button from '../../ui/Button.svelte';
+    import TextField from '../../ui/TextField.svelte';
 
-    import { userStore } from '$lib/stores/data';
+    import { userStore } from '../../../stores/data';
 
     let fullName = $userStore?.fullName || '';
     let birthDate = $userStore?.birthDate || '';

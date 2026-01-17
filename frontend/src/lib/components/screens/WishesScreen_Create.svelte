@@ -1,8 +1,8 @@
 <!-- 2005_Dass_21.12.2025 -->
 <script>
-    import TextField from '$lib/components/ui/TextField.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
+    import TextField from '../ui/TextField.svelte';
+    import Button from '../ui/Button.svelte';
+    import { wishesStore, wishlistsStore } from '../../stores/data.js';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {

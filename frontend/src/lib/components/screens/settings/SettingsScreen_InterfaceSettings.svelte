@@ -1,6 +1,6 @@
 <!-- 2002_3_Dass_18.12.2025 -->
 <script>
-    import { userStore } from '$lib/stores/data';
+    import { userStore } from '../../../stores/data';
 
     export let onGoBack;
     function goBack() {

@@ -1,10 +1,10 @@
 <script>
     import {onMount} from 'svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import Avatar from '$lib/components/ui/Avatar.svelte';
+    import Button from '../ui/Button.svelte';
+    import Avatar from '../ui/Avatar.svelte';
     import {createEventDispatcher} from 'svelte';
-    import {makeProfileTgUrl, makeProfileShareUrl} from '$lib/stores/data.js';
-    import {userStore } from '$lib/stores/data.js';
+    import {makeProfileTgUrl, makeProfileShareUrl} from '../../stores/data.js';
+    import {userStore } from '../../stores/data.js';
 
 
     let user = $userStore;

@@ -1,6 +1,6 @@
 <!-- 2002_4_Dass_20.12.2025 -->
 <script>
-    import { notificationSettingsStore } from '$lib/stores/data';
+    import { notificationSettingsStore } from '../../../stores/data';
     export let onGoBack;
     function goBack() {
         if (onGoBack) {

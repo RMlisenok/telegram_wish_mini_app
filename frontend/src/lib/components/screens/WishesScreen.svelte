@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import { wishesStore, wishlistsStore } from '$lib/stores/data.js';
+    import Button from '../ui/Button.svelte';
+    import { wishesStore, wishlistsStore } from '../../stores/data.js';
 
     const dispatch = createEventDispatcher();
 

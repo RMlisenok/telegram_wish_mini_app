@@ -1,6 +1,6 @@
 <!-- 2008/3_Dass_24.12.2025 -->
 <script>
-    import TextField from '$lib/components/ui/TextField.svelte';
+    import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
     export let onGoBack;
     import { onMount } from 'svelte';
