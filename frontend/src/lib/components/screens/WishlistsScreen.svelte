@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     import { wishesStore } from '../../stores/data.js';
-    import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
+    import { wishlistsStore, loadWishlists, createWishlist } from '../../../types/wishlists.ts';
 
     const dispatch = createEventDispatcher();
 

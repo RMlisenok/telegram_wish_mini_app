@@ -2,7 +2,9 @@
 <script>
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
-    import { wishlistsStore } from '../../stores/data.js';
+    //import { wishlistsStore } from '../../stores/data.js';
+    import { wishlistsStore, createWishlist } from '../../../types/wishlists.ts';
+    export let token;
     export let onGoBack;
     function goBack() {
         if (onGoBack) {
@@ -42,7 +44,7 @@
     function clearError() {
         error = ''; 
     }
-    function saveWishlist() {
+    async function saveWishlist() {
         // Валидация
         if (!title.trim()) {
             error = 'Пожалуйста, заполните название вишлиста';
@@ -51,17 +53,31 @@
         
         error = '';
         
-        // Создание объекта вишлиста
-        const newWishlist = {
-            title: title.trim(),
-            description: description.trim(),
-            photo: photoPreview,
-            privacy: privacy
-        };
-        wishlistsStore.update(wishlists => [...wishlists, newWishlist]);
-        
-        // Возвращаемся назад
-        goBack();
+        try {
+            const wishlistData = {
+                name: title.trim(),
+                description: description.trim(),
+                photo: photoPreview || '',
+                typeprivacy: mapPrivacyToApi(privacy)
+            };
+            
+            await createWishlist(token, wishlistData);
+            
+            goBack();
+        } catch (err) {
+            console.error('Ошибка при создании вишлиста:', err);
+        }
+    }
+    function mapPrivacyToApi(privacy) {
+        switch (privacy) {
+            case 'private':
+                return 'private';
+            case 'restricted':
+                return 'protected';
+            case 'public':
+            default:
+                return 'public';
+        }
     }
 </script>
 

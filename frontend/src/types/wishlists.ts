@@ -59,3 +59,45 @@ function mapPrivacy(typeprivacy: string): 'public' | 'restricted' | 'private' {
             return 'private';
     }
 }
+
+export async function createWishlist(token: string, wishlistData: {
+    name: string;
+    description: string;
+    photo: string;
+    typeprivacy: 'public' | 'protected' | 'private';
+}): Promise<Wishlist> {
+    try {
+        const response = await fetch('/api/v1/wishlists/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wishlistData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка создания вишлиста');
+        }
+        
+        const newWishlist = await response.json();
+        
+        // Добавляем новый вишлист в store
+        wishlistsStore.update(wishlists => {
+            return [...wishlists, {
+                id: newWishlist.id.toString(),
+                name: newWishlist.name,
+                description: newWishlist.description,
+                photo: newWishlist.photo,
+                typeprivacy: mapPrivacy(newWishlist.typeprivacy),
+                created_At: new Date(newWishlist.created_At),
+                updated_At: new Date(newWishlist.updated_At)
+            }];
+        });
+        
+        return newWishlist;
+    } catch (error) {
+        console.error('Ошибка создания вишлиста:', error);
+        throw error;
+    }
+}
