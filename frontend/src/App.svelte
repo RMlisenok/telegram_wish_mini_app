@@ -253,6 +253,7 @@
                     
                     {:else if currentScreen === 'wishlists'}
                         <WishlistsScreen
+                            token={token}
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
                             on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
