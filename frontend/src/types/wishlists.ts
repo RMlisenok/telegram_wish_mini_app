@@ -83,7 +83,7 @@ export async function createWishlist(token: string, wishlistData: {
         const newWishlist = await response.json();
         
         // Добавляем новый вишлист в store
-        wishlistsStore.update(wishlists => {
+        /*wishlistsStore.update(wishlists => {
             return [...wishlists, {
                 id: newWishlist.id.toString(),
                 name: newWishlist.name,
@@ -93,7 +93,7 @@ export async function createWishlist(token: string, wishlistData: {
                 created_At: new Date(newWishlist.created_At),
                 updated_At: new Date(newWishlist.updated_At)
             }];
-        });
+        });*/
         
         return newWishlist;
     } catch (error) {
@@ -128,7 +128,7 @@ export async function updateWishlist(
         
         const updatedWishlist = await response.json();
 
-        wishlistsStore.update(wishlists => 
+        /*wishlistsStore.update(wishlists => 
             wishlists.map(wishlist => 
                 wishlist.id === wishlistId.toString()
                     ? {
@@ -141,7 +141,7 @@ export async function updateWishlist(
                     }
                     : wishlist
             )
-        );
+        );*/
         
         return updatedWishlist;
     } catch (error) {
@@ -163,9 +163,9 @@ export async function deleteWishlist(token: string, wishlistId: string): Promise
             throw new Error('Ошибка удаления вишлиста');
         }
         
-        wishlistsStore.update(wishlists => 
+        /*wishlistsStore.update(wishlists => 
             wishlists.filter(wishlist => wishlist.id !== wishlistId)
-        );
+        );*/
         
     } catch (error) {
         console.error('Ошибка удаления вишлиста:', error);
