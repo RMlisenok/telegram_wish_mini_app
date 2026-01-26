@@ -12,7 +12,7 @@
     }
     export let wishlistId;
     //import { wishlistsStore } from '../../stores/data.js';
-    import { updateWishlist } from '../../../types/wishlists.ts';
+    import { updateWishlist, wishlistsStore } from '../../../types/wishlists.ts';
     let wishlist = null;
     let title = '';
     let description = '';
