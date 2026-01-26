@@ -150,3 +150,25 @@ export async function updateWishlist(
     }
 }
 
+export async function deleteWishlist(token: string, wishlistId: string): Promise<void> {
+    try {
+        const response = await fetch(`/api/v1/wishlists/${wishlistId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка удаления вишлиста');
+        }
+        
+        wishlistsStore.update(wishlists => 
+            wishlists.filter(wishlist => wishlist.id !== wishlistId)
+        );
+        
+    } catch (error) {
+        console.error('Ошибка удаления вишлиста:', error);
+        throw error;
+    }
+}

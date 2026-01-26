@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     import { wishesStore } from '../../stores/data.js';
-    import { wishlistsStore, loadWishlists, createWishlist } from '../../../types/wishlists.ts';
+    import { wishlistsStore, loadWishlists, deleteWishlist } from '../../../types/wishlists.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -139,23 +139,40 @@
     let wishesInWishlist = 0;
 
     // функция подтверждения удаления вишлиста
-    const confirmDeleteWishlist = () => {
+    const confirmDeleteWishlist = async () => {
         if (!wishlistToDelete) return;
         // Удаляем этот wishlistId из всех желаний
-        $wishesStore = $wishesStore.map(wish => {
-            const wishlistIds = wish.wishlistIds || [];
-            if (wishlistIds.includes(wishlistToDelete)) {
-                const newWishlistIds = wishlistIds.filter(id => id !== wishlistToDelete);
-                return {
-                    ...wish,
-                    wishlistIds: newWishlistIds
-                };
-            }
-            return wish;
-        });
-        
-        // удаляем сам вишлист
-        $wishlistsStore = $wishlistsStore.filter(wl => wl.id !== wishlistToDelete);
+        try {
+            // Вызываем API для удаления
+            await deleteWishlist(token, wishlistToDelete);
+            
+            // Локальное обновление желаний
+            $wishesStore = $wishesStore.map(wish => {
+                const wishlistIds = wish.wishlistIds || [];
+                if (wishlistIds.includes(wishlistToDelete)) {
+                    const newWishlistIds = wishlistIds.filter(id => id !== wishlistToDelete);
+                    return {
+                        ...wish,
+                        wishlistIds: newWishlistIds
+                    };
+                }
+                return wish;
+            });
+            
+            console.log('Вишлист успешно удален:', wishlistToDelete);
+            
+        } catch (error) {
+            console.error('Ошибка при удалении вишлиста:', error);
+            // Можно показать сообщение об ошибке
+            showDeleteWishlistModal = false;
+            wishlistToDelete = null;
+            wishlistToDeleteName = '';
+            wishesInWishlist = 0;
+            
+            // Показать уведомление об ошибке
+            alert('Не удалось удалить вишлист. Попробуйте еще раз.');
+            return;
+        }
         
         cancelDeleteWishlist();
         console.log('Вишлист удален:', wishlistToDelete);
