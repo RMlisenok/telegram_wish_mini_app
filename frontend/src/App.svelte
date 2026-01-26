@@ -140,6 +140,13 @@
             }
         });
         console.log(userStore);
+        const responseWishlists = await fetch('/api/v1/wishlists/?limit=1', {
+                    method: 'GET',
+                    headers: {"Authorization": 'Bearer ' + token,
+                                "Content-Type": "application/json"}
+                });
+        const datawishlists = await responseWishlists.json();
+        console.log(datawishlists);
     };
 </script>
 
