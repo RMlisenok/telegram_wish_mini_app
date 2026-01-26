@@ -101,3 +101,52 @@ export async function createWishlist(token: string, wishlistData: {
         throw error;
     }
 }
+
+export async function updateWishlist(
+    token: string, 
+    wishlistId: string, 
+    wishlistData: {
+        name: string;
+        description: string;
+        photo: string;
+        typeprivacy: 'public' | 'protected' | 'private';
+    }
+): Promise<Wishlist> {
+    try {
+        const response = await fetch(`/api/v1/wishlists/${wishlistId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wishlistData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка обновления вишлиста');
+        }
+        
+        const updatedWishlist = await response.json();
+
+        wishlistsStore.update(wishlists => 
+            wishlists.map(wishlist => 
+                wishlist.id === wishlistId.toString()
+                    ? {
+                        ...wishlist,
+                        name: updatedWishlist.name,
+                        description: updatedWishlist.description,
+                        photo: updatedWishlist.photo,
+                        typeprivacy: updatedWishlist.typeprivacy,
+                        updated_At: new Date(updatedWishlist.updated_at)
+                    }
+                    : wishlist
+            )
+        );
+        
+        return updatedWishlist;
+    } catch (error) {
+        console.error('Ошибка обновления вишлиста:', error);
+        throw error;
+    }
+}
+

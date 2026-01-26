@@ -3,6 +3,7 @@
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
     export let onGoBack;
+    export let token;
     import { onMount } from 'svelte';
     function goBack() {
         if (onGoBack) {
@@ -10,7 +11,8 @@
         }
     }
     export let wishlistId;
-    import { wishlistsStore } from '../../stores/data.js';
+    //import { wishlistsStore } from '../../stores/data.js';
+    import { updateWishlist } from '../../../types/wishlists.ts';
     let wishlist = null;
     let title = '';
     let description = '';
@@ -62,7 +64,7 @@
     function clearError() {
         error = ''; 
     }
-    function saveWishlist() {
+    async function saveWishlist() {
         // Валидация
         if (!title.trim()) {
             error = 'Пожалуйста, заполните название вишлиста';
@@ -71,25 +73,35 @@
         
         error = '';
         
-        wishlistsStore.update(wishlists => {
-            return wishlists.map(w => {
-                if (w.id === wishlistId) {
-                    return {
-                        ...w,
-                        title: title.trim(),
-                        description: description.trim(),
-                        rUrl: photoPreview || w.rUrl,
-                        privacy: privacy
-                    };
-                }
-                return w;
-            });
-        });
-        
-        // Возвращаемся назад
-        goBack();
+        try {
+            const apiPrivacy = mapPrivacyToApi(privacy);
+            
+            const wishlistData = {
+                name: title.trim(),
+                description: description.trim(),
+                photo: photoPreview || '',
+                typeprivacy: apiPrivacy
+            };
+            
+            await updateWishlist(token, wishlistId, wishlistData);
+            
+            goBack();
+            
+        } catch (err) {
+            console.error('Ошибка при обновлении вишлиста:', err);
+        }
     }
-
+    function mapPrivacyToApi(privacy) {
+        switch (privacy) {
+            case 'private':
+                return 'private';
+            case 'restricted':
+                return 'protected';
+            case 'public':
+            default:
+                return 'public';
+        }
+    }
 </script>
 
 <div class="screen">
