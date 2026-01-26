@@ -163,13 +163,11 @@
             
         } catch (error) {
             console.error('Ошибка при удалении вишлиста:', error);
-            // Можно показать сообщение об ошибке
             showDeleteWishlistModal = false;
             wishlistToDelete = null;
             wishlistToDeleteName = '';
             wishesInWishlist = 0;
             
-            // Показать уведомление об ошибке
             alert('Не удалось удалить вишлист. Попробуйте еще раз.');
             return;
         }
