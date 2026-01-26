@@ -1,7 +1,8 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishlistsStore, wishesStore } from '../../stores/data.js';
+    import { wishesStore } from '../../stores/data.js';
+    import { wishlistsStore, loadWishlists } from '../../../types/';
 
     const dispatch = createEventDispatcher();
 
@@ -15,6 +16,28 @@
     // Иконки приватности   
     const ICON_PUBLIC_FRIENDS = '../../../../static/icons/view.png';
     const ICON_PRIVATE = '../../../../static/icons/unview.png';
+
+    //add response all wishlists -->
+    export let token;
+    onMount(async () => {
+        if (token) {
+            await fetchWishlists();
+        }
+    });
+
+    async function fetchWishlists() {
+        if (!token) {
+            console.error('Токен отсутствует');
+            return;
+        }
+
+        try {
+            await loadWishlists(token);
+        } catch (err) {
+            console.error('Ошибка загрузки вишлистов:', err);
+        }
+    }
+    // <--
 
     const openCreateWishlists = () => {
         dispatch('openCreateWishlists');
