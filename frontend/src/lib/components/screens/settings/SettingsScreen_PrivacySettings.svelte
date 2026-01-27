@@ -17,15 +17,6 @@
 
     async function saveSettings() {
         try {
-            const userData = {
-                name: userStore.name,
-                birth_date: userStore.birthDate,
-                photo: userStore.photo,
-                theme: userStore.ui?.theme || 'light',
-                text_size: userStore.ui?.textSize || 'medium',
-                show_sub: showSubscriptions 
-            };
-            
             // Отправка запроса на сервер
             const response = await fetch('/api/v1/users/me', {
                 method: 'PUT',
