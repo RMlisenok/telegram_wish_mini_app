@@ -68,5 +68,5 @@ class WishService:
         user_id: int,
         limit: int = 10
     ) -> Optional[WishShort]:
-        wishes = await self.rep_wish.get_user_wishlist(user_id, limit)
+        wishes = await self.rep_wish.get_user_wish(user_id, limit)
         return [WishShort.model_validate(wish) for wish in wishes]
