@@ -12,6 +12,8 @@ from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserResponesF
 from app.schemas.block import BlockResponse
 from app.schemas.wishlist import WishlistShort, WishlistResponse
 from app.schemas.subscription import SubscriptionsResponse, SubscribersResponse
+from app.services.wishlist_service import WishlistService
+from app.repositories.wish_wishlist_repository import WishWishlistRepository
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,7 +26,9 @@ class UserService:
         self.rep_wishlist = WishlistRepository(session)
         self.rep_wish = WishRepository(session)
         self.rep_subs = SubscriptionRepository(session)
+        self.rep_wish_wishlist = WishWishlistRepository(session)
         self.serv_subs = SubscriptionService(session)
+        self.serv_wishlist = WishlistService(session)
 
     async def get_user(self, user_id: int) -> Optional[UserResponse]:
         user = await self.rep_user.get_user_by_id(user_id)
@@ -39,20 +43,14 @@ class UserService:
         user = await self.rep_user.get_user_by_id(user_id)
         if not user:
             return None
-        logger.warning(f'\nINFO|           : {user}\n')
-        wishlist = await self.rep_wishlist.get_user_wishlist_short(
+        wishlist_list = await self.serv_wishlist.get_user_wishlist(
             user_id=user_id,
             is_desc=True,
             limit=3
         )
-        wish_short = []
-        for wish in wishlist:
-            wish_data = WishlistResponse.model_validate(wish)
-            wish_short.append(wish_data)
-        logger.warning(f'\nINFO|           WISH: {wish_short}]\n')
+
         total_wish = await self.rep_wish.get_count_user_wish(user_id)
         total_wishlist = await self.rep_wishlist.get_count_user_wishlist(user_id)
-        logger.warning(f'\nINFO|          wish_:{total_wish} | wishlsit_: {total_wishlist}\n')
 
         subscribers = await self.rep_subs.get_user_subscribers(user_id, True, 2)
         total_subscribers = await self.rep_subs.count_user_subscribers(user_id)
@@ -70,9 +68,6 @@ class UserService:
         )
         subscription = await self.serv_subs.get_my_subscription(user_id, 2)
         subscr = {"subscription": subscription.model_dump()}
-        logger.warning(f"\nDEBUG subscription type: {type(subscription)}\n")
-        logger.warning(f"\nDEBUG subscription value: {subscription}\n")
-
         return UserResponesForMainScreen(
             telegram_id=user.telegram_id,
             name=user.name,
@@ -83,7 +78,7 @@ class UserService:
             show_sub=user.show_sub,
             total_wish=total_wish,
             total_wishlist=total_wishlist,
-            wishlist_last_update=wish_short,
+            wishlist_last_update=wishlist_list,
             subscription=subscr,
             subsсribers=my_subscribers
         )
