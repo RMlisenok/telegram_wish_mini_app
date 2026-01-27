@@ -2,7 +2,7 @@ import { writable, get } from 'svelte/store';
 export interface User {
     id: string;
     fullName: string;
-    birthDate: Date;
+    birthDate: Date | null;
     avatarUrl: string;
     showSubscriptions: boolean;
     ui: {
@@ -14,7 +14,7 @@ export interface User {
 export const userStore = writable<User>({
     id: '',
     fullName: '',
-    birthDate: new Date(),
+    birthDate: null,
     avatarUrl: '',
     showSubscriptions: true,
     ui: {
@@ -26,12 +26,29 @@ export const userStore = writable<User>({
 export const tokenStore = writable<string | null>(null);
 export const telegramStore = writable<any>(null);
 
+function mapApiToUser(apiUser: any, token: string): User {
+    console.log('Преобразование API данных:', apiUser);
+    return {
+        id: token || apiUser.id?.toString() || '',
+        fullName: apiUser.name || 'Гость',
+        birthDate: apiUser.birth_date ? new Date(apiUser.birth_date) : null,
+        avatarUrl: apiUser.photo || '/default-avatar.png',
+        showSubscriptions: apiUser.show_sub ?? true,
+        ui: {
+            textSize: apiUser.text_size || 'medium',
+            theme: apiUser.theme || 'system'
+        }
+    };
+}
+
 export async function authenticateWithTelegram(tg: any): Promise<{ token: string; user: User }> {
     try {
+        console.log('Начало аутентификации, tg:', tg);
         if (!tg?.initData || !tg?.initDataUnsafe?.user) {
             throw new Error('Нет данных от Telegram');
         }
 
+        console.log('Отправка запроса на аутентификацию...');
         const response = await fetch('/api/v1/auth/telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -41,21 +58,23 @@ export async function authenticateWithTelegram(tg: any): Promise<{ token: string
             })
         });
 
+        console.log('Ответ получен, статус:', response.status);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.error || 'Ошибка аутентификации');
         }
 
         const data = await response.json();
-        
+        console.log('Данные ответа:', data);
+
         if (!data.success || !data.token) {
             throw new Error(data.error || 'Ошибка получения токена');
         }
+
+        const user = mapApiToUser(data.user, data.token);
     
         tokenStore.set(data.token); // Сохраняем токен
-        userStore.set(data.user);
-        
-        const user = data.user;
+        userStore.set(user);
         
         return { token: data.token, user: user };
     } catch (error) {
