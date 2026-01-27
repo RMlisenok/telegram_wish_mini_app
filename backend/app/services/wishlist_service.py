@@ -9,6 +9,10 @@ from app.schemas.wishlist import WishlistCreate, WishlistCreateDb, WishlistRespo
 from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate, WishWishlistResponse, WishInWishlistResponse
 
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class WishlistService:
     def __init__(
         self,
@@ -67,9 +71,15 @@ class WishlistService:
     async def get_user_wishlist(
         self,
         user_id: int,
+        is_desc: bool = False,
         limit: int = 10
     ) -> List[WishlistResponse]:
-        wishlists = await self.rep_wishlist.get_user_wishlist(user_id, limit)
+        logger.warning("INFO|                   START WORK IN WISHLIST SERVICE")
+        wishlists = await self.rep_wishlist.get_user_wishlist(
+            user_id,
+            is_desc,
+            limit
+        )
 
         result = []
         for wishlist in wishlists:

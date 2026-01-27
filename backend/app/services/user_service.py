@@ -1,23 +1,87 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.services.subscription_service import SubscriptionService
 from app.repositories.user_repository import UserRepository
 from app.repositories.block_repository import BlockRepository
+from app.repositories.wishlist_repository import WishlistRepository
+from app.repositories.subscription_repository import SubscriptionRepository
+from app.repositories.wish_repository import WishRepository
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserResponesForMainScreen
 from app.schemas.block import BlockResponse
+from app.schemas.wishlist import WishlistShort, WishlistResponse
+from app.schemas.subscription import SubscriptionsResponse, SubscribersResponse
+from app.services.wishlist_service import WishlistService
+from app.repositories.wish_wishlist_repository import WishWishlistRepository
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class UserService:
     def __init__(self, session: AsyncSession):
         self.rep_user = UserRepository(session)
         self.rep_block = BlockRepository(session)
+        self.rep_wishlist = WishlistRepository(session)
+        self.rep_wish = WishRepository(session)
+        self.rep_subs = SubscriptionRepository(session)
+        self.rep_wish_wishlist = WishWishlistRepository(session)
+        self.serv_subs = SubscriptionService(session)
+        self.serv_wishlist = WishlistService(session)
 
     async def get_user(self, user_id: int) -> Optional[UserResponse]:
         user = await self.rep_user.get_user_by_id(user_id)
         if not user:
             return None
         return UserResponse.model_validate(user)
+
+    async def get_user_for_main_screen(
+        self,
+        user_id: int
+    ) -> Optional[UserResponesForMainScreen]:
+        user = await self.rep_user.get_user_by_id(user_id)
+        if not user:
+            return None
+        wishlist_list = await self.serv_wishlist.get_user_wishlist(
+            user_id=user_id,
+            is_desc=True,
+            limit=3
+        )
+
+        total_wish = await self.rep_wish.get_count_user_wish(user_id)
+        total_wishlist = await self.rep_wishlist.get_count_user_wishlist(user_id)
+
+        subscribers = await self.rep_subs.get_user_subscribers(user_id, True, 2)
+        total_subscribers = await self.rep_subs.count_user_subscribers(user_id)
+
+        subscribers_list = []
+        for user_sub in subscribers:
+            subscribers_list.append({
+                "name": user_sub.name,
+                "photo": user_sub.photo,
+                "birth_date": user_sub.birth_date
+            })
+        my_subscribers = SubscribersResponse(
+            subscribers=subscribers_list,
+            total=total_subscribers
+        )
+        subscription = await self.serv_subs.get_my_subscription(user_id, 2)
+        subscr = {"subscription": subscription.model_dump()}
+        return UserResponesForMainScreen(
+            telegram_id=user.telegram_id,
+            name=user.name,
+            birth_date=user.birth_date,
+            photo=user.photo,
+            theme=user.theme,
+            text_size=user.text_size,
+            show_sub=user.show_sub,
+            total_wish=total_wish,
+            total_wishlist=total_wishlist,
+            wishlist_last_update=wishlist_list,
+            subscription=subscr,
+            subsсribers=my_subscribers
+        )
 
     async def get_user_by_telegram_id(
         self,

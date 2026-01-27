@@ -23,6 +23,11 @@ class SubscriptionsResponse(BaseModel):
     total: int
 
 
+class SubscribersResponse(BaseModel):
+    subscribers: List[dict]
+    total: int
+
+
 class SubscribeToUserRequest(BaseModel):
     target_user_id: int = Field(..., description="ID пользователя")
 
