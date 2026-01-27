@@ -142,28 +142,28 @@
                 {#each $mainWishlistsStore.slice(0, 3) as wl}
                     <button class="wishlist-row" type="button" on:click={openWishlists}>
                         <div class="wishlist-cover-small">
-                            {#if wl.coverUrl}
-                                <img src={wl.coverUrl} alt={wl.title} />
+                            {#if wl.photo}
+                                <img src={wl.photo} alt={wl.name} />
                             {:else}
                                 <img src={ICON_GIFT} alt="Подарок"/>
                             {/if}
                         </div>
 
                         <div class="wishlist-main-small">
-                            <div class="wishlist-title-small" title={wl.title}>{wl.title}</div>
+                            <div class="wishlist-title-small" title={wl.name}>{wl.name}</div>
                             <div class="wishlist-meta-small">
               <span class="privacy-chip">
                 <img
                         class="privacy-icon"
-                        src={wl.privacy === 'public'
+                        src={wl.typeprivacy === 'public'
                     ? '../../../../static/icons/view.png'
                     : '../../../../static/icons/unview.png'}
                         alt=""
                 />
                 <span>
-                  {wl.privacy === 'public'
+                  {wl.typeprivacy === 'public'
                       ? 'Виден всем'
-                      : wl.privacy === 'restricted'
+                      : wl.typeprivacy === 'restricted'
                           ? 'Для определённых пользователей'
                           : 'Виден только вам'}
                 </span>
@@ -232,7 +232,7 @@
                             <div class="subs-main">
                                 <div class="subs-name" title={sub.wishlist.name}>{sub.wishlist.name}</div>
                                 <div class="subs-meta">
-                                    <span>{sub.wishlist.user_name}</span>
+                                    <!-- <span>{sub.wishlist.user_name}</span> -->
                                     {#if sub.wishlist.count}
                                         <span> · {sub.wishlist.count} жел.</span>
                                     {/if}
