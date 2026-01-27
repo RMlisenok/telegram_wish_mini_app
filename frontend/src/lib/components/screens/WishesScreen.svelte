@@ -66,7 +66,7 @@
         return wishlistIds
             .map(id => {
                 const wishlist = $wishlistsStore.find(wl => wl.id === id);
-                return wishlist ? wishlist.title : null;
+                return wishlist ? wishlist.name : null;
             })
             .filter(name => name !== null);
     };
@@ -356,15 +356,15 @@
             <div class="detail-content">
                 <!-- Изображение -->
                 <div class="detail-image">
-                    {#if selectedWish.imageUrl}
-                        <img src={selectedWish.imageUrl} alt={selectedWish.title} />
+                    {#if selectedWish.photo}
+                        <img src={selectedWish.photo} alt={selectedWish.name} />
                     {:else}
                         <img src={iconGift} alt="Подарок" class="detail-placeholder" />
                     {/if}
                 </div>
 
                 <!-- Название -->
-                <h2 class="detail-title">{selectedWish.title}</h2>
+                <h2 class="detail-title">{selectedWish.name}</h2>
 
                 <!-- Цена -->
                 {#if selectedWish.price != null}
@@ -478,15 +478,15 @@
                                 </div>
                                 
                                 <div class="wish-selection-info">
-                                    <div class="wish-selection-title">{wish.title}</div>
+                                    <div class="wish-selection-title">{wish.name}</div>
                                     {#if wish.price != null}
                                         <div class="wish-selection-price">{formatPrice(wish)}</div>
                                     {/if}
                                 </div>
                                 
                                 <div class="wish-selection-image">
-                                    {#if wish.imageUrl}
-                                        <img src={wish.imageUrl} alt={wish.title} />
+                                    {#if wish.photo}
+                                        <img src={wish.photo} alt={wish.name} />
                                     {:else}
                                         <img src={iconGift} alt="Подарок" class="placeholder" />
                                     {/if}
@@ -610,7 +610,7 @@
             <h2 class="confirm-title">Удалить желание полностью?</h2>
             
             <p class="confirm-message">
-                Вы собираетесь удалить желание "<strong>{selectedWish.title}</strong>".
+                Вы собираетесь удалить желание "<strong>{selectedWish.name}</strong>".
                 Оно будет удалено из всех вишлистов и списка желаний.
             </p>
             
@@ -647,7 +647,7 @@
             <h2 class="confirm-title">Удалить из вишлиста?</h2>
             
             <p class="confirm-message">
-                Вы хотите удалить "<strong>{selectedWish.title}</strong>" только из этого вишлиста.
+                Вы хотите удалить "<strong>{selectedWish.name}</strong>" только из этого вишлиста.
             </p>
             
             <div class="confirm-actions">
