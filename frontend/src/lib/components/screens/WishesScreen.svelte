@@ -26,7 +26,7 @@
         try {
             await loadWishes(token);
         } catch (err) {
-            console.error('Ошибка загрузки вишлистов:', err);
+            console.error('Ошибка загрузки желаний:', err);
         }
     }
 

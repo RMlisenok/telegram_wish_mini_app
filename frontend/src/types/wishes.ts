@@ -27,7 +27,7 @@ export async function loadWishes(token: string) {
         });
         
         if (!response.ok) {
-            throw new Error('Ошибка загрузки вишлистов');
+            throw new Error('Ошибка загрузки желаний');
         }
         
         const data = await response.json();
@@ -47,7 +47,7 @@ export async function loadWishes(token: string) {
         console.log(wishesStore);
         return data;
     } catch (error) {
-        console.error('Ошибка загрузки вишлистов:', error);
+        console.error('Ошибка загрузки желаний:', error);
         wishesStore.set([]);
         throw error;
     }
