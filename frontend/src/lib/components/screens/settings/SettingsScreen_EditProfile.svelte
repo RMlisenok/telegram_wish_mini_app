@@ -10,6 +10,7 @@
 
     export let userStore;
     export let token;
+    export let onUpdateUser;
 
     let fullName = userStore?.fullName || '';
     let birthDate = userStore?.birthDate || '';
