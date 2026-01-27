@@ -120,7 +120,7 @@
             </div>
         </div>
         <button class="ghost-link" type="button" on:click={openWishes}>
-            Все ваши желания · {n_wishes}
+            Все ваши желания ({n_wishes}) 
         </button>
     </section>
 
