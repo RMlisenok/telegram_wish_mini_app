@@ -6,15 +6,15 @@
 
     // import { userStore } from '../../../stores/data';
 
-    let fullName = $userStore?.fullName || '';
-    let birthDate = $userStore?.birthDate || '';
-    let avatarUrl = $userStore?.avatarUrl || '';
-    let tempAvatarUrl = avatarUrl;
-
     export let onGoBack;
 
     export let userStore;
     export let token;
+    
+    let fullName = $userStore?.fullName || '';
+    let birthDate = $userStore?.birthDate || '';
+    let avatarUrl = $userStore?.avatarUrl || '';
+    let tempAvatarUrl = avatarUrl;
 
     function goBack() {
         if (onGoBack) {
