@@ -1,13 +1,34 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, wishlistsStore } from '../../stores/data.js';
+    import { wishlistsStore } from '../../stores/data.js';
+    import { wishesStore, loadWishes } from '../../../types/wishes.ts';
 
     const dispatch = createEventDispatcher();
 
     const iconGift = '../../../../static/icons/gift3.png';
     const ICON_WARNING = '../../../../static/icons/warning.png';
     export let wishlistId = null; //2009/0_Dass_25.12.2025
+
+    export let token;
+    onMount(async () => {
+        if (token) {
+            await fetchWishes();
+        }
+    });
+
+    async function fetchWishes() {
+        if (!token) {
+            console.error('Токен отсутствует');
+            return;
+        }
+
+        try {
+            await loadWishes(token);
+        } catch (err) {
+            console.error('Ошибка загрузки вишлистов:', err);
+        }
+    }
 
     const formatPrice = (wish) => {
         if (wish.price == null || wish.price === '') return '';
@@ -286,15 +307,15 @@
                     on:keydown={(e) => e.key === 'Enter' && openDetailModal(wish)}
                 >
                     <div class="wish-card-image">
-                        {#if wish.imageUrl}
-                            <img src={wish.imageUrl} alt={wish.title} class="wish-image" />
+                        {#if wish.photo}
+                            <img src={wish.photo} alt={wish.name} class="wish-image" />
                         {:else}
                             <img src={iconGift} alt="Подарок" class="wish-image placeholder" />
                         {/if}
                     </div>
 
                     <div class="wish-card-body">
-                        <div class="wish-title" title={wish.title}>{wish.title}</div>
+                        <div class="wish-title" title={wish.name}>{wish.name}</div>
                         {#if wish.price != null}
                             <div class="wish-price">{formatPrice(wish)}</div>
                         {/if}
