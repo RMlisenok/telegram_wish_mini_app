@@ -44,7 +44,7 @@ export async function loadWishes(token: string) {
         }));
         
         wishesStore.set(transformedWishlists);
-        
+        console.log(wishesStore);
         return data;
     } catch (error) {
         console.error('Ошибка загрузки вишлистов:', error);
