@@ -199,7 +199,12 @@
                     
                     {:else if currentScreen === 'privacySettings'}
                         <SettingsScreenPrivacySettings 
+                            token={token}
+                            userStore={$userStore}
                             onGoBack={() => navigate('settings')}
+                            onUpdateUser={(updatedData) => {
+                                userStore.update(current => ({...current, ...updatedData}));
+                            }}
                         />
                     
                     {:else if currentScreen === 'interfaceSettings'}
