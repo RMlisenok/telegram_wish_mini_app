@@ -189,6 +189,8 @@
                     
                     {:else if currentScreen === 'editProfile'}
                         <SettingsScreenEditProfile
+                            token={token}
+                            userStore={$userStore}
                             onGoBack={() => navigate('settings')}
                         />
                     
