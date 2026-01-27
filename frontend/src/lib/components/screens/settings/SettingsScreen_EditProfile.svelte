@@ -3,6 +3,7 @@
     import Avatar from '../../ui/Avatar.svelte';
     import Button from '../../ui/Button.svelte';
     import TextField from '../../ui/TextField.svelte';
+    import { formatDateToDDMMYYYY } from '../../../../types/mainScreenData.ts'
 
     // import { userStore } from '../../../stores/data';
 
@@ -90,7 +91,7 @@
 
             onUpdateUser({
                 fullName: userData.name,
-                birthDate: userData.birth_date,
+                birthDate: formatDateToDDMMYYYY(userData.birth_date),
                 avatarUrl: userData.photo
             });
             
