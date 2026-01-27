@@ -53,9 +53,6 @@
             console.error('Ошибка сохранения профиля:', error);
             alert('Не удалось сохранить изменения. Проверьте подключение к интернету.');
         }
-
-        console.log('Сохранение настроек:', { showSubscriptions });
-        goBack();
     }
 
     function handleSettingKeydown(event) {
