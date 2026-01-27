@@ -10,10 +10,10 @@
 
     export let userStore;
     export let token;
-    
-    let fullName = $userStore?.fullName || '';
-    let birthDate = $userStore?.birthDate || '';
-    let avatarUrl = $userStore?.avatarUrl || '';
+
+    let fullName = userStore?.fullName || '';
+    let birthDate = userStore?.birthDate || '';
+    let avatarUrl = userStore?.avatarUrl || '';
     let tempAvatarUrl = avatarUrl;
 
     function goBack() {
@@ -66,9 +66,9 @@
                 name: fullName.trim(),
                 birth_date: formattedDate,
                 photo: tempAvatarUrl || '',
-                theme: $userStore.ui?.theme || 'light',
-                text_size: $userStore.ui?.textSize || 'medium',
-                show_sub: $userStore.showSubscriptions || true
+                theme: userStore.ui?.theme || 'light',
+                text_size: userStore.ui?.textSize || 'medium',
+                show_sub: userStore.showSubscriptions || true
             };
             
             // Отправка запроса на сервер
