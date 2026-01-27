@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from app.models.wish import Wish
 
 from app.schemas.wish import WishCreate, WishUpdate
@@ -50,7 +50,7 @@ class WishRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_user_wishlist(
+    async def get_user_wish(
         self,
         user_id: int,
         limit: int = 20
@@ -58,6 +58,16 @@ class WishRepository:
         query = select(Wish).where(Wish.user_id == user_id).limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+    async def get_count_user_wish(
+        self,
+        user_id: int,
+    ) -> int:
+        query = (select(func.count())
+                 .select_from(Wish)
+                 .where(Wish.user_id == user_id))
+        result = await self.session.execute(query)
+        return result.scalar()
 
     async def delete(
         self,

@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, desc, asc, func
 from app.models.wishlist import Wishlist
 
 
@@ -32,15 +32,32 @@ class WishlistRepository:
     async def get_user_wishlist(
         self,
         user_id: int,
+        is_desc: bool = False,
         limit: int = 10
     ) -> List[Wishlist]:
         query = (
             select(Wishlist)
             .where(Wishlist.user_id == user_id)
-            .limit(limit)
         )
+        if is_desc:
+            query = query.order_by(desc(Wishlist.updated_at))
+        else:
+            query = query.order_by(asc(Wishlist.updated_at))
+        query = query.limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+    async def get_count_user_wishlist(
+        self,
+        user_id
+    ) -> int:
+        query = (
+            select(func.count())
+            .select_from(Wishlist)
+            .where(Wishlist.user_id == user_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalar()
 
     async def update(
         self,
