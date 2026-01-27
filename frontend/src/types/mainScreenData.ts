@@ -25,6 +25,7 @@ export interface MainSubscription {
         photo: string;
         description: string;
         typeprivacy: 'public' | 'restricted' | 'private';
+        owner_name: string;
         id: number;
     };
 }
@@ -102,6 +103,7 @@ export async function loadMainScreenData(token: string) {
                         photo: sub.photo,
                         description: sub.description,
                         typeprivacy: mapPrivacy(sub.typeprivacy),
+                        owner_name: sub.owner_name,
                         id: sub.id
                     }
                 };
