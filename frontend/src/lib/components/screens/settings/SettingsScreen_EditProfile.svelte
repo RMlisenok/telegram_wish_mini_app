@@ -86,6 +86,12 @@
             }
             
             const data = await response.json();
+
+            dispatch('profileUpdated', {
+                fullName: fullName.trim(),
+                birthDate,
+                avatarUrl: tempAvatarUrl
+            });
             
             alert('Изменения успешно сохранены');
             goBack();

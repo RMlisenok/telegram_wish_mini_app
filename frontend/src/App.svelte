@@ -192,6 +192,12 @@
                             token={token}
                             userStore={$userStore}
                             onGoBack={() => navigate('settings')}
+                            on:profileUpdated={(e) => {
+                                userStore.update(current => ({
+                                    ...current,
+                                    ...e.detail
+                                }));
+                            }}
                         />
                     
                     {:else if currentScreen === 'privacySettings'}
