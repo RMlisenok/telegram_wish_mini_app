@@ -1,7 +1,7 @@
 export interface User {
     id: string;
     fullName: string;
-    birthDate: Date;
+    birthDate: string;
     avatarUrl: string;
     showSubscriptions: boolean;
     ui: {

@@ -131,7 +131,7 @@
         userStore.set({
             id: token || 'demo-user-1',
             fullName: user.name  || 'Гость',
-            birthDate: user.birth_date ? new Date(user.birth_date) : new Date(),
+            birthDate: formatDateToDDMMYYYY(user.birth_date),
             avatarUrl: user.photo || '/default-avatar.png',
             showSubscriptions: user.show_sub ?? true,
             ui: {
@@ -141,6 +141,14 @@
         });
         console.log(userStore);
     };
+    function formatDateToDDMMYYYY(dateString: string): string {
+        if (!dateString) return '';
+        
+        const [year, month, day] = dateString.split('-');
+        if (!year || !month || !day) return dateString; 
+        
+        return `${day}.${month}.${year}`;
+    }
 </script>
 
 <main>
