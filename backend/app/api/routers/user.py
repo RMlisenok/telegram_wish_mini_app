@@ -8,6 +8,7 @@ from app.core.security import (
     verify_jwt_token
 )
 from app.core.dependencies import get_current_user_id
+from app.services.subscription_service import SubscriptionService
 from app.services.user_service import UserService
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
@@ -24,18 +25,10 @@ async def get_current_user(
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
-    # token = credentials.credentials
-    # payload = verify_jwt_token(token)
-
-    # if not payload:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail='Invalid Token'
-    #     )
-
-    # user_id = int(payload.get('sub'))
     user_service = UserService(db)
-    user = await user_service.get_user(user_id)
+    user = await user_service.get_user_for_main_screen(
+        user_id=user_id
+    )
 
     if not user:
         raise HTTPException(
