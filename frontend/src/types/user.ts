@@ -53,6 +53,7 @@ export async function authenticateWithTelegram(tg: any): Promise<{ token: string
         }
     
         tokenStore.set(data.token); // Сохраняем токен
+        userStore.set(data.user);
         
         const user = data.user;
         
