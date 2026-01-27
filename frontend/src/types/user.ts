@@ -29,7 +29,7 @@ export const telegramStore = writable<any>(null);
 function mapApiToUser(apiUser: any, token: string): User {
     console.log('Преобразование API данных:', apiUser);
     return {
-        id: token || apiUser.id?.toString() || '',
+        id: apiUser.id?.toString() || '',
         fullName: apiUser.name || 'Гость',
         birthDate: apiUser.birth_date ? new Date(apiUser.birth_date) : null,
         avatarUrl: apiUser.photo || '/default-avatar.png',

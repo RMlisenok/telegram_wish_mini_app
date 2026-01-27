@@ -115,8 +115,6 @@
             console.error('Ошибка запуска:', error);
         }
     };
-    
-    
 </script>
 
 <main>
