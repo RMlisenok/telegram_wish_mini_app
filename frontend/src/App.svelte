@@ -165,6 +165,7 @@
                 <div class="app-scroll">
                     {#if currentScreen === 'main'}
                         <MainScreen
+                            token={token}
                             user={$userStore}
                             on:openSettings={() => navigate('settings')}
                             on:openQuestionnaire={() => navigate('questionnaire')}

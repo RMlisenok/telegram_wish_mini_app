@@ -1,16 +1,29 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import Avatar from '../ui/Avatar.svelte';
     import Button from '../ui/Button.svelte';
 
+    // import {
+    //     wishlistsStore,
+    //     wishesStore,
+    //     subscriptionsStore,
+    //     subscribersStore
+    // } from '../../stores/data.js';
+
     import {
-        wishlistsStore,
-        wishesStore,
-        subscriptionsStore,
-        subscribersStore
-    } from '../../stores/data.js';
+        mainWishlistsStore,
+        mainSubscriptionsStore,
+        mainSubscribersStore,
+        totalWishesStore,
+        totalWishlistsStore,
+        totalSubscribersStore,
+        totalSubscriptionsStore,
+        loadMainScreenData
+    } from '../../../types/mainScreenData.ts';
 
+    import { wishesStore } from '../../stores/data.js';
 
+    export let token;
 
     export let user;
 
@@ -34,26 +47,45 @@
         return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
     };
 
-    $: n_wishes = $wishesStore.length;
-    $: n_wishlist = $wishlistsStore.length;
-    $: n_sub = $subscriptionsStore.length;
-    $: n_subi = $subscribersStore.length;
+    $: n_wishes = $totalWishesStore;
+    $: n_wishlist = $totalWishlistsStore;
+    $: n_sub = $totalSubscriptionsStore;
+    $: n_subi = $totalSubscribersStore;
 
-    $: sortedSubscribers = $subscribersStore
-        .slice()
-        .sort((a, b) => {
-            const parseDate = (dateStr) => {
-                const [day, month, year] = dateStr.split('.').map(Number);
-                return new Date(year, month - 1, day);
-            };
+    // $: sortedSubscribers = $subscribersStore
+    //     .slice()
+    //     .sort((a, b) => {
+    //         const parseDate = (dateStr) => {
+    //             const [day, month, year] = dateStr.split('.').map(Number);
+    //             return new Date(year, month - 1, day);
+    //         };
             
-            return parseDate(b.subscription_date) - parseDate(a.subscription_date);
-        });
+    //         return parseDate(b.subscription_date) - parseDate(a.subscription_date);
+    //     });
 
-    $: latestSubscribers = sortedSubscribers.slice(0, 2);
+    // $: latestSubscribers = sortedSubscribers.slice(0, 2);
 
-    const getWishlistCount = (wishlistId) =>
-        $wishesStore.filter((w) => (w.wishlistIds || []).includes(wishlistId)).length;
+    // const getWishlistCount = (wishlistId) =>
+    //     $wishesStore.filter((w) => (w.wishlistIds || []).includes(wishlistId)).length;
+
+    onMount(async () => {
+        if (!token) {
+            console.error('Токен не найден');
+            return;
+        }
+        
+        try {
+            const result = await loadMainScreenData(token);
+            console.log('Загруженные totals:', {
+                totalWishes: result?.totalWish,
+                totalWishlists: result?.totalWishlist,
+                totalSubscribers: result?.totalSubscribers,
+                totalSubscriptions: result?.totalSubscription
+            });
+        } catch (error) {
+            console.error('Ошибка загрузки данных MainScreen:', error);
+        }
+    });
 
 </script>
 
@@ -101,13 +133,13 @@
             </button>
         </div>
 
-        {#if $wishlistsStore.length === 0}
+        {#if $mainWishlistsStore.length === 0}
             <div class="empty-note">
                 Здесь появятся ваши вишлисты. Создайте первый, чтобы друзья знали, что вам подарить.
             </div>
         {:else}
             <div class="wishlist-list">
-                {#each $wishlistsStore.slice(0, 3) as wl}
+                {#each $mainWishlistsStore.slice(0, 3) as wl}
                     <button class="wishlist-row" type="button" on:click={openWishlists}>
                         <div class="wishlist-cover-small">
                             {#if wl.coverUrl}
@@ -136,7 +168,7 @@
                           : 'Виден только вам'}
                 </span>
               </span>
-                                <span> · {getWishlistCount(wl.id)} жел.</span>
+                                <span> · {wl.count} жел.</span>
                             </div>
                         </div>
                         <img 
@@ -162,11 +194,11 @@
                 </button>
             </div>
 
-            {#if $subscriptionsStore.length === 0}
+            {#if $mainSubscriptionsStore.length === 0}
                 <div class="empty-note">Вы ещё ни на кого не подписаны.</div>
             {:else}
                 <div class="subs-list">
-                    {#each $subscriptionsStore.slice(0, 2) as sub}
+                    {#each $mainSubscriptionsStore.slice(0, 2) as sub}
                         <button
                                 type="button"
                                 class="subs-row"
@@ -201,8 +233,8 @@
                                 <div class="subs-name" title={sub.wishlist.name}>{sub.wishlist.name}</div>
                                 <div class="subs-meta">
                                     <span>{sub.wishlist.user_name}</span>
-                                    {#if sub.wishlist.number_of_wishes}
-                                        <span> · {sub.wishlist.number_of_wishes} жел.</span>
+                                    {#if sub.wishlist.count}
+                                        <span> · {sub.wishlist.count} жел.</span>
                                     {/if}
                                 </div>
                             </div>
@@ -229,7 +261,7 @@
             </button>
         </div>
 
-        {#if $subscribersStore.length === 0}
+        {#if $mainSubscribersStore.length === 0}
             <div class="empty-note">У вас пока нет подписчиков.</div>
         {:else}
             <div class="subs-list">
