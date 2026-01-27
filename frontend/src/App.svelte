@@ -116,6 +116,7 @@
         }
     };
     $: token = getCurrentToken();
+    console.log(token);
 </script>
 
 <main>
