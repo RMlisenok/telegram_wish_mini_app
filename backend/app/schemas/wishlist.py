@@ -52,5 +52,6 @@ class WishlistShort(BaseModel):
     name: str
     photo: Optional[str] = None
     privacy: TypePrivacyEnum
+    wishes_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)
