@@ -32,19 +32,6 @@ class WishlistRepository:
     async def get_user_wishlist(
         self,
         user_id: int,
-        limit: int = 10
-    ) -> List[Wishlist]:
-        query = (
-            select(Wishlist)
-            .where(Wishlist.user_id == user_id)
-            .limit(limit)
-        )
-        result = await self.session.execute(query)
-        return list(result.scalars().all())
-
-    async def get_user_wishlist_short(
-        self,
-        user_id: int,
         is_desc: bool = False,
         limit: int = 10
     ) -> List[Wishlist]:
