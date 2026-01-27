@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.schemas.wishlist import TypePrivacyEnum
+from datetime import datetime
 
 
 class UserSubscription(BaseModel):
@@ -26,6 +27,11 @@ class SubscriptionsResponse(BaseModel):
 class SubscribersResponse(BaseModel):
     subscribers: List[dict]
     total: int
+
+
+class SubscribersVisitUpdate(BaseModel):
+    status: bool
+    updated_at: datetime
 
 
 class SubscribeToUserRequest(BaseModel):

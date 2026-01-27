@@ -52,6 +52,25 @@ async def subscribe_to_wishlist(
     return {"message": "Subscribed to thish wishlist successfully"}
 
 
+@router.patch("/visit/{subscribe_id}")
+async def visit_subscibe(
+    subscribe_id: int,
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db)
+):
+    service = SubscriptionService(db)
+    success = await service.update_visit(
+        user_id=user_id,
+        subscribe_id=user_id
+    )
+    if success is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Sunscription not found"
+        )
+    return success
+
+
 @router.delete("/users/{target_user_id}")
 async def unsubscribe_from_user(
     target_user_id: int,

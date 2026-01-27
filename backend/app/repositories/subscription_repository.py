@@ -1,12 +1,12 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func, desc, asc
+from sqlalchemy import select, and_, func, desc, asc, update
 from sqlalchemy.orm import joinedload
 
 from app.models.subscription import Subscription
 from app.models.user import User
 from app.models.wishlist import Wishlist
-
+from app.schemas.subscription import SubscribersVisitUpdate
 
 class SubscriptionRepository:
     def __init__(self, session: AsyncSession):
@@ -75,6 +75,7 @@ class SubscriptionRepository:
         self,
         subscriber_id: int,
         limit: int = 100,
+        is_desc: bool = False,
         only_users: bool = False,
         only_wishlists: bool = False,
     ) -> List[Subscription]:
@@ -89,9 +90,13 @@ class SubscriptionRepository:
             query = query.where(Subscription.type_sub == False)
         query = query.options(
             joinedload(Subscription.target_user),
-            joinedload(Subscription.target_wishlist)
+            joinedload(Subscription.target_wishlist),
+            joinedload(Subscription.target_wishlist).joinedload(Wishlist.owner)
         )
-        query = query.order_by(Subscription.created_at.desc())
+        if is_desc:
+            query = query.order_by(desc(Subscription.updated_at))
+        else:
+            query = query.order_by(asc(Subscription.updated_at))
         query = query.limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
@@ -122,6 +127,31 @@ class SubscriptionRepository:
         query = query.limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+    async def update(
+        self,
+        subscribe_id: int
+    ) -> Optional[SubscribersVisitUpdate]:
+        query = (
+            update(Subscription)
+            .where(Subscription.id == subscribe_id)
+            .values(
+                updated_at=func.now()
+            )
+            .returning(Subscription.updated_at)
+        )
+        
+        result = await self.session.execute(query)
+        await self.session.commit()
+        
+        updated_time = result.scalar_one_or_none()
+        
+        if updated_time:
+            return SubscribersVisitUpdate(
+                status=True,
+                updated_at=updated_time
+            )
+        return None
 
     async def count_user_subscribers(
         self,

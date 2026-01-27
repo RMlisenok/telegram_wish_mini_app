@@ -8,6 +8,7 @@ from app.repositories.wishlist_repository import WishlistRepository
 from app.schemas.subscription import (
     SubscribeToWishlistRequest,
     SubscribeToUserRequest,
+    SubscribersVisitUpdate,
     SubscriptionsResponse
     )
 
@@ -77,6 +78,16 @@ class SubscriptionService:
         subscription = await self.rep_subs.create(subscription_data)
         return subscription is not None
 
+    async def update_visit(
+        self,
+        user_id: int,
+        subscribe_id: int
+    ) -> SubscribersVisitUpdate:
+        update = await self.rep_subs.update(subscribe_id)
+        if update:
+            return SubscribersVisitUpdate.model_validate(update)
+        return None
+
     async def unsubscribe_from_user(
         self,
         user_id: int,
@@ -102,10 +113,12 @@ class SubscriptionService:
     async def get_my_subscription(
         self,
         user_id: int,
+        is_desc: bool = False,
         limit: int = 100
     ) -> SubscriptionsResponse:
         subscriptions = await self.rep_subs.get_user_subscription(
             subscriber_id=user_id,
+            is_desc=is_desc,
             limit=limit
         )
         total = await self.rep_subs.count_user_subscriptions(
@@ -116,20 +129,27 @@ class SubscriptionService:
             if sub.type_sub:
                 subscription_list.append({
                     "type": "user",
-                    "id": sub.target_user.id,
+                    "sub_id": sub.id,
                     "name": sub.target_user.name,
                     "photo": sub.target_user.photo,
-                    "user_id": sub.target_user.id
+                    "user_id": sub.target_user.id,
+                    "created_at": sub.created_at,
+                    "updated_at": sub.updated_at
                 })
             else:
                 if sub.target_wishlist:
                     subscription_list.append({
                         "type": "wishlist",
-                        "id": sub.target_wishlist.id,
+                        "sub_id": sub.id,
+                        "wishlist_id": sub.target_wishlist.id,
                         "name": sub.target_wishlist.name,
                         "description": sub.target_wishlist.description,
                         "photo": sub.target_wishlist.photo,
                         "type_privacy": sub.target_wishlist.typeprivacy.value,
+                        "created_at": sub.created_at,
+                        "updated_at": sub.updated_at,
+                        "owner_id": sub.target_wishlist.user_id,
+                        "owner_name": sub.target_wishlist.owner.name
                     })
         return SubscriptionsResponse(
             subscriptions=subscription_list,
