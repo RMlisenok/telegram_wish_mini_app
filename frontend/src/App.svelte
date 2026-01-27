@@ -110,6 +110,7 @@
             } else {
                 navigate('main');
             }
+            console.log(userStore);
         } catch (error) {
             console.error('Ошибка запуска:', error);
         }
