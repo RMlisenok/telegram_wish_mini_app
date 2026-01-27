@@ -67,6 +67,7 @@ export async function loadMainScreenData(token: string) {
         }
         
         const data = await response.json();
+        console.log(data);
         
         // Обновляем вишлисты
         const transformedWishlists = data.wishlist_last_update.map((wl: any) => ({
