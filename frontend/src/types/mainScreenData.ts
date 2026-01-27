@@ -140,7 +140,7 @@ export async function loadMainScreenData(token: string) {
     }
 }
 
-function formatDateToDDMMYYYY(dateString: string): string {
+export function formatDateToDDMMYYYY(dateString: string): string {
     if (!dateString) return '';
     
     const [year, month, day] = dateString.split('-');
