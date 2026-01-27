@@ -120,7 +120,7 @@ export async function loadMainScreenData(token: string) {
         totalWishesStore.set(data.total_wish || 0);
         totalWishlistsStore.set(data.total_wishlist || 0);
         totalSubscribersStore.set(data.subscribers?.total || 0);
-        totalSubscriptionsStore.set(data.subscription?.total || 0);
+        totalSubscriptionsStore.set(data.subscription.subscription?.total || 0);
         
         return {
             wishlists: transformedWishlists,
@@ -129,7 +129,7 @@ export async function loadMainScreenData(token: string) {
             totalWish: data.total_wish,
             totalWishlist: data.total_wishlist,
             totalSubscribers: data.subscribers.total,
-            totalSubscription: data.subscription.total
+            totalSubscription: data.subscription.subscription.total
         };
         
     } catch (error) {
