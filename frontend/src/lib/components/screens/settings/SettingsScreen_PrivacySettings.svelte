@@ -33,7 +33,9 @@
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify({
+                    show_sub: showSubscriptions 
+                })
             });
             
             if (!response.ok) {
