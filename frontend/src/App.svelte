@@ -220,6 +220,7 @@
                     
                     {:else if currentScreen === 'wishes'}
                         <WishesScreen 
+                            token={token}
                             wishlistId={currentWishlistId}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                             on:openEditWishes={(e) => {
