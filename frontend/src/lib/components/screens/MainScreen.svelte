@@ -127,7 +127,7 @@
     <!-- Вишлисты -->
     <section class="section-card">
         <div class="section-header">
-            <div class="h2">Ваши вишлисты · {n_wishlist}</div>
+            <div class="h2">Ваши вишлисты ({n_wishlist})</div>
             <button class="tiny-link" type="button" on:click={openWishlists}>
                 Показать все
             </button>
@@ -188,7 +188,7 @@
     {#if user.showSubscriptions}
         <section class="section-card">
             <div class="section-header">
-                <div class="h2">Подписки · {n_sub}</div>
+                <div class="h2">Подписки ({n_sub})</div>
                 <button class="tiny-link" type="button" on:click={openSubscriptions}>
                     Показать всех
                 </button>
@@ -255,7 +255,7 @@
     <!-- Подписчики -->
     <section class="section-card">
         <div class="section-header">
-            <div class="h2">Подписчики · {n_subi}</div>
+            <div class="h2">Подписчики ({n_subi})</div>
             <button class="tiny-link" type="button" on:click={openSubscribers}>
                 Показать всех
             </button>
