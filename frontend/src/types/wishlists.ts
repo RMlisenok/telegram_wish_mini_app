@@ -27,6 +27,7 @@ export async function loadWishlists(token: string) {
         }
         
         const data = await response.json();
+        console.log(data)
         
         const transformedWishlists = data.map((wishlist: any) => ({
             id: wishlist.id.toString(),

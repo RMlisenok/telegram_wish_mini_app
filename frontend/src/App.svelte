@@ -46,7 +46,7 @@
     
     let showStartScreen = true; // Состояние для отображения стартового экрана
     let tg = null;
-    let token = null; //токен важно!
+    $: token = getCurrentToken();
     //let userStore = null;
     
     onMount(() => {
@@ -115,8 +115,8 @@
             console.error('Ошибка запуска:', error);
         }
     };
-    $: token = getCurrentToken();
-    console.log(token);
+    
+    
 </script>
 
 <main>
