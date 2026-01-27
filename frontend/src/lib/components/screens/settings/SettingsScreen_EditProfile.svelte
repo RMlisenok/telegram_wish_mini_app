@@ -87,10 +87,10 @@
             
             const data = await response.json();
 
-            dispatch('profileUpdated', {
-                fullName: fullName.trim(),
-                birthDate,
-                avatarUrl: tempAvatarUrl
+            onUpdateUser({
+                fullName: userData.name,
+                birthDate: userData.birth_date,
+                avatarUrl: userData.photo
             });
             
             alert('Изменения успешно сохранены');

@@ -192,11 +192,8 @@
                             token={token}
                             userStore={$userStore}
                             onGoBack={() => navigate('settings')}
-                            on:profileUpdated={(e) => {
-                                userStore.update(current => ({
-                                    ...current,
-                                    ...e.detail
-                                }));
+                            onUpdateUser={(updatedData) => {
+                                userStore.update(current => ({...current, ...updatedData}));
                             }}
                         />
                     
