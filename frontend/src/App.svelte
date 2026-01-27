@@ -25,13 +25,8 @@
     import WishlistsScreen from './lib/components/screens/WishlistsScreen.svelte';
     import SubscriptionsScreen from './lib/components/screens/SubscriptionsScreen.svelte';
     import SubscribersScreen from './lib/components/screens/SubscribersScreen.svelte';
-    import { 
-        userStore, 
-        tokenStore, 
-        telegramStore, 
-        initializeApp,
-        getCurrentToken
-    } from './types/user';
+    import type { User } from './types/user';
+    import { writable } from 'svelte/store';
 
     // Импорты stores (нужно будет создать или импортировать)
     import { otherProfilesMock } from './lib/stores/data';
@@ -46,7 +41,7 @@
     
     let showStartScreen = true; // Состояние для отображения стартового экрана
     let tg = null;
-    $: token = getCurrentToken();
+    let token = null; //токен важно!
     //let userStore = null;
     
     onMount(() => {
@@ -98,22 +93,53 @@
             currentWishlistId = null;
         }
     }
+    export const userStore = writable<User>({
+        id: '',
+        fullName: '',
+        birthDate: new Date(),
+        avatarUrl: '',
+        showSubscriptions: true,
+        ui: {
+            textSize: 'medium',
+            theme: 'system'
+        }
+    });
 
     // Обработчик начала работы
     const handleStart = async () => {
         showStartScreen = false;
-        try {
-            const { token, user, needsProfile } = await initializeApp();
-            
-            if (needsProfile) {
-                navigate('editProfile');
-            } else {
-                navigate('main');
-            }
-            console.log(userStore);
-        } catch (error) {
-            console.error('Ошибка запуска:', error);
+        
+        const response = await fetch('/api/v1/auth/telegram', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ initData: tg.initData, user: tg.initDataUnsafe.user })
+                });
+        const data = await response.json();
+        if (data.token) {
+            token = data.token;
+            console.log('Получен токен:', token);
         }
+        const user = data.user;
+        if (user.birth_date != null)
+        {
+            navigate('main');
+        }
+        else
+        {
+            navigate('editProfile');
+        }
+        userStore.set({
+            id: token || 'demo-user-1',
+            fullName: user.name  || 'Гость',
+            birthDate: user.birth_date ? new Date(user.birth_date) : new Date(),
+            avatarUrl: user.photo || '/default-avatar.png',
+            showSubscriptions: user.show_sub ?? true,
+            ui: {
+                textSize: (user.text_size as 'small' | 'medium' | 'large') || 'medium',
+                theme: (user.theme as 'light' | 'dark' | 'system') || 'system'
+            }
+        });
+        console.log(userStore);
     };
 </script>
 
