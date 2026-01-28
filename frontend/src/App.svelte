@@ -252,6 +252,7 @@
                     
                     {:else if currentScreen === 'wishesCreate'}
                         <WishesScreenCreate
+                            token={token}
                             onGoBack={() => navigate('wishes')}
                         />
                     

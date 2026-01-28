@@ -52,3 +52,34 @@ export async function loadWishes(token: string) {
         throw error;
     }
 }
+
+export async function createWish(token: string, wishData: {
+    name: string;
+    photo: string;
+    url_gift: string;
+    price: number;
+    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT';
+    description: string;
+}): Promise<Wish> {
+    try {
+        const response = await fetch('/api/v1/wishes/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wishData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка создания желания');
+        }
+        
+        const newWishlist = await response.json();
+        
+        return newWishlist;
+    } catch (error) {
+        console.error('Ошибка создания желания:', error);
+        throw error;
+    }
+}
