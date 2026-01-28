@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, func, desc
 from sqlalchemy.orm import joinedload
 from app.models.wish_wishlist import WishWishlist
 from app.models.wish import Wish
@@ -153,6 +153,10 @@ class WishWishlistRepository:
         query = (
             select(WishWishlist)
             .where(WishWishlist.wish_id == wish_id)
+            .options(
+                joinedload(WishWishlist.wishlist).joinedload(Wishlist.owner)
+            )
+            .order_by(desc(WishWishlist.created_at))
             .limit(limit)
         )
         result = await self.session.execute(query)
