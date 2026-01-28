@@ -13,8 +13,8 @@ export interface WishWishlistConnection {
 export interface WishWishlistCreateData {
     wish_id: number;
     wishlist_id: number;
-    is_pinned?: boolean;
-    order_position?: number;
+    is_pinned: boolean;
+    order_position: number;
 }
 
 export interface WishWishlistUpdateData {
@@ -108,8 +108,8 @@ export async function addWishToWishlist(
         const connectData: WishWishlistCreateData = {
             wish_id: parseInt(wishId),
             wishlist_id: parseInt(wishlistId),
-            ...(options?.is_pinned !== undefined && { is_pinned: options.is_pinned }),
-            ...(options?.order_position !== undefined && { order_position: options.order_position })
+            is_pinned: options?.is_pinned ?? false,
+            order_position: options?.order_position ?? 0
         };
         
         const response = await fetch(`/api/v1/wishlists/${wishlistId}/wishes`, {
@@ -247,7 +247,10 @@ export async function addMultipleWishesToWishlist(
     
     const promises = wishIds.map(async (wishId) => {
         try {
-            const result = await addWishToWishlist(token, wishlistId, wishId, options);
+            const result = await addWishToWishlist(token, wishlistId, wishId, {
+                is_pinned: options?.is_pinned ?? false,
+                order_position: options?.order_position ?? 0
+            });
             return result;
         } catch (error) {
             console.error(`Ошибка добавления желания ${wishId}:`, error);
