@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
@@ -57,6 +57,11 @@ class WishResponse(WishBase):
     created_at: datetime
     updated_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class WishResponseMoreInfo(WishResponse):
+    wishlists: List[dict]
     model_config = ConfigDict(from_attributes=True)
 
 
