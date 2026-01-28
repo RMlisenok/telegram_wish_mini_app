@@ -5,6 +5,7 @@ from .wishlist import Wishlist
 from .wish_wishlist import WishWishlist
 from .wish_reservation import WishReservation
 from .subscription import Subscription
+from .notification_settings import NotificationSettings
 
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "Wishlist",
     "WishWishlist",
     "WishReservation",
-    "Subscription"
+    "Subscription",
+    "NotificationSettings"
 ]
