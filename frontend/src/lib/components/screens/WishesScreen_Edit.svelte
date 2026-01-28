@@ -1,6 +1,8 @@
 <!-- 2006/2_Dass_24.12.2025 -->
 <script>
-    import { wishesStore, wishlistsStore } from '../../stores/data.js';
+    import { wishesStore } from '../../../types/wishes.ts';
+    import { wishlistsStore } from '../../../types/wishlists.ts';
+
     import { onMount } from 'svelte';
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
