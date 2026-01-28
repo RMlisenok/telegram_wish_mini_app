@@ -17,10 +17,10 @@ class WishBase(BaseModel):
     user_id: int
     name: str
     photo: Optional[str] = None
-    url_gift: str
-    price: float
-    currency: CurrencyEnum = CurrencyEnum.RUB
-    description: str
+    url_gift: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[CurrencyEnum] = None
+    description: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -28,10 +28,10 @@ class WishBase(BaseModel):
 class WishCreate(BaseModel):
     name: str
     photo: Optional[str] = None
-    url_gift: str
-    price: float
-    currency: CurrencyEnum = CurrencyEnum.RUB
-    description: str
+    url_gift: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[CurrencyEnum] = None
+    description: Optional[str] = None
 
 
 class WishCreateDb(WishCreate):
@@ -41,12 +41,12 @@ class WishCreateDb(WishCreate):
 class WishUpdate(BaseModel):
     name: str
     photo: Optional[str] = None
-    url_gift: str
-    price: float
-    currency: CurrencyEnum = CurrencyEnum.RUB
-    description: str
-    is_booked: bool
-    status_is_finished: bool
+    url_gift: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[CurrencyEnum] = None
+    description: Optional[str] = None
+    is_booked: Optional[bool] = False
+    status_is_finished: Optional[bool] = False
 
 
 class WishResponse(WishBase):
