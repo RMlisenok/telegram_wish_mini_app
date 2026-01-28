@@ -48,9 +48,8 @@
     let showDetailModal = false;
 
     // Открыть модальное окно с детальной информацией
-    const openDetailModal = (wish) => {
-        selectedWish = wish;
-        showDetailModal = true;
+    const openDetailModal = async (wish) => {
+        await loadWishDetails(wish.id);
     };
 
     // Закрыть модальное окно
