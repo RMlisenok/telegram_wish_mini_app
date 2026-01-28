@@ -12,6 +12,7 @@
     export let userStore;
     export let token;
     export let onUpdateUser;
+    export let birthDateOnly = false;
 
     let fullName = userStore?.fullName || '';
     let birthDate = userStore?.birthDate || '';
@@ -95,7 +96,10 @@
                 avatarUrl: userData.photo
             });
             
-            alert('Изменения успешно сохранены');
+            if (!birthDateOnly) {
+                alert('Изменения успешно сохранены');
+            }
+
             goBack();
             
         } catch (error) {
@@ -152,51 +156,63 @@
 
 <div class="screen">
     <header class="app-header">
-        <button class="back-btn" type="button" on:click={goBack}>
-            ←
-        </button>
-        <div class="h1">Редактировать профиль</div>
+        {#if !birthDateOnly}
+            <button class="back-btn" type="button" on:click={goBack}>
+                ←
+            </button>
+        {/if}
+        <div class="h1">
+            {#if birthDateOnly}
+                Укажите дату рождения
+            {:else}
+                Редактировать профиль
+            {/if}
+        </div>
         <div class="header-placeholder"></div>
     </header>
 
     <div class="edit-profile-content">
         <section class="section-card">
             <!-- Фотография профиля -->
-            <div class="avatar-section">
-                <div class="avatar-container">
-                    <Avatar 
-                        size={152} 
-                        src={tempAvatarUrl} 
-                        initials={getInitials(fullName)} 
-                    />
-                </div>
-                
-                <div class="avatar-actions">
-                    <Button kind="ghost" on:click={uploadPhoto}>
-                        <img src="../../../../static/icons/add.png" alt="" class="btn-icon" />
-                        <span>Загрузить фото</span>
-                    </Button>
+             {#if !birthDateOnly}
+                <div class="avatar-section">
+                    <div class="avatar-container">
+                        <Avatar 
+                            size={152} 
+                            src={tempAvatarUrl} 
+                            initials={getInitials(fullName)} 
+                        />
+                    </div>
                     
-                    {#if tempAvatarUrl}
-                        <Button kind="ghost" on:click={removePhoto}>
-                            <img src="../../../../static/icons/delete.png" alt="" class="btn-icon" />
-                            <span>Удалить</span>
+                    <div class="avatar-actions">
+                        <Button kind="ghost" on:click={uploadPhoto}>
+                            <img src="../../../../static/icons/add.png" alt="" class="btn-icon" />
+                            <span>Загрузить фото</span>
                         </Button>
-                    {/if}
-                    
+                        
+                        {#if tempAvatarUrl}
+                            <Button kind="ghost" on:click={removePhoto}>
+                                <img src="../../../../static/icons/delete.png" alt="" class="btn-icon" />
+                                <span>Удалить</span>
+                            </Button>
+                        {/if}
+                        
+                    </div>
                 </div>
-            </div>
+            {/if}
 
             <!-- Фамилия и имя-->
              <div class="form-fields">
-                <TextField
-                    label="Имя и фамилия"
-                    placeholder="Введите ваше имя и фамилию"
-                    bind:value={fullName}
-                    on:change={handleFullNameChange}
-                    error={errors.fullName}
-                    required={true}
-                />
+                {#if !birthDateOnly}
+                    <TextField
+                        label="Имя и фамилия"
+                        placeholder="Введите ваше имя и фамилию"
+                        bind:value={fullName}
+                        on:change={handleFullNameChange}
+                        error={errors.fullName}
+                        required={true}
+                    />
+                {/if}
                 
                 <TextField
                     label="Дата рождения"
@@ -211,7 +227,11 @@
             
             
             <Button kind="primary" full={true} on:click={saveProfile}>
-                Сохранить изменения
+                {#if birthDateOnly}
+                    Сохранить и продолжить
+                {:else}
+                    Сохранить изменения
+                {/if}
             </Button>
         </section>
     </div>

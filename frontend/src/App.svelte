@@ -126,7 +126,7 @@
         }
         else
         {
-            navigate('editProfile');
+            navigate('editProfileBirthDate');
         }
         userStore.set({
             id: token || 'demo-user-1',
@@ -317,7 +317,18 @@
                             on:show-all-wishlists={() => pushNavigate('wishlists')}
                             on:show-all-subscriptions={() => pushNavigate('subscriptions')}
                         />
-                    
+                    {:else if currentScreen === 'editProfileBirthDate'}
+                        <SettingsScreenEditProfile
+                            token={token}
+                            userStore={$userStore}
+                            birthDateOnly={true}
+                            onGoBack={() => navigate('main')}
+                            onUpdateUser={(updatedData) => {
+                                userStore.update(current => ({...current, ...updatedData}));
+                                navigate('main'); 
+                            }}
+                        />
+
                     {/if}
                 </div>
                 
