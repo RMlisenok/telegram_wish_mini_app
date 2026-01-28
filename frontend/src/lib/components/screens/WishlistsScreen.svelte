@@ -57,7 +57,7 @@
         const wishlist = $wishlistsStore.find(wl => wl.id === wishlistId);
         if (!wishlist) return;
         
-        wishesInWishlist = getWishlistCount(wishlistId);
+        wishesInWishlist = wishlist.count;
         
         wishlistToDelete = wishlistId;
         wishlistToDeleteName = wishlist.title;
@@ -95,11 +95,11 @@
     };
 
     // Получить количество желаний в вишлисте
-    const getWishlistCount = (wishlistId) => {
-        return $wishesStore.filter((wish) => 
-            (wish.wishlistIds || []).includes(wishlistId)
-        ).length;
-    };
+    // const getWishlistCount = (wishlistId) => {
+    //     return $wishesStore.filter((wish) => 
+    //     (wish.wishlistIds || []).includes(wishlistId)
+    // ).length;
+    // };
 
     // Получить текст и иконку для статуса приватности
     const getPrivacyInfo = (privacy) => {
