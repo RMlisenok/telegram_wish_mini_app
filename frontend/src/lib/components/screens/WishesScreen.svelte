@@ -144,7 +144,6 @@
         }
 
         selectedWishesForAdding = new Set();
-        showAddExistingModal = true;
 
         try {
             await loadAvailableWishes();

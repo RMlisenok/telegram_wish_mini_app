@@ -236,14 +236,41 @@ export async function addMultipleWishesToWishlist(
 ): Promise<WishWishlistConnection[]> {
     const results: WishWishlistConnection[] = [];
     
-    for (const wishId of wishIds) {
+    // for (const wishId of wishIds) {
+    //     try {
+    //         const result = await addWishToWishlist(token, wishlistId, wishId, options);
+    //         results.push(result);
+    //     } catch (error) {
+    //         console.error(`Ошибка добавления желания ${wishId}:`, error);
+    //     }
+    // }
+    
+    const promises = wishIds.map(async (wishId) => {
         try {
             const result = await addWishToWishlist(token, wishlistId, wishId, options);
-            results.push(result);
+            return result;
         } catch (error) {
             console.error(`Ошибка добавления желания ${wishId}:`, error);
+            throw error;
         }
-    }
+    });
     
+    try {
+        const settledResults = await Promise.allSettled(promises);
+        
+        settledResults.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                results.push(result.value);
+            } else {
+                console.error(`Не удалось добавить желание ${wishIds[index]}:`, result.reason);
+            }
+        });
+        
+        return results;
+    } catch (error) {
+        console.error('Ошибка при массовом добавлении:', error);
+        throw error;
+    }
+
     return results;
 }
