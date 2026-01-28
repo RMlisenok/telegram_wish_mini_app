@@ -288,13 +288,13 @@
                     currency: data.currency,
                     url_gift: data.url_gift,
                     wishlistIds: data.wishlists?.map(w => w.id) || [],
-                    wishlistNames: data.wishlists?.map(w => w.name) || [],
+                    wishlists: data.wishlists || [],
                     isBooked: data.is_booked,
                     isFinished: data.status_is_finished,
                     createdAt: data.created_at,
                     updatedAt: data.updated_at
                 };
-                
+                console.log('selectedWish после обработки:', selectedWish);
                 showDetailModal = true;
             }
         } catch (error) {
