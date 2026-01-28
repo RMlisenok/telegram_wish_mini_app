@@ -3,6 +3,7 @@
     import Button from '../ui/Button.svelte';
     import { wishlistsStore } from '../../stores/data.js';
     import { wishesStore, loadWishes } from '../../../types/wishes.ts';
+    import { addMultipleWishesToWishlist, getWishesFromWishlist, wishWishlistsStore } from '../../../types/wish_wishlist.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -14,6 +15,16 @@
     onMount(async () => {
         if (token) {
             await fetchWishes();
+        }
+
+        // Если мы в режиме вишлиста, загружаем его желания
+        if (wishlistId) {
+            try {
+                const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
+                wishWishlistsStore.set(wishesInWishlist);
+            } catch (error) {
+                console.error('Ошибка загрузки желаний вишлиста:', error);
+            }
         }
     });
 
@@ -101,10 +112,22 @@
     };
 
     // открытие вишлиста 2009/0_Dass_25.12.2025
+    // $: filteredWishes = wishlistId 
+    //     ? $wishesStore.filter(wish => 
+    //         (wish.wishlistIds || []).includes(wishlistId)
+    //       )
+    //     : $wishesStore;
     $: filteredWishes = wishlistId 
-        ? $wishesStore.filter(wish => 
-            (wish.wishlistIds || []).includes(wishlistId)
-          )
+        ? $wishWishlistsStore.map(item => ({
+            id: item.id,
+            name: item.name,
+            photo: item.photo,
+            price: item.price,
+            currency: item.currency,
+            description: item.description,
+            url_gift: item.url_gift,
+            wishlistIds: [wishlistId]
+        }))
         : $wishesStore;
 
     $: currentWishlist = wishlistId 
@@ -114,34 +137,106 @@
     // 2009_1_Dass_25.12.2025 -->
     let showAddExistingModal = false;
     let selectedWishesForAdding = new Set();
-    const openAddExistingModal = () => {
+    const openAddExistingModal = async () => {
+        if (!token || !wishlistId) {
+            console.error('Токен или ID вишлиста отсутствует');
+            return;
+        }
+
         selectedWishesForAdding = new Set();
         showAddExistingModal = true;
+
+        try {
+            await loadAvailableWishes();
+            showAddExistingModal = true;
+        } catch (error) {
+            console.error('Ошибка загрузки доступных желаний:', error);
+        }
     };
-    const addSelectedWishesToWishlist = () => {
-        if (!wishlistId) return;
+    const addSelectedWishesToWishlist = async () => {
+        // if (!wishlistId) return;
         
-        $wishesStore = $wishesStore.map(wish => {
-            if (selectedWishesForAdding.has(wish.id)) {
-                const existingWishlistIds = wish.wishlistIds || [];
-                if (!existingWishlistIds.includes(wishlistId)) {
-                    return {
-                        ...wish,
-                        wishlistIds: [...existingWishlistIds, wishlistId]
-                    };
-                }
-            }
-            return wish;
-        });
+        // $wishesStore = $wishesStore.map(wish => {
+        //     if (selectedWishesForAdding.has(wish.id)) {
+        //         const existingWishlistIds = wish.wishlistIds || [];
+        //         if (!existingWishlistIds.includes(wishlistId)) {
+        //             return {
+        //                 ...wish,
+        //                 wishlistIds: [...existingWishlistIds, wishlistId]
+        //             };
+        //         }
+        //     }
+        //     return wish;
+        // });
             
-        // Закрываем модальное окно
-        showAddExistingModal = false;
-        selectedWishesForAdding.clear();
+        // // Закрываем модальное окно
+        // showAddExistingModal = false;
+        // selectedWishesForAdding.clear();
+        if (!wishlistId || !token) return;
+        
+        try {
+            // Конвертируем Set в массив ID
+            const wishIds = Array.from(selectedWishesForAdding);
+            
+            // Используем метод из wish_wishlist.ts для массового добавления
+            await addMultipleWishesToWishlist(token, wishlistId, wishIds);
+            
+            // После успешного добавления обновляем данные
+            await updateWishesInWishlist();
+            
+            // Закрываем модальное окно
+            showAddExistingModal = false;
+            selectedWishesForAdding.clear();
+            
+        } catch (error) {
+            console.error('Ошибка добавления желаний в вишлист:', error);
+        }
+    };
+
+    const updateWishesInWishlist = async () => {
+        if (!wishlistId || !token) return;
+        
+        try {
+            // Загружаем обновленный список желаний из вишлиста
+            const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
+            
+            // Обновляем локальный store
+            wishWishlistsStore.set(wishesInWishlist);
+            
+        } catch (error) {
+            console.error('Ошибка обновления списка желаний:', error);
+        }
+    };
+
+    // Функция для загрузки доступных желаний
+    const loadAvailableWishes = async () => {
+        if (!token || !wishlistId) return;
+        
+        try {
+            // Загружаем все желания пользователя
+            await loadWishes(token);
+            
+            // Загружаем желания, которые уже в вишлисте
+            const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
+            wishWishlistsStore.set(wishesInWishlist);
+            
+        } catch (error) {
+            console.error('Ошибка загрузки доступных желаний:', error);
+            throw error;
+        }
     };
     
-    $: availableWishes = $wishesStore.filter(wish => 
-        !wish.wishlistIds?.includes(wishlistId)
-    );
+    // Функция для получения ID желаний, которые уже в вишлисте
+    const getWishIdsInCurrentWishlist = () => {
+        return $wishWishlistsStore.map(item => item.id);
+    };
+    
+    $: availableWishes = $wishesStore.filter(wish => {
+        // !wish.wishlistIds?.includes(wishlistId)
+        // Проверяем, нет ли этого желания в текущем вишлисте
+        const wishIdsInWishlist = getWishIdsInCurrentWishlist();
+        return !wishIdsInWishlist.includes(wish.id);
+    });
     // 2009_1_Dass_25.12.2025 <--
 
     // 2009_2_Dass_25.12.2025 -->
