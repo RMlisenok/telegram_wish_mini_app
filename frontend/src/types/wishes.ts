@@ -18,7 +18,7 @@ export const wishesStore = writable<Wish[]>([]);
 
 export async function loadWishes(token: string) {
     try {
-        const response = await fetch('/api/v1/wishes/', {
+        const response = await fetch('/api/v1/wishes/finish?is_finish=true', {
             method: 'GET',
             headers: {
                 "Authorization": 'Bearer ' + token,
