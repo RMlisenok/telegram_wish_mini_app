@@ -1,24 +1,51 @@
 <!-- 2002_2_Dass_18.12.2025 -->
 <script>
     import Button from '../../ui/Button.svelte';
-    import { userStore } from '../../../stores/data';
+    //import { userStore } from '../../../stores/data';
     export let onGoBack;
+    export let token;
+    export let userStore;
+    export let onUpdateUser;
+
     function goBack() {
         if (onGoBack) {
             onGoBack();
         }
     }
 
-    let showSubscriptions = $userStore.showSubscriptions;
+    let showSubscriptions = userStore.showSubscriptions;
 
-    function saveSettings() {
-        userStore.update(current => ({
-            ...current,
-            showSubscriptions: showSubscriptions
-        }));
-        console.log('Сохранение настроек:', { showSubscriptions });
-        // Здесь будет запрос к API для сохранения настройки
-        goBack();
+    async function saveSettings() {
+        try {
+            // Отправка запроса на сервер
+            const response = await fetch('/api/v1/users/me', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    show_sub: showSubscriptions 
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении профиля');
+            }
+            
+            const data = await response.json();
+
+            onUpdateUser({
+                showSubscriptions: showSubscriptions
+            });
+            
+            alert('Изменения успешно сохранены');
+            goBack();
+            
+        } catch (error) {
+            console.error('Ошибка сохранения профиля:', error);
+            alert('Не удалось сохранить изменения. Проверьте подключение к интернету.');
+        }
     }
 
     function handleSettingKeydown(event) {

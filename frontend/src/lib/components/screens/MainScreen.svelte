@@ -232,7 +232,7 @@
                             <div class="subs-main">
                                 <div class="subs-name" title={sub.wishlist.name}>{sub.wishlist.name}</div>
                                 <div class="subs-meta">
-                                    <!-- <span>{sub.wishlist.user_name}</span> -->
+                                    <span>{sub.wishlist.owner_name}</span>
                                     {#if sub.wishlist.count}
                                         <span> · {sub.wishlist.count} жел.</span>
                                     {/if}

@@ -2,8 +2,27 @@
 <script>
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, wishlistsStore } from '../../stores/data.js';
+    import { onMount } from 'svelte';
+    //import { wishesStore, wishlistsStore } from '../../stores/data.js';
+
+    import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
+    import { createWish } from '../../../types/wishes.ts';
     export let onGoBack;
+    export let token;
+
+    onMount(async () => {
+        if (!token) {
+            console.error('Токен не найден');
+            return;
+        }
+        
+        try {
+            await loadWishlists(token);
+        } catch (error) {
+            console.error('Ошибка загрузки данных MainScreen:', error);
+        }
+    });
+
     function goBack() {
         if (onGoBack) {
             onGoBack();
@@ -50,7 +69,7 @@
     }
 
     // Сохранение желания
-    function saveWish() {
+    async function saveWish() {
         // Валидация
         if (!title.trim()) {
             error = 'Пожалуйста, заполните название желания';
@@ -60,19 +79,65 @@
         error = '';
         
         // Создание объекта желания
-        const newWish = {
-            title: title.trim(),
+        const wishData = {
+            name: title.trim(),
             description: description.trim(),
             price: price ? parseFloat(price) : null,
             currency: currency || null,
-            link: link.trim(),
-            photo: photoPreview,
-            wishlistIds: selectedWishlists.map(id => parseInt(id))
+            url_gift: link.trim(),
+            photo: photoPreview
         };
-        wishesStore.update(wishes => [...wishes, newWish]);
-        
-        // Возвращаемся назад
-        goBack();
+
+        try {
+            const newWish = await createWish(token, wishData);
+            console.log('Создано новое желание:', newWish);
+
+            if (selectedWishlists.length > 0 && newWish.id) {
+                for (const wishlistId of selectedWishlists) {
+                    try {
+                        await connectWishToWishlist(token, newWish.id, parseInt(wishlistId));
+                    } catch (connectError) {
+                        console.warn(`Не удалось привязать к вишлисту ${wishlistId}:`, connectError);
+                    }
+                }
+            }
+            
+            // Возвращаемся назад
+            goBack();
+        } catch (error) {
+            console.error('Ошибка создания желания:', error);
+            error = 'Не удалось создать желание. Пожалуйста, попробуйте еще раз.';
+        }
+    }
+    async function connectWishToWishlist(token, wishId, wishlistId) {
+        const connectData = {
+            "is_pinned": false,
+            "order_position": 1,
+            "wish_id": wishId,
+            "wishlist_id": wishlistId
+        };
+
+        try {
+            const response = await fetch(`/api/v1/wishlists/${wishlistId}/wishes`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(connectData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка привязки к вишлисту: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Желание привязано к вишлисту:', result);
+            return result;
+        } catch (error) {
+            console.error('Ошибка привязки желания к вишлисту:', error);
+            throw error;
+        }
     }
 </script>
 

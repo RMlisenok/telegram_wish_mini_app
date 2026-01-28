@@ -3,15 +3,21 @@
     import Avatar from '../../ui/Avatar.svelte';
     import Button from '../../ui/Button.svelte';
     import TextField from '../../ui/TextField.svelte';
+    import { formatDateToDDMMYYYY } from '../../../../types/mainScreenData.ts'
 
-    import { userStore } from '../../../stores/data';
-
-    let fullName = $userStore?.fullName || '';
-    let birthDate = $userStore?.birthDate || '';
-    let avatarUrl = $userStore?.avatarUrl || '';
-    let tempAvatarUrl = avatarUrl;
+    // import { userStore } from '../../../stores/data';
 
     export let onGoBack;
+
+    export let userStore;
+    export let token;
+    export let onUpdateUser;
+
+    let fullName = userStore?.fullName || '';
+    let birthDate = userStore?.birthDate || '';
+    let avatarUrl = userStore?.avatarUrl || '';
+    let tempAvatarUrl = avatarUrl;
+
     function goBack() {
         if (onGoBack) {
             onGoBack();
@@ -49,20 +55,53 @@
         tempAvatarUrl = '';
     }
 
-    function saveProfile() {
+    async function saveProfile() {
         if (!validateForm()) {
             return;
         }
         
-        $userStore = {
-            ...$userStore,
-            fullName: fullName.trim(),
-            birthDate,
-            avatarUrl: tempAvatarUrl
-        };
-        
-        alert('Изменения успешно сохранены');
-        goBack();
+        try {
+            const [day, month, year] = birthDate.split('.');
+            const formattedDate = `${year}-${month}-${day}`;
+            
+            const userData = {
+                name: fullName.trim(),
+                birth_date: formattedDate,
+                photo: tempAvatarUrl || '',
+                theme: userStore.ui?.theme || 'light',
+                text_size: userStore.ui?.textSize || 'medium',
+                show_sub: userStore.showSubscriptions || true
+            };
+            
+            // Отправка запроса на сервер
+            const response = await fetch('/api/v1/users/me', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении профиля');
+            }
+            
+            const data = await response.json();
+
+            onUpdateUser({
+                fullName: userData.name,
+                birthDate: formatDateToDDMMYYYY(userData.birth_date),
+                avatarUrl: userData.photo
+            });
+            
+            alert('Изменения успешно сохранены');
+            goBack();
+            
+        } catch (error) {
+            console.error('Ошибка сохранения профиля:', error);
+            alert('Не удалось сохранить изменения. Проверьте подключение к интернету.');
+        }
     }
 
     function handleFullNameChange(event) {

@@ -234,7 +234,7 @@
 
                         <!-- Количество желаний -->
                         <div class="wishlist-count">
-                            {getWishlistCount(wishlist.id)} {getWishesWord(getWishlistCount(wishlist.id))}
+                            {wishlist.count} {getWishesWord(wishlist.count)}
                         </div>
 
                         <!-- Владелец -->

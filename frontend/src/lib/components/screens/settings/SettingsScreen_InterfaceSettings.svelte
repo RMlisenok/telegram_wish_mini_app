@@ -1,6 +1,9 @@
 <!-- 2002_3_Dass_18.12.2025 -->
 <script>
-    import { userStore } from '../../../stores/data';
+    //import { userStore } from '../../../stores/data';
+    export let token;
+    export let userStore;
+    export let onUpdateUser;
 
     export let onGoBack;
     function goBack() {
@@ -22,13 +25,13 @@
     ];
 
     function setTheme(theme) {
-        $userStore.ui.theme = theme;
+        userStore.ui.theme = theme;
         applySettings();
     }
     //2002_3_Dass_20.12.2025 <--
 
     function setTextSize(size) {
-        $userStore.ui.textSize = size;
+        userStore.ui.textSize = size;
         applySettings();
     }
 
@@ -39,32 +42,32 @@
             medium: '16px',
             large: '18px'
         };
-        const fontSize = fontSizeMap[$userStore.ui.textSize] || '16px';
+        const fontSize = fontSizeMap[userStore.ui.textSize] || '16px';
         // Устанавливаем CSS-переменную на корневом элементе
         document.documentElement.style.setProperty('--app-font-size', fontSize);
         // Также обновляем класс для обратной совместимости
         const appRoot = document.querySelector('.app-root');
         if (appRoot) {
             appRoot.classList.remove('small', 'medium', 'large');
-            appRoot.classList.add($userStore.ui.textSize);
+            appRoot.classList.add(userStore.ui.textSize);
         }
-        localStorage.setItem('app-font-size', $userStore.ui.textSize);
+        localStorage.setItem('app-font-size', userStore.ui.textSize);
     }
     
 
     function getCurrentTextSizeLabel() {
-        const option = textSizeOptions.find(opt => opt.value === $userStore.ui.textSize);
+        const option = textSizeOptions.find(opt => opt.value === userStore.ui.textSize);
         return option ? option.label : 'Средний';
     }
 
     //2002_3_Dass_20.12.2025 -->
     function getCurrentThemeLabel() {
-        const option = themeOptions.find(opt => opt.value === $userStore.ui.theme);
+        const option = themeOptions.find(opt => opt.value === userStore.ui.theme);
         return option ? option.label : 'Как в системе';
     }
 
     function applyTheme() {
-        const theme = $userStore.ui.theme || 'system';
+        const theme = userStore.ui.theme || 'system';
         let effectiveTheme = theme;
         if (theme === 'system') {
             effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -110,28 +113,63 @@
         }
     }
 
-    function applySettings() {
-        applyTextSize();
-        applyTheme(); //2002_3_Dass_20.12.2025
+    async function applySettings() {
+        try {
+            const response = await fetch('/api/v1/users/me', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    theme: userStore.ui?.theme || 'system',
+                    text_size: userStore.ui?.textSize || 'medium'
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении настроек интерфейса');
+            }
+            
+            const data = await response.json();
+            
+            if (onUpdateUser) {
+                onUpdateUser({
+                    ui: {
+                        theme: userStore.ui.theme,
+                        textSize: userStore.ui.textSize
+                    }
+                });
+            }
+            
+            applyTextSize();
+            applyTheme();
+            
+        } catch (error) {
+            console.error('Ошибка сохранения настроек интерфейса:', error);
+            applyTextSize();
+            applyTheme();
+            alert('Не удалось сохранить изменения на сервер. Настройки применены локально.');
+        }
     }
 
     import { onMount } from 'svelte';
     onMount(() => {
-        if (!$userStore.ui.textSize || !['small', 'medium', 'large'].includes($userStore.ui.textSize)) {
+        if (!userStore.ui.textSize || !['small', 'medium', 'large'].includes(userStore.ui.textSize)) {
             const savedSize = localStorage.getItem('app-font-size');
             if (savedSize && ['small', 'medium', 'large'].includes(savedSize)) {
-                $userStore.ui.textSize = savedSize;
+                userStore.ui.textSize = savedSize;
             } else {
-                $userStore.ui.textSize = 'medium';
+                userStore.ui.textSize = 'medium';
             }
         }
 
-        if (!$userStore.ui.theme || !['light', 'dark', 'system'].includes($userStore.ui.theme)) {
+        if (!userStore.ui.theme || !['light', 'dark', 'system'].includes(userStore.ui.theme)) {
             const savedTheme = localStorage.getItem('app-theme');
             if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-                $userStore.ui.theme = savedTheme;
+                userStore.ui.theme = savedTheme;
             } else {
-                $userStore.ui.theme = 'system';
+                userStore.ui.theme = 'system';
             }
         }
 
@@ -140,7 +178,7 @@
         //2002_3_Dass_20.12.2025 -->
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleSystemThemeChange = () => {
-            if ($userStore.ui.theme === 'system') {
+            if (userStore.ui.theme === 'system') {
                 applyTheme();
             }
         };
@@ -194,15 +232,15 @@
                 {#each textSizeOptions as option (option.value)}
                     <button
                         type="button"
-                        class="dropdown-item {option.value === $userStore.ui.textSize ? 'selected' : ''}"
+                        class="dropdown-item {option.value === userStore.ui.textSize ? 'selected' : ''}"
                         on:click={() => setTextSize(option.value)}
                         on:keydown={(e) => handleOptionKeydown(() => setTextSize(option.value), e)}
                         role="option"
-                        aria-selected={option.value === $userStore.ui.textSize}
+                        aria-selected={option.value === userStore.ui.textSize}
                     >
                         <span class="item-icon" style="{option.style || ''}">{option.icon}</span>
                         <span class="item-label">{option.label}</span>
-                        {#if option.value === $userStore.ui.textSize}
+                        {#if option.value === userStore.ui.textSize}
                             <span class="item-check" aria-hidden="true">✓</span>
                         {/if}
                     </button>
@@ -225,9 +263,9 @@
             >
                 <span class="dropdown-selected">
                     <span class="selected-icon">
-                        {#if $userStore.ui.theme === 'light'}
+                        {#if userStore.ui.theme === 'light'}
                             ☀️
-                        {:else if $userStore.ui.theme === 'dark'}
+                        {:else if userStore.ui.theme === 'dark'}
                             🌙
                         {:else}
                             ⚙️
@@ -247,15 +285,15 @@
                 {#each themeOptions as option (option.value)}
                     <button
                         type="button"
-                        class="dropdown-item {option.value === $userStore.ui.theme ? 'selected' : ''}"
+                        class="dropdown-item {option.value === userStore.ui.theme ? 'selected' : ''}"
                         on:click={() => setTheme(option.value)}
                         on:keydown={(e) => handleOptionKeydown(() => setTheme(option.value), e)}
                         role="option"
-                        aria-selected={option.value === $userStore.ui.theme}
+                        aria-selected={option.value === userStore.ui.theme}
                     >
                         <span class="item-icon">{option.icon}</span>
                         <span class="item-label">{option.label}</span>
-                        {#if option.value === $userStore.ui.theme}
+                        {#if option.value === userStore.ui.theme}
                             <span class="item-check" aria-hidden="true">✓</span>
                         {/if}
                     </button>

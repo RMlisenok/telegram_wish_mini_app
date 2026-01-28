@@ -6,7 +6,7 @@ export interface Wish {
     photo: string;
     url_gift: string;
     price: number;
-    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT';
+    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
     description: string;
     is_booked: boolean;
     status_is_finished: boolean;
@@ -27,7 +27,7 @@ export async function loadWishes(token: string) {
         });
         
         if (!response.ok) {
-            throw new Error('Ошибка загрузки вишлистов');
+            throw new Error('Ошибка загрузки желаний');
         }
         
         const data = await response.json();
@@ -47,8 +47,39 @@ export async function loadWishes(token: string) {
         console.log(wishesStore);
         return data;
     } catch (error) {
-        console.error('Ошибка загрузки вишлистов:', error);
+        console.error('Ошибка загрузки желаний:', error);
         wishesStore.set([]);
+        throw error;
+    }
+}
+
+export async function createWish(token: string, wishData: {
+    name: string;
+    photo: string;
+    url_gift: string;
+    price: number;
+    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
+    description: string;
+}): Promise<Wish> {
+    try {
+        const response = await fetch('/api/v1/wishes/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wishData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка создания желания');
+        }
+        
+        const newWishlist = await response.json();
+        
+        return newWishlist;
+    } catch (error) {
+        console.error('Ошибка создания желания:', error);
         throw error;
     }
 }
