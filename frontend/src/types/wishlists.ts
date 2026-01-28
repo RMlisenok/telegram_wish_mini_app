@@ -6,6 +6,7 @@ export interface Wishlist {
     description: string;
     photo: string;
     typeprivacy: 'public' | 'restricted' | 'private';
+    count: number;
     created_At: Date;
     updated_At: Date;
 }
@@ -28,7 +29,7 @@ export async function loadWishlists(token: string) {
         
         const data = await response.json();
         console.log(data)
-        
+
         const transformedWishlists = data.map((wishlist: any) => ({
             id: wishlist.id.toString(),
             title: wishlist.name,
