@@ -88,6 +88,10 @@
             photo: photoPreview
         };
 
+        if (currency && currency.trim() !== '') {
+            wishData.currency = currency;
+        }
+
         try {
             const newWish = await createWish(token, wishData);
             console.log('Создано новое желание:', newWish);

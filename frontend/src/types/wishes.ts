@@ -39,7 +39,7 @@ export async function loadWishes(token: string) {
             photo: wish.photo,
             url_gift: wish.url_gift,
             price: wish.price,
-            currency: wish.currency,
+            currency: wish.currency || null,
             is_booked: wish.is_booked
         }));
         
@@ -58,10 +58,26 @@ export async function createWish(token: string, wishData: {
     photo: string;
     url_gift: string;
     price: number;
-    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
+    currency?: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
     description: string;
+    is_booked: boolean;
+    status_is_finished: boolean;
 }): Promise<Wish> {
     try {
+        const requestData: any = {
+            name: wishData.name,
+            description: wishData.description,
+            photo: wishData.photo,
+            url_gift: wishData.url_gift,
+            price: wishData.price,
+            is_booked: wishData.is_booked,
+            status_is_finished: wishData.status_is_finished
+        };
+        
+        if (wishData.currency !== null && wishData.currency !== undefined) {
+            requestData.currency = wishData.currency;
+        }
+
         const response = await fetch('/api/v1/wishes/', {
             method: 'POST',
             headers: {
