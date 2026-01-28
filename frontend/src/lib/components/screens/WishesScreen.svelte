@@ -266,6 +266,42 @@
         selectedWish = null;
     };
     //2006_7_Dass_25.12.2025 <--
+
+    const loadWishDetails = async (wishId) => {
+        try {
+            const response = await fetch(`/api/v1/wishes/${wishId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                selectedWish = {
+                    id: data.id,
+                    name: data.name,
+                    photo: data.photo,
+                    description: data.description,
+                    price: data.price,
+                    currency: data.currency,
+                    url_gift: data.url_gift,
+                    wishlistIds: data.wishlists?.map(w => w.id) || [],
+                    wishlistNames: data.wishlists?.map(w => w.name) || [],
+                    isBooked: data.is_booked,
+                    isFinished: data.status_is_finished,
+                    createdAt: data.created_at,
+                    updatedAt: data.updated_at
+                };
+                
+                showDetailModal = true;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки деталей желания:', error);
+        }
+    };
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -380,28 +416,28 @@
                 {/if}
 
                 <!-- Ссылка -->
-                {#if selectedWish.link}
+                {#if selectedWish.url_gift}
                     <div class="detail-section">
                         <h3>Ссылка на товар</h3>
                         <a 
-                            href={selectedWish.link} 
+                            href={selectedWish.url_gift} 
                             class="detail-link"
-                            on:click|stopPropagation={(e) => openLink(selectedWish.link, e)}
+                            on:click|stopPropagation={(e) => openLink(selectedWish.url_gift, e)}
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            {selectedWish.link}
+                            {selectedWish.url_gift}
                         </a>
                     </div>
                 {/if}
 
                 <!-- Вишлисты -->
-                {#if selectedWish.wishlistIds && selectedWish.wishlistIds.length > 0}
+                {#if selectedWish.wishlists && selectedWish.wishlists.length > 0}
                     <div class="detail-section">
                         <h3>Добавлено в вишлисты</h3>
                         <div class="detail-wishlists">
-                            {#each getWishlistNames(selectedWish.wishlistIds) as wishlistName}
-                                <span class="wishlist-tag">{wishlistName}</span>
+                            {#each selectedWish.wishlists as wishlist}
+                                <span class="wishlist-tag">{wishlist.name}</span>
                             {/each}
                         </div>
                     </div>
