@@ -6,7 +6,7 @@ export interface Wish {
     photo: string;
     url_gift: string;
     price: number;
-    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT';
+    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
     description: string;
     is_booked: boolean;
     status_is_finished: boolean;
@@ -58,7 +58,7 @@ export async function createWish(token: string, wishData: {
     photo: string;
     url_gift: string;
     price: number;
-    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT';
+    currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
     description: string;
 }): Promise<Wish> {
     try {
