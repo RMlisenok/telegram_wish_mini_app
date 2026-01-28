@@ -83,3 +83,40 @@ export async function createWish(token: string, wishData: {
         throw error;
     }
 }
+
+export async function updateWish(
+    token: string, 
+    wishId: string, 
+    wishData: {
+        name: string;
+        description: string;
+        photo: string;
+        url_gift: string;
+        price: number;
+        currency: 'RUB' | 'BYN' | 'USD' | 'EUR' | 'UAH' | 'KZT' | null;
+        is_booked: boolean;
+        status_is_finished: boolean;
+    }
+): Promise<Wish> {
+    try {
+        const response = await fetch(`/api/v1/wishes/${wishId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(wishData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка обновления желания');
+        }
+        
+        const updatedWish = await response.json();
+        
+        return updatedWish;
+    } catch (error) {
+        console.error('Ошибка обновления желания:', error);
+        throw error;
+    }
+}
