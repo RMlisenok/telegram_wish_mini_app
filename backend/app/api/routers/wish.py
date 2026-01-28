@@ -27,6 +27,16 @@ async def get_wishes(
     return await service.get_user_wish(user_id, is_desc, limit)
 
 
+@router.get("/finish", response_model=List[WishResponse])
+async def get_wishes_sorted(
+    user_id: int = Depends(get_current_user_id),
+    is_finish: bool = True,
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db)
+):
+    service = WishService(db)
+    return await service.get_user_wish_sorted(user_id, is_finish, limit)
+
 @router.get("/{wish_id}", response_model=WishResponseMoreInfo)
 async def get_wish(
     wish_id: int,
