@@ -94,7 +94,20 @@ class WishService:
         self,
         user_id: int,
         is_desc: bool = True,
-        limit: int = 10
+        limit: int = 20
     ) -> Optional[WishResponse]:
         wishes = await self.rep_wish.get_user_wish(user_id, is_desc, limit)
+        return [WishResponse.model_validate(wish) for wish in wishes]
+
+    async def get_user_wish_sorted(
+        self,
+        user_id: int,
+        is_finish: bool = True,
+        limit: int = 20
+    ) -> Optional[WishResponse]:
+        wishes = await self.rep_wish.get_user_wish_sorted(
+            user_id,
+            is_finish,
+            limit
+        )
         return [WishResponse.model_validate(wish) for wish in wishes]
