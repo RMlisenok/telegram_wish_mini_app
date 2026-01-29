@@ -119,12 +119,12 @@
     };
 
     // Функция для переключения закрепления желания
-    const togglePinWish = async (wishId, connectionId, currentPinnedState) => {
+    const togglePinWish = async (wishId, connectionId, currentPinnedState, currentOrderPosition) => {
         if (!token || !connectionId) return;
         
         try {
             const newPinnedState = !currentPinnedState;
-            await toggleWishPinInWishlist(token, connectionId, newPinnedState);
+            await toggleWishPinInWishlist(token, connectionId, newPinnedState, currentOrderPosition || 0);
             
             // Обновляем локальное состояние
             wishWishlistsStore.update(items => 
@@ -515,7 +515,7 @@
                         {#if wishlistId && wish.connection_id}
                             <button 
                                 class="pin-button {wish.is_pinned ? 'pinned' : ''}"
-                                on:click|stopPropagation={() => togglePinWish(wish.id, wish.connection_id, wish.is_pinned)}
+                                on:click|stopPropagation={() => togglePinWish(wish.id, wish.connection_id, wish.is_pinned, wish.order_position)}
                                 aria-label="{wish.is_pinned ? 'Открепить' : 'Закрепить'}"
                                 title="{wish.is_pinned ? 'Открепить' : 'Закрепить'}"
                             >

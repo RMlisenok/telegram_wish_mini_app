@@ -217,10 +217,12 @@ export async function removeWishFromWishlist(
 export async function toggleWishPinInWishlist(
     token: string,
     connectionId: string,
-    pinned: boolean
+    pinned: boolean,
+    currentOrderPosition?: number
 ): Promise<WishWishlistConnection> {
     return await updateWishWishlistConnection(token, connectionId, {
-        is_pinned: pinned
+        is_pinned: pinned,
+        order_position: currentOrderPosition ?? 0
     });
 }
 
