@@ -26,7 +26,7 @@ class UserForm(Base):
         ForeignKey("users.id", ondelete="CASCADE"))
     tag: Mapped[str] = mapped_column(String(255), nullable=False)
     detail: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
-    type_tag: Mapped[int] = mapped_column(BigInteger, default=1)
+    type_tag: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now()
