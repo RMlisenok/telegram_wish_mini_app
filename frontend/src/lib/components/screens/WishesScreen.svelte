@@ -76,6 +76,10 @@
         selectedWish = null;
     };
 
+    $: pinnedWishesCount = wishlistId 
+        ? $wishWishlistsStore.filter(wish => wish.is_pinned).length
+        : 0;
+
     // Получить названия вишлистов по их ID
     const getWishlistNames = (wishlistIds) => {
         if (!wishlistIds || wishlistIds.length === 0) return [];
@@ -121,6 +125,11 @@
     // Функция для переключения закрепления желания
     const togglePinWish = async (wishId, connectionId, currentPinnedState, currentOrderPosition) => {
         if (!token || !connectionId) return;
+
+        if (!currentPinnedState && pinnedWishesCount >= 5) {
+            showNotification('В этом вишлисте можно закрепить не более 5 желаний');
+            return;
+        }
         
         try {
             const newPinnedState = !currentPinnedState;
@@ -143,6 +152,19 @@
         } catch (error) {
             console.error('Ошибка при переключении закрепления:', error);
         }
+    };
+
+    let showNotificationFlag = false;
+    let notificationMessage = '';
+    
+    const showNotification = (message) => {
+        notificationMessage = message;
+        showNotificationFlag = true;
+        
+        // Автоматически скрываем уведомление через 3 секунды
+        setTimeout(() => {
+            showNotificationFlag = false;
+        }, 3000);
     };
 
     // открытие вишлиста 2009/0_Dass_25.12.2025
@@ -703,6 +725,14 @@
                     {/if}
                 </div>
             </div>
+        </div>
+    </div>
+{/if}
+
+{#if showNotificationFlag}
+    <div class="notification-overlay">
+        <div class="notification">
+            {notificationMessage}
         </div>
     </div>
 {/if}
@@ -1571,6 +1601,48 @@
         gap: 12px;
         margin: 0 auto;
         max-width: 300px;
+    }
+
+    .notification-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        pointer-events: none;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    .notification {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        text-align: center;
+        max-width: 400px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 
 
