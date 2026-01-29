@@ -441,6 +441,13 @@
             
             if (response.ok) {
                 const data = await response.json();
+
+                let connectionInfo = null;
+                if (wishlistId) {
+                    connectionInfo = $wishWishlistsStore.find(item => 
+                        item.id === wishId.toString()
+                    );
+                }
                 
                 selectedWish = {
                     id: data.id,
@@ -455,7 +462,10 @@
                     isBooked: data.is_booked,
                     isFinished: data.status_is_finished,
                     createdAt: data.created_at,
-                    updatedAt: data.updated_at
+                    updatedAt: data.updated_at,
+                    connection_id: connectionInfo?.connection_id || null,
+                    is_pinned: connectionInfo?.is_pinned || false,
+                    order_position: connectionInfo?.order_position || 0
                 };
                 console.log('selectedWish после обработки:', selectedWish);
                 showDetailModal = true;
@@ -575,9 +585,32 @@
                         <div class="detail-actions">
                             <Button 
                                 kind="ghost" 
-                                on:click={() => {
-                                    togglePinWish(selectedWish.id, selectedWish.connection_id, selectedWish.is_pinned);
-                                    selectedWish.is_pinned = !selectedWish.is_pinned;
+                                on:click={async () => {
+                                    if (!selectedWish.connection_id) return;
+                            
+                                    try {
+                                        await togglePinWish(
+                                            selectedWish.id, 
+                                            selectedWish.connection_id, 
+                                            selectedWish.is_pinned,
+                                            selectedWish.order_position
+                                        );
+                                        
+                                        // Обновляем локальное состояние
+                                        selectedWish.is_pinned = !selectedWish.is_pinned;
+                                        
+                                        // Обновляем wishWishlistsStore
+                                        wishWishlistsStore.update(items => 
+                                            items.map(item => 
+                                                item.connection_id === selectedWish.connection_id
+                                                    ? { ...item, is_pinned: selectedWish.is_pinned }
+                                                    : item
+                                            )
+                                        );
+                                        
+                                    } catch (error) {
+                                        console.error('Ошибка при переключении закрепления:', error);
+                                    }
                                 }}
                             >
                                 {#if selectedWish.is_pinned}
