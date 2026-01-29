@@ -3,12 +3,19 @@
     import Button from '../ui/Button.svelte';
     import { wishlistsStore } from '../../stores/data.js';
     import { wishesStore, loadWishes } from '../../../types/wishes.ts';
-    import { addMultipleWishesToWishlist, getWishesFromWishlist, wishWishlistsStore } from '../../../types/wish_wishlist.ts';
+    import { 
+        addMultipleWishesToWishlist, 
+        getWishesFromWishlist, 
+        wishWishlistsStore,
+        toggleWishPinInWishlist 
+    } from '../../../types/wish_wishlist.ts';
 
     const dispatch = createEventDispatcher();
 
     const iconGift = '../../../../static/icons/gift3.png';
     const ICON_WARNING = '../../../../static/icons/warning.png';
+    const iconPinned = '../../../../static/icons/pinned.svg';
+    const iconPinnedOff = '../../../../static/icons/pinned-off.svg';
     export let wishlistId = null; //2009/0_Dass_25.12.2025
 
     export let token;
@@ -111,6 +118,33 @@
         showFullDeleteModal = true;
     };
 
+    // Функция для переключения закрепления желания
+    const togglePinWish = async (wishId, connectionId, currentPinnedState) => {
+        if (!token || !connectionId) return;
+        
+        try {
+            const newPinnedState = !currentPinnedState;
+            await toggleWishPinInWishlist(token, connectionId, newPinnedState);
+            
+            // Обновляем локальное состояние
+            wishWishlistsStore.update(items => 
+                items.map(item => 
+                    item.connection_id === connectionId 
+                        ? { ...item, is_pinned: newPinnedState }
+                        : item
+                )
+            );
+            
+            // Обновляем также в основном списке желаний, если нужно
+            if (wishlistId) {
+                await updateWishesInWishlist();
+            }
+            
+        } catch (error) {
+            console.error('Ошибка при переключении закрепления:', error);
+        }
+    };
+
     // открытие вишлиста 2009/0_Dass_25.12.2025
     // $: filteredWishes = wishlistId 
     //     ? $wishesStore.filter(wish => 
@@ -126,9 +160,44 @@
             currency: item.currency,
             description: item.description,
             url_gift: item.url_gift,
-            wishlistIds: [wishlistId]
+            wishlistIds: [wishlistId],
+            connection_id: item.connection_id,
+            is_pinned: item.is_pinned || false
         }))
-        : $wishesStore;
+    : $wishesStore.map(wish => ({
+        ...wish,
+        is_pinned: false,
+        connection_id: null
+    }));
+
+    $: sortedFilteredWishes = wishlistId 
+    ? [...$wishWishlistsStore]
+        .sort((a, b) => {
+            // Сначала закрепленные, потом обычные
+            if (a.is_pinned && !b.is_pinned) return -1;
+            if (!a.is_pinned && b.is_pinned) return 1;
+            // Затем по order_position
+            return (a.order_position || 0) - (b.order_position || 0);
+        })
+        .map(item => ({
+            id: item.id,
+            name: item.name,
+            photo: item.photo,
+            price: item.price,
+            currency: item.currency,
+            description: item.description,
+            url_gift: item.url_gift,
+            wishlistIds: [wishlistId],
+            connection_id: item.connection_id,
+            is_pinned: item.is_pinned || false,
+            order_position: item.order_position || 0
+        }))
+        : $wishesStore.map(wish => ({
+            ...wish,
+            is_pinned: false,
+            connection_id: null,
+            order_position: 0
+        }));
 
     $: currentWishlist = wishlistId 
         ? $wishlistsStore.find(wl => wl.id === wishlistId)
@@ -416,7 +485,7 @@
 
 <section class="section-card">
     <!--2009/0_Dass_25.12.2025-->
-    {#if filteredWishes.length === 0}
+    {#if sortedFilteredWishes.length === 0}
         <p class="empty-note">
             {#if wishlistId}
                 В этом вишлисте пока нет желаний.
@@ -426,7 +495,7 @@
         </p>
     {:else}
         <div class="wish-grid">
-            {#each filteredWishes as wish (wish.id)}
+            {#each sortedFilteredWishes as wish (wish.id)}
                 <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
                 <article 
                     class="wish-card" 
@@ -440,6 +509,22 @@
                             <img src={wish.photo} alt={wish.name} class="wish-image" />
                         {:else}
                             <img src={iconGift} alt="Подарок" class="wish-image placeholder" />
+                        {/if}
+
+                        <!-- Иконка закрепления (только в режиме вишлиста) -->
+                        {#if wishlistId && wish.connection_id}
+                            <button 
+                                class="pin-button {wish.is_pinned ? 'pinned' : ''}"
+                                on:click|stopPropagation={() => togglePinWish(wish.id, wish.connection_id, wish.is_pinned)}
+                                aria-label="{wish.is_pinned ? 'Открепить' : 'Закрепить'}"
+                                title="{wish.is_pinned ? 'Открепить' : 'Закрепить'}"
+                            >
+                                <img 
+                                    src={wish.is_pinned ? iconPinned : iconPinnedOff} 
+                                    alt="{wish.is_pinned ? 'Закреплено' : 'Не закреплено'}"
+                                    class="pin-icon"
+                                />
+                            </button>
                         {/if}
                     </div>
 
@@ -833,6 +918,62 @@
         justify-content: center;
         overflow: hidden;
         flex-shrink: 0;
+    }
+
+    /* Иконка закрепления */
+    .pin-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #e5e7eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 2;
+        padding: 0;
+    }
+
+    .pin-button:hover {
+        background: white;
+        border-color: #3b82f6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: scale(1.05);
+    }
+
+    .pin-button.pinned {
+        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .pin-button.pinned:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .pin-icon {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease;
+    }
+
+    .pin-button .pin-icon {
+        filter: brightness(0.6);
+    }
+
+    .pin-button.pinned .pin-icon {
+        filter: brightness(1) invert(1);
+    }
+
+    /* Эффект для закрепленных карточек */
+    .wish-card.pinned {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 1px #3b82f6, 0 2px 4px rgba(59, 130, 246, 0.1);
     }
 
     .wish-image {
