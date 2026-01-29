@@ -568,6 +568,30 @@
             </button>
             <h2>Детальное описание желания</h2>
             <div class="detail-content">
+                <!-- Добавляем кнопку закрепления в детальном просмотре -->
+                {#if wishlistId && selectedWish.connection_id}
+                    <div class="detail-section">
+                        <h3>Действия</h3>
+                        <div class="detail-actions">
+                            <Button 
+                                kind="ghost" 
+                                on:click={() => {
+                                    togglePinWish(selectedWish.id, selectedWish.connection_id, selectedWish.is_pinned);
+                                    selectedWish.is_pinned = !selectedWish.is_pinned;
+                                }}
+                            >
+                                {#if selectedWish.is_pinned}
+                                    <img src={iconPinned} alt="Открепить" class="action-icon" />
+                                    Открепить
+                                {:else}
+                                    <img src={iconPinnedOff} alt="Закрепить" class="action-icon" />
+                                    Закрепить
+                                {/if}
+                            </Button>
+                        </div>
+                    </div>
+                {/if}
+                
                 <!-- Изображение -->
                 <div class="detail-image">
                     {#if selectedWish.photo}
@@ -970,10 +994,11 @@
         filter: brightness(1) invert(1);
     }
 
-    /* Эффект для закрепленных карточек */
-    .wish-card.pinned {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px #3b82f6, 0 2px 4px rgba(59, 130, 246, 0.1);
+    .action-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 
     .wish-image {
