@@ -7,7 +7,7 @@ from app.api.routers.wish import router as wish_routers
 from app.api.routers.wishlist import router as wishlist_routers
 from app.api.routers.reservation import router as reservation_routers
 from app.api.routers.subscription import router as subscription_routers
-
+from app.api.routers.notification_settings import router as settings_routers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +25,7 @@ app.include_router(wish_routers, prefix='/v1')
 app.include_router(wishlist_routers, prefix='/v1')
 app.include_router(reservation_routers, prefix='/v1')
 app.include_router(subscription_routers, prefix='/v1')
+app.include_router(settings_routers, prefix='/v1')
 
 
 @app.get('/')
