@@ -609,6 +609,11 @@
                                 kind="ghost" 
                                 on:click={async () => {
                                     if (!selectedWish.connection_id) return;
+
+                                    if (!selectedWish.is_pinned && pinnedWishesCount >= 5) {
+                                        showNotification('В этом вишлисте можно закрепить не более 5 желаний');
+                                        return;
+                                    }
                             
                                     try {
                                         await togglePinWish(
