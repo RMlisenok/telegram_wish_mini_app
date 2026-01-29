@@ -24,4 +24,22 @@ class TagBase(BaseModel):
 
 class TagResponse(TagBase):
     id: int
+    detail: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TagForm(BaseModel):
+    user_id: int
+    tag: str
+    detail: str
+    type_tag: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TagCreate(BaseModel):
+    tag_value: str
+    type_tag: Optional[bool] = True
+    detail: Optional[str] = ""
+
     model_config = ConfigDict(from_attributes=True)
