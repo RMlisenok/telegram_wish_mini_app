@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wish_repository import WishRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
-from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort, WishCreateDb
+from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort, WishResponseMoreInfo, WishCreateDb
 
 
 class WishService:
@@ -24,6 +24,33 @@ class WishService:
             if not wish:
                 return None
             return WishResponse.model_validate(wish)
+        except Exception as e:
+            print(f"Exception: {e}")
+            return None
+
+    async def get_wish_with_wishlists_info(
+        self,
+        wish_id: int
+    ) -> Optional[WishResponseMoreInfo]:
+        try:
+            wish = await self.rep_wish.get(wish_id)
+            if not wish:
+                return None
+
+            list_wishlists = await self.rep_wish_wishlist.get_wish_from_all_wishlist(wish_id)
+            wishlist_info = []
+            for wishlist in list_wishlists:
+                if wishlist.wishlist:
+                    wishlist_info.append({
+                        "id": wishlist.wishlist.id,
+                        "name": wishlist.wishlist.name
+                    })
+            wish_respones = WishResponse.model_validate(wish)
+            more_info_response = WishResponseMoreInfo(
+                **wish_respones.model_dump(),
+                wishlists=wishlist_info
+            )
+            return more_info_response
         except Exception as e:
             print(f"Exception: {e}")
             return None
@@ -66,7 +93,21 @@ class WishService:
     async def get_user_wish(
         self,
         user_id: int,
-        limit: int = 10
-    ) -> Optional[WishShort]:
-        wishes = await self.rep_wish.get_user_wishlist(user_id, limit)
-        return [WishShort.model_validate(wish) for wish in wishes]
+        is_desc: bool = True,
+        limit: int = 20
+    ) -> Optional[WishResponse]:
+        wishes = await self.rep_wish.get_user_wish(user_id, is_desc, limit)
+        return [WishResponse.model_validate(wish) for wish in wishes]
+
+    async def get_user_wish_sorted(
+        self,
+        user_id: int,
+        is_finish: bool = True,
+        limit: int = 20
+    ) -> Optional[WishResponse]:
+        wishes = await self.rep_wish.get_user_wish_sorted(
+            user_id,
+            is_finish,
+            limit
+        )
+        return [WishResponse.model_validate(wish) for wish in wishes]

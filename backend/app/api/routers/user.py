@@ -8,6 +8,7 @@ from app.core.security import (
     verify_jwt_token
 )
 from app.core.dependencies import get_current_user_id
+from app.services.subscription_service import SubscriptionService
 from app.services.user_service import UserService
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
@@ -24,18 +25,10 @@ async def get_current_user(
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
-    # token = credentials.credentials
-    # payload = verify_jwt_token(token)
-
-    # if not payload:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail='Invalid Token'
-    #     )
-
-    # user_id = int(payload.get('sub'))
     user_service = UserService(db)
-    user = await user_service.get_user(user_id)
+    user = await user_service.get_user_for_main_screen(
+        user_id=user_id
+    )
 
     if not user:
         raise HTTPException(
@@ -78,7 +71,7 @@ async def create_test_user(
 @router.put("/me")
 async def update_current_user(
     user_data: UserUpdate,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ) -> UserResponse:
     service = UserService(db)
@@ -133,8 +126,8 @@ async def get_user_by_id(
 
 @router.post("/block/{blocked_id}")
 async def block_user(
-    blocker_id: int,
     blocked_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     if blocker_id == blocked_id:
@@ -154,8 +147,8 @@ async def block_user(
 
 @router.delete("/block/{blocked_id}")
 async def unblock_user(
-    blocker_id: int,
     blocked_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
@@ -170,8 +163,8 @@ async def unblock_user(
 
 @router.get("/block/status/{user_id}")
 async def check_block_status(
-    user_id: int,
     blocker_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
@@ -181,7 +174,7 @@ async def check_block_status(
 
 @router.get("/block/list")
 async def get_blocked_user_list(
-    blocker_id: int,
+    blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)

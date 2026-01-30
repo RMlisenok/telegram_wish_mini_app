@@ -41,7 +41,7 @@ class WishWishlist(Base):
     )
 
     wishlist: Mapped["Wishlist"] = relationship(
-        "Wishlist", 
+        "Wishlist",
         back_populates="wish_associations"
     )
 

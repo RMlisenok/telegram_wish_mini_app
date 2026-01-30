@@ -29,7 +29,7 @@ class Wish(Base):
     price: Mapped[Optional[float]] = mapped_column(Numeric(12, 2), nullable=True)
     currency: Mapped[CurrencyEnum] = mapped_column(
         Enum(CurrencyEnum),
-        default=CurrencyEnum.RUB
+        nullable=True
     )
     description: Mapped[Optional[str]] = mapped_column(String(250), nullable=True)
     is_booked: Mapped[bool] = mapped_column(Boolean, default=False)

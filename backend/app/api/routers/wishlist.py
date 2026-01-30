@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.models.wishlist import Wishlist
+from app.core.dependencies import get_current_user_id
 from app.services.wishlist_service import WishlistService
 from app.schemas.wishlist import WishlistCreate, WishlistResponse, WishlistUpdate
 from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistResponse, WishWishlistUpdate, WishInWishlistResponse
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 @router.get("/",
             response_model=List[WishlistResponse])
 async def get_user_wishlists(
-    user_id: int,
     limit: int = 10,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ) -> List[WishlistResponse]:
     service = WishlistService(db)
@@ -42,8 +43,8 @@ async def get_wishlist(
              response_model=WishlistResponse,
              status_code=status.HTTP_201_CREATED)
 async def create_wishlist(
-    user_id: int,
     wishlist_data: WishlistCreate,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = WishlistService(db)
@@ -136,7 +137,6 @@ async def get_wishes_from_wishlist(
     db: AsyncSession = Depends(get_db)
 ):
     service = WishlistService(db)
-    
     wishlist = await service.get_wishlist(wishlist_id)
     if not wishlist:
         raise HTTPException(
