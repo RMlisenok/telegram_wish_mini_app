@@ -5,7 +5,8 @@ from .wishlist import Wishlist
 from .wish_wishlist import WishWishlist
 from .wish_reservation import WishReservation
 from .subscription import Subscription
-
+from .notification_settings import NotificationSettings
+from .questionnaire import UserForm
 
 __all__ = [
     "User",
@@ -13,5 +14,7 @@ __all__ = [
     "Wishlist",
     "WishWishlist",
     "WishReservation",
-    "Subscription"
+    "Subscription",
+    "NotificationSettings",
+    "UserForm"
 ]
