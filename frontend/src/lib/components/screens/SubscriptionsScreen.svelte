@@ -1,7 +1,14 @@
 <script>
     import Avatar from '../ui/Avatar.svelte';
     import TextField from '../ui/TextField.svelte';
-    import { subscriptionsStore } from '../../stores/data.js';
+    // import { subscriptionsStore } from '../../stores/data.js';
+    import { 
+    getMySubscriptions, 
+    unsubscribeFromUser, 
+    unsubscribeFromWishlist
+    } from '../../types/subscription.js';
+    import { subscriptionsStore } from '../../type  s/subscription.js';
+    import { loadMainScreenData } from '../types/mainScreenData.js';
 
     // Lyse Modifications
 
@@ -18,7 +25,7 @@
 
     // Фильтрация подписок по поисковому запросу
     $: sortedSubscriptions = (() => {
-        let result = $subscriptionsStore;
+        let result = $subscriptionsStore.subscriptions;
         const query = searchQuery.trim().toLowerCase();
 
         if (query) {
@@ -39,6 +46,42 @@
         return sortSubscriptions(result, sortBy);
     })();
 
+    let isLoading = true;
+    let errorMessage = '';
+
+    onMount(async () => {
+        await loadSubscriptions();
+    });
+
+    function getToken() {
+        const tokenFromStorage = localStorage.getItem('token') || 
+                                localStorage.getItem('authToken') || 
+                                sessionStorage.getItem('token');
+        
+        return tokenFromStorage || '';
+    }
+
+    async function loadSubscriptions() {
+        try {
+            isLoading = true;
+            errorMessage = '';
+            const token = getToken();
+            
+            if (!token) {
+                errorMessage = 'Пользователь не авторизован';
+                return;
+            }
+            
+            // Загружаем подписки из API
+            await getMySubscriptions(token);
+        } catch (error) {
+            errorMessage = error.message || 'Не удалось загрузить подписки';
+            console.error('Ошибка загрузки подписок:', error);
+        } finally {
+            isLoading = false;
+        }
+    }
+
     // Функция сортировки
     const sortSubscriptions = (subscriptions, sortType) => {
         let result = [...subscriptions];
@@ -46,11 +89,11 @@
         switch (sortType) {
             case 'users':
                 // Только пользователи
-                return result.filter(item => item.type_sub);
+                return result.filter(item => item.type === 'user');
                 
             case 'wishlists':
                 // Только вишлисты
-                return result.filter(item => !item.type_sub);
+                return result.filter(item => item.type === 'wishlist');
                 
             case 'birth_date_asc':
                 // Сначала сортируем пользователей по дате рождения по возрастанию
@@ -114,28 +157,41 @@
     };
 
     // Обработчик отписки
-    const handleUnsubscribe = (subscriptionId, event) => {
+    const handleUnsubscribe = async (subscriptionId, event) => {
         if (event) event.stopPropagation();
         
-        if (confirm('Вы уверены, что хотите отписаться?')) {
-            console.log('Отписка от:', subscriptionId);
-            // TODO: Реализовать отписку
+        const token = getToken();
+        if (!token) {
+            alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
+            return;
+        }
+
+        const confirmMessage = subscription.type === 'user' 
+        ? `Вы уверены, что хотите отписаться от пользователя ${subscription.name}?`
+        : `Вы уверены, что хотите отписаться от вишлиста "${subscription.name}"?`;
+    
+        if (!confirm(confirmMessage)) return;
+        
+        try {
+            if (subscription.type === 'user') {
+                await unsubscribeFromUser(token, subscription.user_id);
+            } else {
+                await unsubscribeFromWishlist(token, subscription.wishlist_id);
+            }
+            
+        } catch (error) {
+            alert(error.message || 'Ошибка отписки');
+            console.error('Ошибка отписки:', error);
         }
     };
 
     // Обработчик открытия профиля/вишлиста
     const handleOpenItem = (subscription) => {
-        if (subscription.type_sub) {
-
-            // Lyse Modification
-
-            dispatch('open-profile', { profileId: subscription.user?.user_id });
-
-            console.log('Открытие профиля пользователя:', subscription.user?.user_id);
-            // TODO: Реализовать переход к профилю пользователя
+        if (subscription.type === 'user') {
+            dispatch('open-profile', { profileId: subscription.user_id });
         } else {
-            console.log('Открытие вишлиста:', subscription.wishlist?.wishlist_id);
-            // TODO: Реализовать переход к вишлисту
+            // Для вишлиста можно добавить новый ивент или использовать существующий
+            console.log('Открытие вишлиста:', subscription.wishlist_id);
         }
     };
 
@@ -263,7 +319,7 @@
                     on:keydown={(e) => e.key === 'Enter' && handleOpenItem(subscription)}
                 >
                     <!-- Контент подписки -->
-                    {#if subscription.type_sub}
+                    {#if subscription.type === 'user'}
                         <!-- Подписка на пользователя -->
                         <div class="subscription-content">
                             <Avatar 
@@ -277,9 +333,9 @@
                                     {subscription.user?.name || 'Пользователь'}
                                 </div>
                                 
-                                <div class="subscription-meta">
+                                <!-- <div class="subscription-meta">
                                     <span>Дата рождения: {subscription.user?.birth_date || 'не указана'}</span>
-                                </div>
+                                </div> -->
                                 
                             </div>
                         </div>
@@ -309,8 +365,8 @@
                                 
                                 <div class="subscription-meta">
                                     <span>Владелец: {subscription.wishlist?.user_name || 'не указан'}</span>
-                                    <span> · </span>
-                                    <span>{subscription.wishlist?.number_of_wishes || 0} {getWishesWord(subscription.wishlist?.number_of_wishes || 0)}</span>
+                                    <!-- <span> · </span> -->
+                                    <!-- <span>{subscription.wishlist?.number_of_wishes || 0} {getWishesWord(subscription.wishlist?.number_of_wishes || 0)}</span> -->
                                 </div>
 
                             </div>
