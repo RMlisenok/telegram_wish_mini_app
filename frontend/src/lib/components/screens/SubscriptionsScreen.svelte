@@ -7,8 +7,10 @@
     unsubscribeFromUser, 
     unsubscribeFromWishlist
     } from '../../types/subscription.js';
-    import { subscriptionsStore } from '../../type  s/subscription.js';
-    import { loadMainScreenData } from '../types/mainScreenData.js';
+    import { subscriptionsStore } from '../../../types/subscription.js';
+    import { loadMainScreenData } from '../../../types/mainScreenData.js';
+
+    import { onMount } from 'svelte';
 
     // Lyse Modifications
 
@@ -157,7 +159,7 @@
     };
 
     // Обработчик отписки
-    const handleUnsubscribe = async (subscriptionId, event) => {
+    const handleUnsubscribe = async (subscription, event) => {
         if (event) event.stopPropagation();
         
         const token = getToken();
@@ -310,7 +312,7 @@
         </p>
     {:else}
         <div class="subscriptions-list">
-            {#each sortedSubscriptions as subscription (subscription.id)}
+            {#each sortedSubscriptions as subscription (subscription.sub_id)}
                 <div 
                     class="subscription-card"
                     on:click={() => handleOpenItem(subscription)}
