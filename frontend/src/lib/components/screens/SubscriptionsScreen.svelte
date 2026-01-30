@@ -5,9 +5,9 @@
     import { 
     getMySubscriptions, 
     unsubscribeFromUser, 
-    unsubscribeFromWishlist
-    } from '../../types/subscription.js';
-    import { subscriptionsStore } from '../../../types/subscription.js';
+    unsubscribeFromWishlist,
+    subscriptionsStore
+    } from '../../../types/subscription.js';
     import { loadMainScreenData } from '../../../types/mainScreenData.js';
 
     import { onMount } from 'svelte';
@@ -32,7 +32,7 @@
 
         if (query) {
             result = result.filter(item => {
-                if (item.type_sub) {
+                if (item.type === 'user') {
                     // Подписка на пользователя
                     const userName = item.user?.name?.toLowerCase() || '';
                     return userName.includes(query);
@@ -97,47 +97,47 @@
                 // Только вишлисты
                 return result.filter(item => item.type === 'wishlist');
                 
-            case 'birth_date_asc':
-                // Сначала сортируем пользователей по дате рождения по возрастанию
-                const usersAsc = result
-                    .filter(item => item.type_sub)
-                    .sort((a, b) => {
-                        const dateA = parseBirthDate(a.user?.birth_date);
-                        const dateB = parseBirthDate(b.user?.birth_date);
+            // case 'birth_date_asc':
+            //     // Сначала сортируем пользователей по дате рождения по возрастанию
+            //     const usersAsc = result
+            //         .filter(item => item.type_sub)
+            //         .sort((a, b) => {
+            //             const dateA = parseBirthDate(a.user?.birth_date);
+            //             const dateB = parseBirthDate(b.user?.birth_date);
                         
-                        // Если нет даты, идет в конец
-                        if (!dateA && !dateB) return 0;
-                        if (!dateA) return 1;
-                        if (!dateB) return -1;
+            //             // Если нет даты, идет в конец
+            //             if (!dateA && !dateB) return 0;
+            //             if (!dateA) return 1;
+            //             if (!dateB) return -1;
                         
-                        return dateA - dateB; // Старшие сначала
-                    });
+            //             return dateA - dateB; // Старшие сначала
+            //         });
                 
-                // Вишлисты идут после пользователей (без сортировки)
-                const wishlists = result.filter(item => !item.type_sub);
+            //     // Вишлисты идут после пользователей (без сортировки)
+            //     const wishlists = result.filter(item => !item.type_sub);
                 
-                return [...usersAsc, ...wishlists];
+            //     return [...usersAsc, ...wishlists];
                 
-            case 'birth_date_desc':
-                // Сначала сортируем пользователей по дате рождения по убыванию
-                const usersDesc = result
-                    .filter(item => item.type_sub)
-                    .sort((a, b) => {
-                        const dateA = parseBirthDate(a.user?.birth_date);
-                        const dateB = parseBirthDate(b.user?.birth_date);
+            // case 'birth_date_desc':
+            //     // Сначала сортируем пользователей по дате рождения по убыванию
+            //     const usersDesc = result
+            //         .filter(item => item.type_sub)
+            //         .sort((a, b) => {
+            //             const dateA = parseBirthDate(a.user?.birth_date);
+            //             const dateB = parseBirthDate(b.user?.birth_date);
                         
-                        // Если нет даты, идет в конец
-                        if (!dateA && !dateB) return 0;
-                        if (!dateA) return 1;
-                        if (!dateB) return -1;
+            //             // Если нет даты, идет в конец
+            //             if (!dateA && !dateB) return 0;
+            //             if (!dateA) return 1;
+            //             if (!dateB) return -1;
                         
-                        return dateB - dateA; // Младшие сначала
-                    });
+            //             return dateB - dateA; // Младшие сначала
+            //         });
                 
-                // Вишлисты идут после пользователей (без сортировки)
-                const wishlistsDesc = result.filter(item => !item.type_sub);
+            //     // Вишлисты идут после пользователей (без сортировки)
+            //     const wishlistsDesc = result.filter(item => !item.type_sub);
                 
-                return [...usersDesc, ...wishlistsDesc];
+            //     return [...usersDesc, ...wishlistsDesc];
                 
             default:
                 // 'default' - выводятся пользователи и вишлисты без упорядочивания
@@ -146,17 +146,17 @@
     };
 
     // Функция для парсинга даты рождения из формата "DD.MM.YYYY"
-    const parseBirthDate = (dateStr) => {
-        if (!dateStr) return null;
+    // const parseBirthDate = (dateStr) => {
+    //     if (!dateStr) return null;
         
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) return null;
+    //     const parts = dateStr.split('.');
+    //     if (parts.length !== 3) return null;
         
-        const [day, month, year] = parts.map(Number);
-        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    //     const [day, month, year] = parts.map(Number);
+    //     if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
         
-        return new Date(year, month - 1, day);
-    };
+    //     return new Date(year, month - 1, day);
+    // };
 
     // Обработчик отписки
     const handleUnsubscribe = async (subscription, event) => {
@@ -326,13 +326,13 @@
                         <div class="subscription-content">
                             <Avatar 
                                 size={60}
-                                src={subscription.user?.photo}
-                                initials={getInitials(subscription.user?.name)}
+                                src={subscription.photo}
+                                initials={getInitials(subscription.name)}
                             />
                             
                             <div class="subscription-info">
-                                <div class="subscription-title" title={subscription.user?.name}>
-                                    {subscription.user?.name || 'Пользователь'}
+                                <div class="subscription-title" title={subscription.name}>
+                                    {subscription.name || 'Пользователь'}
                                 </div>
                                 
                                 <!-- <div class="subscription-meta">
@@ -345,10 +345,10 @@
                         <!-- Подписка на вишлист -->
                         <div class="subscription-content">
                             <div class="wishlist-cover">
-                                {#if subscription.wishlist?.photo}
+                                {#if subscription.photo}
                                     <img 
-                                        src={subscription.wishlist.photo} 
-                                        alt={subscription.wishlist.name}
+                                        src={subscription.photo} 
+                                        alt={subscription.name}
                                         class="cover-image"
                                     />
                                 {:else}
@@ -361,12 +361,12 @@
                             </div>
                             
                             <div class="subscription-info">
-                                <div class="subscription-title" title={subscription.wishlist?.name}>
-                                    {subscription.wishlist?.name || 'Вишлист'}
+                                <div class="subscription-title" title={subscription.name}>
+                                    {subscription.name || 'Вишлист'}
                                 </div>
                                 
                                 <div class="subscription-meta">
-                                    <span>Владелец: {subscription.wishlist?.user_name || 'не указан'}</span>
+                                    <span>Владелец: {subscription.owner_name || 'не указан'}</span>
                                     <!-- <span> · </span> -->
                                     <!-- <span>{subscription.wishlist?.number_of_wishes || 0} {getWishesWord(subscription.wishlist?.number_of_wishes || 0)}</span> -->
                                 </div>
@@ -380,7 +380,7 @@
                         <!-- Кнопка отписки -->
                         <button
                             class="action-button unsubscribe-button"
-                            on:click|stopPropagation={(e) => handleUnsubscribe(subscription.id, e)}
+                            on:click|stopPropagation={(e) => handleUnsubscribe(subscription, e)}
                             aria-label="Отписаться"
                         >
                             Отписаться
@@ -570,7 +570,7 @@
         color: #374151;
     }
 
-    .subscriptions-counts {
+    /* .subscriptions-counts {
         display: flex;
         gap: 8px;
     }
@@ -582,7 +582,7 @@
         color: #4f46e5;
         border-radius: 12px;
         font-weight: 500;
-    }
+    } */
 
     .sort-options {
         display: flex;
