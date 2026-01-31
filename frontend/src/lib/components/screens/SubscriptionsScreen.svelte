@@ -27,29 +27,6 @@
     let errorMessage = '';
     $: filteredAndSortedSubscriptions = getFilteredAndSortedSubscriptions($subscriptionsStore);
 
-    // // Фильтрация подписок по поисковому запросу
-    // $: sortedSubscriptions = (() => {
-    //     let result = $subscriptionsStore;
-    //     const query = searchQuery.trim().toLowerCase();
-
-    //     if (query) {
-    //         result = result.filter(item => {
-    //             if (item.type_sub) {
-    //                 // Подписка на пользователя
-    //                 const userName = item.user?.name?.toLowerCase() || '';
-    //                 return userName.includes(query);
-    //             } else {
-    //                 // Подписка на вишлист
-    //                 const wishlistName = item.wishlist?.name?.toLowerCase() || '';
-    //                 const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
-    //                 return wishlistName.includes(query) || wishlistOwner.includes(query);
-    //             }
-    //         });
-    //     }
-
-    //     return sortSubscriptions(result, sortBy);
-    // })();
-
 
     onMount(async () => {
         if (!token) {
@@ -80,6 +57,42 @@
             isLoading = false;
         }
     }
+
+    // Функция преобразования даты для отображения
+    const formatDateForDisplay = (dateStr) => {
+        if (!dateStr) return 'не указана';
+        
+        // Если дата в формате YYYY-MM-DD
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const [year, month, day] = parts;
+                return `${day}.${month}.${year}`;
+            }
+        }
+        
+        // Если дата уже в правильном формате
+        return dateStr;
+    };
+
+    // Функция для сортировки по дате
+    const getDateForSorting = (dateStr) => {
+        if (!dateStr) return null;
+        
+        let isoDateStr = dateStr;
+        
+        // Преобразуем DD.MM.YYYY в YYYY-MM-DD
+        if (dateStr.includes('.')) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+                const [day, month, year] = parts.map(Number);
+                isoDateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        const date = new Date(isoDateStr);
+        return isNaN(date.getTime()) ? null : date;
+    };
 
     const getFilteredAndSortedSubscriptions = (subscriptions) => {
         let result = [...subscriptions];
@@ -121,8 +134,8 @@
                 const usersAsc = result
                     .filter(item => item.type === 'user')
                     .sort((a, b) => {
-                        const dateA = parseBirthDate(a.birth_date);
-                        const dateB = parseBirthDate(b.birth_date);
+                        const dateA = getDateForSorting(a.birth_date);
+                        const dateB = getDateForSorting(b.birth_date);
                         
                         // Если нет даты, идет в конец
                         if (!dateA && !dateB) return 0;
@@ -142,8 +155,8 @@
                 const usersDesc = result
                     .filter(item => item.type === 'user')
                     .sort((a, b) => {
-                        const dateA = parseBirthDate(a.birth_date);
-                        const dateB = parseBirthDate(b.birth_date);
+                        const dateA = getDateForSorting(a.birth_date);
+                        const dateB = getDateForSorting(b.birth_date);
                         
                         // Если нет даты, идет в конец
                         if (!dateA && !dateB) return 0;
@@ -162,19 +175,6 @@
                 // 'default' - выводятся пользователи и вишлисты без упорядочивания
                 return result;
         }
-    };
-
-    // Функция для парсинга даты рождения из формата "DD.MM.YYYY"
-    const parseBirthDate = (dateStr) => {
-        if (!dateStr) return null;
-        
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) return null;
-        
-        const [day, month, year] = parts.map(Number);
-        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-        
-        return new Date(year, month - 1, day);
     };
 
     // Обработчик отписки
@@ -364,7 +364,7 @@
                                 </div>
                                 
                                 <div class="subscription-meta">
-                                    <span>Дата рождения: {subscription.birth_date || 'не указана'}</span>
+                                    <span>Дата рождения: {formatDateForDisplay(subscription.birth_date) || 'не указана'}</span>
                                 </div>
                                 
                             </div>
