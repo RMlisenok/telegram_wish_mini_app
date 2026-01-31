@@ -68,6 +68,21 @@
     // const getWishlistCount = (wishlistId) =>
     //     $wishesStore.filter((w) => (w.wishlistIds || []).includes(wishlistId)).length;
 
+    $: latestSubscribers = $mainSubscribersStore
+        .slice()
+        .sort((a, b) => {
+            // Преобразуем даты для сортировки (если есть поле created_at или subscription_date)
+            const dateA = a.created_at || a.subscription_date || '';
+            const dateB = b.created_at || b.subscription_date || '';
+            
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            
+            return new Date(dateB).getTime() - new Date(dateA).getTime();
+        })
+        .slice(0, 2);
+
     onMount(async () => {
         if (!token) {
             console.error('Токен не найден');
