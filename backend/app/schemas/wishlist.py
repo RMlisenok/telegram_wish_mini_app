@@ -13,7 +13,7 @@ class TypePrivacyEnum(str, Enum):
 class WishlistBase(BaseModel):
     user_id: int
     name: str
-    description: str
+    description: Optional[str] = None
     photo: Optional[str] = None
     typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
 
@@ -22,7 +22,7 @@ class WishlistBase(BaseModel):
 
 class WishlistCreate(BaseModel):
     name: str
-    description: str
+    description: Optional[str] = None
     photo: Optional[str] = None
     typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
 
@@ -33,7 +33,7 @@ class WishlistCreateDb(WishlistCreate):
 
 class WishlistUpdate(BaseModel):
     name: str
-    description: str
+    description: Optional[str] = None
     photo: Optional[str] = None
     typeprivacy: TypePrivacyEnum = TypePrivacyEnum.public
 
