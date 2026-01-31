@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     await init_tags()
     yield
     print('Stop work and clean tables')
-    await drop_tables()
+    # await drop_tables()
     print('clean completed')
 
 
