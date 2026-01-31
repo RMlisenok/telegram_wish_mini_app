@@ -6,8 +6,7 @@ from .wish_wishlist import WishWishlist
 from .wish_reservation import WishReservation
 from .subscription import Subscription
 from .notification_settings import NotificationSettings
-from .questionnaire import UserForm
-from .questionnaire import TagForm
+from .questionnaire import UserForm, TagForm
 
 __all__ = [
     "User",
