@@ -52,20 +52,12 @@ class UserService:
         total_wish = await self.rep_wish.get_count_user_wish(user_id)
         total_wishlist = await self.rep_wishlist.get_count_user_wishlist(user_id)
 
-        subscribers = await self.rep_subs.get_user_subscribers(user_id, True, 2)
-        total_subscribers = await self.rep_subs.count_user_subscribers(user_id)
-
-        subscribers_list = []
-        for user_sub in subscribers:
-            subscribers_list.append({
-                "name": user_sub.name,
-                "photo": user_sub.photo,
-                "birth_date": user_sub.birth_date
-            })
-        my_subscribers = SubscribersResponse(
-            subscribers=subscribers_list,
-            total=total_subscribers
+        my_subscribers = await self.serv_subs.get_user_subscribers(
+            user_id,
+            True,
+            2
         )
+
         subscription = await self.serv_subs.get_my_subscription(user_id, True, 2)
         subscr = {"subscription": subscription.model_dump()}
         return UserResponesForMainScreen(
