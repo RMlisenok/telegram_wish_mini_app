@@ -25,29 +25,30 @@
     let sortBy = 'default'; // 'default', 'users', 'wishlists', 'birth_date_asc', 'birth_date_desc'
     let isLoading = true;
     let errorMessage = '';
+    $: filteredAndSortedSubscriptions = getFilteredAndSortedSubscriptions($subscriptionsStore);
 
-    // Фильтрация подписок по поисковому запросу
-    $: sortedSubscriptions = (() => {
-        let result = $subscriptionsStore;
-        const query = searchQuery.trim().toLowerCase();
+    // // Фильтрация подписок по поисковому запросу
+    // $: sortedSubscriptions = (() => {
+    //     let result = $subscriptionsStore;
+    //     const query = searchQuery.trim().toLowerCase();
 
-        if (query) {
-            result = result.filter(item => {
-                if (item.type_sub) {
-                    // Подписка на пользователя
-                    const userName = item.user?.name?.toLowerCase() || '';
-                    return userName.includes(query);
-                } else {
-                    // Подписка на вишлист
-                    const wishlistName = item.wishlist?.name?.toLowerCase() || '';
-                    const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
-                    return wishlistName.includes(query) || wishlistOwner.includes(query);
-                }
-            });
-        }
+    //     if (query) {
+    //         result = result.filter(item => {
+    //             if (item.type_sub) {
+    //                 // Подписка на пользователя
+    //                 const userName = item.user?.name?.toLowerCase() || '';
+    //                 return userName.includes(query);
+    //             } else {
+    //                 // Подписка на вишлист
+    //                 const wishlistName = item.wishlist?.name?.toLowerCase() || '';
+    //                 const wishlistOwner = item.wishlist?.user_name?.toLowerCase() || '';
+    //                 return wishlistName.includes(query) || wishlistOwner.includes(query);
+    //             }
+    //         });
+    //     }
 
-        return sortSubscriptions(result, sortBy);
-    })();
+    //     return sortSubscriptions(result, sortBy);
+    // })();
 
 
     onMount(async () => {
