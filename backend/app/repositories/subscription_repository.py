@@ -101,23 +101,50 @@ class SubscriptionRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
+    # async def get_user_subscribers(
+    #     self,
+    #     user_id,
+    #     is_desc: bool,
+    #     limit: int = 100
+    # ) -> List[User]:
+    #     query = (
+    #         select(User)
+    #         .join(
+    #             Subscription,
+    #             User.id == Subscription.subscriber_id
+    #         )
+    #         .where(
+    #             and_(
+    #                 Subscription.target_user_id == user_id,
+    #                 Subscription.type_sub == True
+    #             )
+    #         )
+    #     )
+    #     if is_desc:
+    #         query = query.order_by(desc(Subscription.created_at))
+    #     else:
+    #         query = query.order_by(asc(Subscription.created_at))
+    #     query = query.limit(limit)
+    #     result = await self.session.execute(query)
+    #     return list(result.scalars().all())
+
+
     async def get_user_subscribers(
         self,
         user_id,
         is_desc: bool,
         limit: int = 100
-    ) -> List[User]:
+    ) -> List[Subscription]:
         query = (
-            select(User)
-            .join(
-                Subscription,
-                User.id == Subscription.subscriber_id
-            )
+            select(Subscription)
             .where(
                 and_(
                     Subscription.target_user_id == user_id,
                     Subscription.type_sub == True
                 )
+            )
+            .options(
+                joinedload(Subscription.subscriber),
             )
         )
         if is_desc:
@@ -127,6 +154,7 @@ class SubscriptionRepository:
         query = query.limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
 
     async def update(
         self,
