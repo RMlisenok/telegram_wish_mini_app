@@ -1,13 +1,11 @@
 <script>
     import Avatar from '../ui/Avatar.svelte';
     import TextField from '../ui/TextField.svelte';
-    import { subscriptionsStore } from '../../stores/data.js';
     import { 
         getMySubscriptions, 
         unsubscribeFromUser, 
         unsubscribeFromWishlist,
-        SubscriptionItem,
-        SubscriptionsResponse
+        subscriptionsStore
     } from '../../../types/subscription.js';
     
     import { createEventDispatcher, onMount } from 'svelte';
