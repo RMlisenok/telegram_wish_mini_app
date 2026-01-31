@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.core.dependencies import get_current_user_id
 from app.core.db import get_db
 from app.models.access_request import AccessRequest, AccessRequestStatus
 from app.services.access_request_service import AccessRequestService
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/access-requests", tags=["access-requests"])
              status_code=status.HTTP_201_CREATED)
 async def create_access_request(
     request_data: AccessRequestCreate,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = AccessRequestService(db)
@@ -44,7 +44,7 @@ async def create_access_request(
             response_model=AccessRequestWithDetails)
 async def get_access_request(
     request_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = AccessRequestService(db)
@@ -67,7 +67,7 @@ async def get_access_request(
 async def update_access_request(
     request_id: int,
     update_data: UpdateAccessRequest,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = AccessRequestService(db)
@@ -88,7 +88,7 @@ async def update_access_request(
 @router.delete("/{request_id}")
 async def delete_access_request(
     request_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = AccessRequestService(db)
@@ -113,7 +113,7 @@ async def delete_access_request(
 @router.get("/my/requests",
             response_model=AccessRequestsResponse)
 async def get_my_access_requests(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     status_req: Optional[AccessRequestStatus] = None,
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
@@ -135,7 +135,7 @@ async def get_my_access_requests(
 @router.get("/my/wishlists",
             response_model=AccessRequestsResponse)
 async def get_requests_for_my_wishlists(
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     status_req: Optional[AccessRequestStatus] = None,
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
@@ -157,7 +157,7 @@ async def get_requests_for_my_wishlists(
 @router.get("/check/{wishlist_id/access")
 async def check_access(
     wishlist_id: int,
-    user_id: int,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = AccessRequestService(db)
