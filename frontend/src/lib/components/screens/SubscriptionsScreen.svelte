@@ -1,16 +1,16 @@
 <script>
     import Avatar from '../ui/Avatar.svelte';
     import TextField from '../ui/TextField.svelte';
-    // import { subscriptionsStore } from '../../stores/data.js';
-    import { 
-    getMySubscriptions, 
-    unsubscribeFromUser, 
-    unsubscribeFromWishlist,
-    subscriptionsStore
-    } from '../../../types/subscription.js';
-    import { loadMainScreenData } from '../../../types/mainScreenData.js';
+    import { subscriptionsStore } from '../../stores/data.js';
+    // import { 
+    // getMySubscriptions, 
+    // unsubscribeFromUser, 
+    // unsubscribeFromWishlist,
+    // subscriptionsStore
+    // } from '../../../types/subscription.js';
+    // import { loadMainScreenData } from '../../../types/mainScreenData.js';
 
-    import { onMount } from 'svelte';
+    // import { onMount } from 'svelte';
 
     // Lyse Modifications
 
@@ -27,12 +27,12 @@
 
     // Фильтрация подписок по поисковому запросу
     $: sortedSubscriptions = (() => {
-        let result = $subscriptionsStore.subscriptions;
+        let result = $subscriptionsStore;
         const query = searchQuery.trim().toLowerCase();
 
         if (query) {
             result = result.filter(item => {
-                if (item.type === 'user') {
+                if (item.type_sub) {
                     // Подписка на пользователя
                     const userName = item.user?.name?.toLowerCase() || '';
                     return userName.includes(query);
@@ -48,41 +48,41 @@
         return sortSubscriptions(result, sortBy);
     })();
 
-    let isLoading = true;
-    let errorMessage = '';
+    // let isLoading = true;
+    // let errorMessage = '';
 
-    onMount(async () => {
-        await loadSubscriptions();
-    });
+    // onMount(async () => {
+    //     await loadSubscriptions();
+    // });
 
-    function getToken() {
-        const tokenFromStorage = localStorage.getItem('token') || 
-                                localStorage.getItem('authToken') || 
-                                sessionStorage.getItem('token');
+    // function getToken() {
+    //     const tokenFromStorage = localStorage.getItem('token') || 
+    //                             localStorage.getItem('authToken') || 
+    //                             sessionStorage.getItem('token');
         
-        return tokenFromStorage || '';
-    }
+    //     return tokenFromStorage || '';
+    // }
 
-    async function loadSubscriptions() {
-        try {
-            isLoading = true;
-            errorMessage = '';
-            const token = getToken();
+    // async function loadSubscriptions() {
+    //     try {
+    //         isLoading = true;
+    //         errorMessage = '';
+    //         const token = getToken();
             
-            if (!token) {
-                errorMessage = 'Пользователь не авторизован';
-                return;
-            }
+    //         if (!token) {
+    //             errorMessage = 'Пользователь не авторизован';
+    //             return;
+    //         }
             
-            // Загружаем подписки из API
-            await getMySubscriptions(token);
-        } catch (error) {
-            errorMessage = error.message || 'Не удалось загрузить подписки';
-            console.error('Ошибка загрузки подписок:', error);
-        } finally {
-            isLoading = false;
-        }
-    }
+    //         // Загружаем подписки из API
+    //         await getMySubscriptions(token);
+    //     } catch (error) {
+    //         errorMessage = error.message || 'Не удалось загрузить подписки';
+    //         console.error('Ошибка загрузки подписок:', error);
+    //     } finally {
+    //         isLoading = false;
+    //     }
+    // }
 
     // Функция сортировки
     const sortSubscriptions = (subscriptions, sortType) => {
@@ -91,53 +91,53 @@
         switch (sortType) {
             case 'users':
                 // Только пользователи
-                return result.filter(item => item.type === 'user');
+                return result.filter(item => item.type_sub);
                 
             case 'wishlists':
                 // Только вишлисты
-                return result.filter(item => item.type === 'wishlist');
+                return result.filter(item => item.type_sub);
                 
-            // case 'birth_date_asc':
-            //     // Сначала сортируем пользователей по дате рождения по возрастанию
-            //     const usersAsc = result
-            //         .filter(item => item.type_sub)
-            //         .sort((a, b) => {
-            //             const dateA = parseBirthDate(a.user?.birth_date);
-            //             const dateB = parseBirthDate(b.user?.birth_date);
+            case 'birth_date_asc':
+                // Сначала сортируем пользователей по дате рождения по возрастанию
+                const usersAsc = result
+                    .filter(item => item.type_sub)
+                    .sort((a, b) => {
+                        const dateA = parseBirthDate(a.user?.birth_date);
+                        const dateB = parseBirthDate(b.user?.birth_date);
                         
-            //             // Если нет даты, идет в конец
-            //             if (!dateA && !dateB) return 0;
-            //             if (!dateA) return 1;
-            //             if (!dateB) return -1;
+                        // Если нет даты, идет в конец
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return 1;
+                        if (!dateB) return -1;
                         
-            //             return dateA - dateB; // Старшие сначала
-            //         });
+                        return dateA - dateB; // Старшие сначала
+                    });
                 
-            //     // Вишлисты идут после пользователей (без сортировки)
-            //     const wishlists = result.filter(item => !item.type_sub);
+                // Вишлисты идут после пользователей (без сортировки)
+                const wishlists = result.filter(item => !item.type_sub);
                 
-            //     return [...usersAsc, ...wishlists];
+                return [...usersAsc, ...wishlists];
                 
-            // case 'birth_date_desc':
-            //     // Сначала сортируем пользователей по дате рождения по убыванию
-            //     const usersDesc = result
-            //         .filter(item => item.type_sub)
-            //         .sort((a, b) => {
-            //             const dateA = parseBirthDate(a.user?.birth_date);
-            //             const dateB = parseBirthDate(b.user?.birth_date);
+            case 'birth_date_desc':
+                // Сначала сортируем пользователей по дате рождения по убыванию
+                const usersDesc = result
+                    .filter(item => item.type_sub)
+                    .sort((a, b) => {
+                        const dateA = parseBirthDate(a.user?.birth_date);
+                        const dateB = parseBirthDate(b.user?.birth_date);
                         
-            //             // Если нет даты, идет в конец
-            //             if (!dateA && !dateB) return 0;
-            //             if (!dateA) return 1;
-            //             if (!dateB) return -1;
+                        // Если нет даты, идет в конец
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return 1;
+                        if (!dateB) return -1;
                         
-            //             return dateB - dateA; // Младшие сначала
-            //         });
+                        return dateB - dateA; // Младшие сначала
+                    });
                 
-            //     // Вишлисты идут после пользователей (без сортировки)
-            //     const wishlistsDesc = result.filter(item => !item.type_sub);
+                // Вишлисты идут после пользователей (без сортировки)
+                const wishlistsDesc = result.filter(item => !item.type_sub);
                 
-            //     return [...usersDesc, ...wishlistsDesc];
+                return [...usersDesc, ...wishlistsDesc];
                 
             default:
                 // 'default' - выводятся пользователи и вишлисты без упорядочивания
@@ -146,54 +146,58 @@
     };
 
     // Функция для парсинга даты рождения из формата "DD.MM.YYYY"
-    // const parseBirthDate = (dateStr) => {
-    //     if (!dateStr) return null;
+    const parseBirthDate = (dateStr) => {
+        if (!dateStr) return null;
         
-    //     const parts = dateStr.split('.');
-    //     if (parts.length !== 3) return null;
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return null;
         
-    //     const [day, month, year] = parts.map(Number);
-    //     if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+        const [day, month, year] = parts.map(Number);
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
         
-    //     return new Date(year, month - 1, day);
-    // };
+        return new Date(year, month - 1, day);
+    };
 
     // Обработчик отписки
-    const handleUnsubscribe = async (subscription, event) => {
+    const handleUnsubscribe = (subscriptionId, event) => {
         if (event) event.stopPropagation();
-        
-        const token = getToken();
-        if (!token) {
-            alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
-            return;
-        }
 
-        const confirmMessage = subscription.type === 'user' 
-        ? `Вы уверены, что хотите отписаться от пользователя ${subscription.name}?`
-        : `Вы уверены, что хотите отписаться от вишлиста "${subscription.name}"?`;
-    
-        if (!confirm(confirmMessage)) return;
-        
-        try {
-            if (subscription.type === 'user') {
-                await unsubscribeFromUser(token, subscription.user_id);
-            } else {
-                await unsubscribeFromWishlist(token, subscription.wishlist_id);
-            }
-            
-        } catch (error) {
-            alert(error.message || 'Ошибка отписки');
-            console.error('Ошибка отписки:', error);
+        if (confirm('Вы уверены, что хотите отписаться?')) {
+            console.log('Отписка от:', subscriptionId);
+            // TODO: Реализовать отписку
         }
+        // const token = getToken();
+        // if (!token) {
+        //     alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
+        //     return;
+        // }
+
+        // const confirmMessage = subscription.type === 'user' 
+        // ? `Вы уверены, что хотите отписаться от пользователя ${subscription.name}?`
+        // : `Вы уверены, что хотите отписаться от вишлиста "${subscription.name}"?`;
+    
+        // if (!confirm(confirmMessage)) return;
+        
+        // try {
+        //     if (subscription.type === 'user') {
+        //         await unsubscribeFromUser(token, subscription.user_id);
+        //     } else {
+        //         await unsubscribeFromWishlist(token, subscription.wishlist_id);
+        //     }
+            
+        // } catch (error) {
+        //     alert(error.message || 'Ошибка отписки');
+        //     console.error('Ошибка отписки:', error);
+        // }
     };
 
     // Обработчик открытия профиля/вишлиста
     const handleOpenItem = (subscription) => {
-        if (subscription.type === 'user') {
-            dispatch('open-profile', { profileId: subscription.user_id });
+        if (subscription.type_sub) {
+            dispatch('open-profile', { profileId: subscription.user?.user_id });
         } else {
             // Для вишлиста можно добавить новый ивент или использовать существующий
-            console.log('Открытие вишлиста:', subscription.wishlist_id);
+            console.log('Открытие вишлиста:', subscription.wishlist?.wishlist_id);
         }
     };
 
@@ -312,7 +316,7 @@
         </p>
     {:else}
         <div class="subscriptions-list">
-            {#each sortedSubscriptions as subscription (subscription.sub_id)}
+            {#each sortedSubscriptions as subscription (subscription.id)}
                 <div 
                     class="subscription-card"
                     on:click={() => handleOpenItem(subscription)}
@@ -321,23 +325,23 @@
                     on:keydown={(e) => e.key === 'Enter' && handleOpenItem(subscription)}
                 >
                     <!-- Контент подписки -->
-                    {#if subscription.type === 'user'}
+                    {#if subscription.type_sub}
                         <!-- Подписка на пользователя -->
                         <div class="subscription-content">
                             <Avatar 
                                 size={60}
-                                src={subscription.photo}
-                                initials={getInitials(subscription.name)}
+                                src={subscription.user?.photo}
+                                initials={getInitials(subscription.user?.name)}
                             />
                             
                             <div class="subscription-info">
-                                <div class="subscription-title" title={subscription.name}>
-                                    {subscription.name || 'Пользователь'}
+                                <div class="subscription-title" title={subscription.user?.name}>
+                                    {subscription.user?.name || 'Пользователь'}
                                 </div>
                                 
-                                <!-- <div class="subscription-meta">
+                                <div class="subscription-meta">
                                     <span>Дата рождения: {subscription.user?.birth_date || 'не указана'}</span>
-                                </div> -->
+                                </div>
                                 
                             </div>
                         </div>
@@ -345,10 +349,10 @@
                         <!-- Подписка на вишлист -->
                         <div class="subscription-content">
                             <div class="wishlist-cover">
-                                {#if subscription.photo}
+                                {#if subscription.wishlist?.photo}
                                     <img 
-                                        src={subscription.photo} 
-                                        alt={subscription.name}
+                                        src={subscription.wishlist.photo} 
+                                        alt={subscription.wishlist.name}
                                         class="cover-image"
                                     />
                                 {:else}
@@ -361,14 +365,14 @@
                             </div>
                             
                             <div class="subscription-info">
-                                <div class="subscription-title" title={subscription.name}>
-                                    {subscription.name || 'Вишлист'}
+                                <div class="subscription-title" title={subscription.wishlist?.name}>
+                                    {subscription.wishlist?.name || 'Вишлист'}
                                 </div>
                                 
                                 <div class="subscription-meta">
-                                    <span>Владелец: {subscription.owner_name || 'не указан'}</span>
-                                    <!-- <span> · </span> -->
-                                    <!-- <span>{subscription.wishlist?.number_of_wishes || 0} {getWishesWord(subscription.wishlist?.number_of_wishes || 0)}</span> -->
+                                    <span>Владелец: {subscription.wishlist?.owner_name || 'не указан'}</span>
+                                    <span> · </span>
+                                    <span>{subscription.wishlist?.number_of_wishes || 0} {getWishesWord(subscription.wishlist?.number_of_wishes || 0)}</span>
                                 </div>
 
                             </div>
@@ -380,7 +384,7 @@
                         <!-- Кнопка отписки -->
                         <button
                             class="action-button unsubscribe-button"
-                            on:click|stopPropagation={(e) => handleUnsubscribe(subscription, e)}
+                            on:click|stopPropagation={(e) => handleUnsubscribe(subscription.id, e)}
                             aria-label="Отписаться"
                         >
                             Отписаться
