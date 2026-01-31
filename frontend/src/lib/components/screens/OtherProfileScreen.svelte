@@ -1,5 +1,5 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import Avatar from '../ui/Avatar.svelte';
     import Button from '../ui/Button.svelte';
 

@@ -29,7 +29,7 @@
     import { writable } from 'svelte/store';
 
     // Импорты stores (нужно будет создать или импортировать)
-    import { otherProfilesMock } from './lib/stores/data';
+    // import { otherProfilesMock } from './lib/stores/data';
 
     let currentScreen = 'start';
     let viewedProfile = null;
@@ -69,20 +69,138 @@
         viewedProfile = profile;
         pushNavigate('otherProfile');
     }
+
+    async function loadUserProfileById(profileId: number) {
+        if (!token) {
+            console.error('Token не найден для загрузки профиля');
+            return null;
+        }
+
+        try {
+            const response = await fetch(`/api/v1/users/${profileId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Ошибка загрузки профиля: ${response.status}`);
+            }
+            
+            const userData = await response.json();
+            
+            // Преобразуем данные в формат, ожидаемый OtherProfileScreen
+            return {
+                id: userData.id,
+                fullName: userData.name,
+                birthDate: formatDateToDDMMYYYY(userData.birth_date),
+                avatarUrl: userData.photo || '/default-avatar.png',
+                isSubscribed: false, // Нужно будет проверить через API
+                publicWishlists: [], // Нужно загрузить отдельно
+                subscriptions: [], // Нужно загрузить отдельно
+                questionnaire: { interests: [], noGifts: [] } // Нужно загрузить отдельно
+            };
+            
+        } catch (error) {
+            console.error('Ошибка загрузки профиля пользователя:', error);
+            return null;
+        }
+    }
     
-    function openOtherProfileById(profileId) {
-        const key = String(profileId);
-        viewedProfile = otherProfilesMock[key] ?? {
+    async function openOtherProfileById(profileId) {
+        viewedProfile = {
             id: profileId,
-            fullName: '—',
+            fullName: 'Загрузка...',
             birthDate: '—',
             avatarUrl: '',
+            isSubscribed: false,
             publicWishlists: [],
             subscriptions: [],
-            isSubscribed: false,
             questionnaire: { interests: [], noGifts: [] }
         };
+        
         pushNavigate('otherProfile');
+        
+        // Загружаем данные профиля
+        const profileData = await loadUserProfileById(profileId);
+        
+        if (profileData) {
+            // Загружаем дополнительные данные
+            try {
+                // Загружаем публичные вишлисты пользователя
+                const wishlistsResponse = await fetch(`/api/v1/users/${profileId}/wishlists`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (wishlistsResponse.ok) {
+                    const wishlistsData = await wishlistsResponse.json();
+                    profileData.publicWishlists = wishlistsData
+                        .filter((wl: any) => wl.typeprivacy === 'public')
+                        .map((wl: any) => ({
+                            id: wl.id,
+                            title: wl.name,
+                            iconUrl: wl.photo,
+                            visibility: wl.typeprivacy,
+                            wishesCount: wl.wishes_count
+                        }));
+                }
+                
+                // Загружаем подписки пользователя (если они публичные)
+                const subscriptionsResponse = await fetch(`/api/v1/subscriptions/users/${profileId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (subscriptionsResponse.ok) {
+                    const subscriptionsData = await subscriptionsResponse.json();
+                    profileData.subscriptions = subscriptionsData.subscriptions
+                        .filter((sub: any) => sub.type === 'user')
+                        .map((sub: any) => ({
+                            id: sub.user_id,
+                            fullName: sub.name,
+                            avatarUrl: sub.photo,
+                            birthDate: formatDateToDDMMYYYY(sub.birth_date)
+                        }));
+                }
+                
+                // Загружаем анкету пользователя
+                const questionnaireResponse = await fetch(`/api/v1/questionnaire/${profileId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (questionnaireResponse.ok) {
+                    const questionnaireData = await questionnaireResponse.json();
+                    profileData.questionnaire = {
+                        interests: questionnaireData.interests || [],
+                        noGifts: questionnaireData.avoid_gifts || []
+                    };
+                }
+                
+                // Проверяем подписку текущего пользователя
+                const subscriptionCheckResponse = await fetch(`/api/v1/subscriptions/check/user/${profileId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (subscriptionCheckResponse.ok) {
+                    const checkData = await subscriptionCheckResponse.json();
+                    profileData.isSubscribed = checkData.is_subscribed;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки дополнительных данных:', error);
+            }
+            
+            viewedProfile = profileData;
+        }
     }
     
     function navigate(screen, params = {}) {
