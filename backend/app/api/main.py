@@ -15,7 +15,7 @@ from app.api.routers.questionnaire import router as questionnaire_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_database()
-    await init_tags()
+    # await init_tags()
     yield
     print('Stop work and clean tables')
     # await drop_tables()
