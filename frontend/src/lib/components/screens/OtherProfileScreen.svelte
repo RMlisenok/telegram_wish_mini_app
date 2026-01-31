@@ -4,8 +4,10 @@
     import Button from '../ui/Button.svelte';
 
     export let profile;
+    export let token;
 
     const dispatch = createEventDispatcher();
+    let isLoading = false;
 
     // IMPORTANT: si "profile" change (quand tu viens de Subscribers/Subscriptions),
     // il faut recalculer isSubscribed.
@@ -18,12 +20,92 @@
 
     const goBack = () => dispatch('back');
 
-    const toggleSubscribe = () => {
-        dispatch('toggle-subscribe', {
-            profileId: profile?.id,
-            value: !isSubscribed
-        });
+    // Функция подписки/отписки
+    const toggleSubscribe = async () => {
+        if (!token || !profile?.id) {
+            console.error('Токен или ID профиля отсутствуют');
+            return;
+        }
+
+        isLoading = true;
+        
+        try {
+            if (isSubscribed) {
+                // Отписаться
+                await unsubscribeFromUser();
+            } else {
+                // Подписаться
+                await subscribeToUser();
+            }
+            
+            // Обновляем состояние подписки
+            isSubscribed = !isSubscribed;
+            
+            // Отправляем событие родителю для обновления данных
+            dispatch('toggle-subscribe', {
+                profileId: profile.id,
+                value: !isSubscribed
+            });
+            
+        } catch (error) {
+            console.error('Ошибка при подписке/отписке:', error);
+            alert(error.message || 'Произошла ошибка');
+        } finally {
+            isLoading = false;
+        }
     };
+
+    // Функция подписки на пользователя
+    async function subscribeToUser() {
+        if (!token || !profile?.id) return;
+        
+        try {
+            const response = await fetch('/api/v1/subscriptions/users', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    target_user_id: profile.id 
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || 'Ошибка подписки');
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Ошибка подписки:', error);
+            throw error;
+        }
+    }
+
+    // Функция отписки от пользователя
+    async function unsubscribeFromUser() {
+        if (!token || !profile?.id) return;
+        
+        try {
+            const response = await fetch(`/api/v1/subscriptions/users/${profile.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || 'Ошибка отписки');
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Ошибка отписки:', error);
+            throw error;
+        }
+    }
 
     const showAllWishlists = () => {
         dispatch('show-all-wishlists', { profileId: profile?.id });
@@ -60,14 +142,22 @@
             <div class="profile-birth">{profile?.birthDate ?? '—'}</div>
 
             <div class="profile-actions">
-                <Button kind="ghost" on:click={toggleSubscribe}>
-                    <img
+                <Button 
+                    kind="ghost" 
+                    on:click={toggleSubscribe}
+                    disabled={isLoading || !profile?.id}
+                >
+                    {#if isLoading}
+                        <span>Загрузка...</span>
+                    {:else}
+                        <img
                             src={isSubscribed ? '../../../../static/icons/bell-on.png' : '../../../../static/icons/bell-off.png'}
                             alt=""
                             class="icon-16"
                             loading="lazy"
-                    />
-                    <span>{isSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
+                        />
+                        <span>{isSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
+                    {/if}
                 </Button>
             </div>
         </div>
