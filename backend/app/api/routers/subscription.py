@@ -186,3 +186,19 @@ async def check_wishlist_subscription(
         wishlist_id
     )
     return {"is_subscribed": is_subscribed}
+
+
+@router.get("/my/subscribers")
+async def get_my_subscribers(
+    user_id: int = Depends(get_current_user_id),
+    is_desc: bool = True,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    service = SubscriptionService(db)
+    subscribers = await service.get_user_subscribers(
+        user_id,
+        is_desc,
+        limit
+    )
+    return subscribers
