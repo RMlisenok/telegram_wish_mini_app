@@ -5,11 +5,13 @@ from app.models.subscription import Subscription
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.wishlist_repository import WishlistRepository
+from app.repositories.wish_wishlist_repository import WishWishlistRepository
 from app.schemas.subscription import (
     SubscribeToWishlistRequest,
     SubscribeToUserRequest,
     SubscribersVisitUpdate,
-    SubscriptionsResponse
+    SubscriptionsResponse,
+    SubscribersResponse
     )
 
 
@@ -22,6 +24,7 @@ class SubscriptionService:
         self.rep_subs = SubscriptionRepository(session)
         self.rep_user = UserRepository(session)
         self.rep_wishlist = WishlistRepository(session)
+        self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def subscribe_to_user(
         self,
@@ -131,6 +134,7 @@ class SubscriptionService:
                     "type": "user",
                     "sub_id": sub.id,
                     "name": sub.target_user.name,
+                    "birth_date": sub.target_user.birth_date,
                     "photo": sub.target_user.photo,
                     "user_id": sub.target_user.id,
                     "created_at": sub.created_at,
@@ -138,6 +142,9 @@ class SubscriptionService:
                 })
             else:
                 if sub.target_wishlist:
+                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                        sub.target_wishlist_id
+                    )
                     subscription_list.append({
                         "type": "wishlist",
                         "sub_id": sub.id,
@@ -148,6 +155,7 @@ class SubscriptionService:
                         "type_privacy": sub.target_wishlist.typeprivacy.value,
                         "created_at": sub.created_at,
                         "updated_at": sub.updated_at,
+                        "total_wishes": count_wishes,
                         "owner_id": sub.target_wishlist.user_id,
                         "owner_name": sub.target_wishlist.owner.name
                     })
@@ -175,10 +183,13 @@ class SubscriptionService:
             if sub.type_sub:
                 subscription_list.append({
                     "type": "user",
-                    "id": sub.target_user.id,
+                    "sub_id": sub.id,
                     "name": sub.target_user.name,
+                    "birth_date": sub.target_user.birth_date,
                     "photo": sub.target_user.photo,
-                    "user_id": sub.target_user.id
+                    "user_id": sub.target_user.id,
+                    "created_at": sub.created_at,
+                    "updated_at": sub.updated_at
                 })
         return SubscriptionsResponse(
             subscriptions=subscription_list,
@@ -202,13 +213,22 @@ class SubscriptionService:
         subscription_list = []
         for sub in subscriptions:
             if sub.target_wishlist:
+                count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                    sub.target_wishlist_id
+                )
                 subscription_list.append({
                     "type": "wishlist",
-                    "id": sub.target_wishlist.id,
+                    "sub_id": sub.id,
+                    "wishlist_id": sub.target_wishlist.id,
                     "name": sub.target_wishlist.name,
                     "description": sub.target_wishlist.description,
                     "photo": sub.target_wishlist.photo,
                     "type_privacy": sub.target_wishlist.typeprivacy.value,
+                    "created_at": sub.created_at,
+                    "updated_at": sub.updated_at,
+                    "total_wishes": count_wishes,
+                    "owner_id": sub.target_wishlist.user_id,
+                    "owner_name": sub.target_wishlist.owner.name
                 })
         return SubscriptionsResponse(
             subscriptions=subscription_list,
@@ -238,20 +258,32 @@ class SubscriptionService:
             if sub.type_sub:
                 subscription_list.append({
                     "type": "user",
-                    "id": sub.target_user.id,
+                    "sub_id": sub.id,
                     "name": sub.target_user.name,
+                    "birth_date": sub.target_user.birth_date,
                     "photo": sub.target_user.photo,
-                    "user_id": sub.target_user.id
+                    "user_id": sub.target_user.id,
+                    "created_at": sub.created_at,
+                    "updated_at": sub.updated_at
                 })
             else:
                 if sub.target_wishlist:
+                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                        sub.target_wishlist_id
+                    )
                     subscription_list.append({
                         "type": "wishlist",
-                        "id": sub.target_wishlist.id,
+                        "sub_id": sub.id,
+                        "wishlist_id": sub.target_wishlist.id,
                         "name": sub.target_wishlist.name,
                         "description": sub.target_wishlist.description,
                         "photo": sub.target_wishlist.photo,
                         "type_privacy": sub.target_wishlist.typeprivacy.value,
+                        "created_at": sub.created_at,
+                        "updated_at": sub.updated_at,
+                        "total_wishes": count_wishes,
+                        "owner_id": sub.target_wishlist.user_id,
+                        "owner_name": sub.target_wishlist.owner.name
                     })
         return SubscriptionsResponse(
             subscriptions=subscription_list,
@@ -281,3 +313,33 @@ class SubscriptionService:
             target_wishlist_id=target_wishlist_id
         )
         return subscription is not None
+
+    async def get_user_subscribers(
+        self,
+        user_id: int,
+        is_desc: bool = True,
+        limit: int = 100
+    ):
+        subscribers = await self.rep_subs.get_user_subscribers(
+            user_id,
+            is_desc,
+            limit
+        )
+        subscribers_list = []
+        for sub in subscribers:
+            # if sub.type_sub:
+            subscribers_list.append({
+                "type": "user",
+                "sub_id": sub.id,
+                "name": sub.subscriber.name,
+                "birth_date": sub.subscriber.birth_date,
+                "photo": sub.subscriber.photo,
+                "user_id": sub.subscriber.id,
+                "created_at": sub.created_at,
+                "updated_at": sub.updated_at
+            })
+
+        return SubscribersResponse(
+            subscribers=subscribers_list,
+            total=len(subscribers_list)
+        )
