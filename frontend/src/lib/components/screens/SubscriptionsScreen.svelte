@@ -10,12 +10,13 @@
         SubscriptionsResponse
     } from '../../../types/subscription.js';
     
-    import { onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
 
     // Lyse Modifications
 
-    import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
+
+    export let token;
 
 
     // Иконки
@@ -52,6 +53,12 @@
 
 
     onMount(async () => {
+        if (!token) {
+            console.warn('Token не передан в SubscriptionsScreen');
+            errorMessage = 'Требуется авторизация';
+            isLoading = false;
+            return;
+        }
         await loadSubscriptions();
     });
 
@@ -59,10 +66,10 @@
         try {
             isLoading = true;
             errorMessage = '';
-            const token = getToken();
             
             if (!token) {
-                errorMessage = 'Пользователь не авторизован';
+                errorMessage = 'Токен не найден';
+                console.error('Токен не найден для загрузки подписок');
                 return;
             }
             
@@ -73,13 +80,6 @@
         } finally {
             isLoading = false;
         }
-    }
-    
-    function getToken() {
-        const tokenFromStorage = localStorage.getItem('token') || 
-                                localStorage.getItem('authToken') || 
-                                sessionStorage.getItem('token');
-        return tokenFromStorage || '';
     }
 
     const getFilteredAndSortedSubscriptions = (subscriptions) => {
@@ -182,7 +182,6 @@
     const handleUnsubscribe = async (subscription, event) => {
         if (event) event.stopPropagation();
 
-        const token = getToken();
         if (!token) {
             alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
             return;
@@ -215,7 +214,7 @@
             dispatch('open-profile', { profileId: subscription.user_id });
         } else {
             // Для вишлиста
-            dispatch('open-wishlist', { wishlistId: subscription.wishlist_id });
+            dispatch('openWishlistDetail', { wishlistId: subscription.wishlist_id });
         }
     };
 

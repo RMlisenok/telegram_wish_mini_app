@@ -294,7 +294,9 @@
                     
                     {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
+                            token={token}
                             on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
+                            on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
                         />
                     
                     {:else if currentScreen === 'subscribers'}
