@@ -25,7 +25,6 @@
     let sortBy = 'default'; // 'default', 'users', 'wishlists', 'birth_date_asc', 'birth_date_desc'
     let isLoading = true;
     let errorMessage = '';
-    $: filteredAndSortedSubscriptions = getFilteredAndSortedSubscriptions($subscriptionsStore);
 
 
     onMount(async () => {
@@ -94,27 +93,27 @@
         return isNaN(date.getTime()) ? null : date;
     };
 
-    const getFilteredAndSortedSubscriptions = (subscriptions) => {
-        let result = [...subscriptions];
-        const query = searchQuery.trim().toLowerCase();
+    // const getFilteredAndSortedSubscriptions = (subscriptions) => {
+    //     let result = [...subscriptions];
+    //     const query = searchQuery.trim().toLowerCase();
         
-        // Фильтрация по поиску
-        if (query) {
-            result = result.filter(item => {
-                if (item.type === 'user') {
-                    const userName = item.name.toLowerCase();
-                    return userName.includes(query);
-                } else {
-                    const wishlistName = item.name.toLowerCase();
-                    const wishlistOwner = item.owner_name.toLowerCase();
-                    return wishlistName.includes(query) || wishlistOwner.includes(query);
-                }
-            });
-        }
+    //     // Фильтрация по поиску
+    //     if (query) {
+    //         result = result.filter(item => {
+    //             if (item.type === 'user') {
+    //                 const userName = item.name.toLowerCase();
+    //                 return userName.includes(query);
+    //             } else {
+    //                 const wishlistName = item.name.toLowerCase();
+    //                 const wishlistOwner = item.owner_name.toLowerCase();
+    //                 return wishlistName.includes(query) || wishlistOwner.includes(query);
+    //             }
+    //         });
+    //     }
         
-        // Сортировка
-        return sortSubscriptions(result, sortBy);
-    };
+    //     // Сортировка
+    //     return sortSubscriptions(result, sortBy);
+    // };
 
     // Функция сортировки
     const sortSubscriptions = (subscriptions, sortType) => {
@@ -176,6 +175,28 @@
                 return result;
         }
     };
+
+        $: filteredAndSortedSubscriptions = (() => {
+        let result = [...$subscriptionsStore];
+        const query = searchQuery.trim().toLowerCase();
+        
+        // Фильтрация по поиску
+        if (query) {
+            result = result.filter(item => {
+                if (item.type === 'user') {
+                    const userName = item.name.toLowerCase();
+                    return userName.includes(query);
+                } else {
+                    const wishlistName = item.name.toLowerCase();
+                    const wishlistOwner = item.owner_name.toLowerCase();
+                    return wishlistName.includes(query) || wishlistOwner.includes(query);
+                }
+            });
+        }
+        
+        // Сортировка
+        return sortSubscriptions(result, sortBy);
+    })();
 
     // Обработчик отписки
     const handleUnsubscribe = async (subscription, event) => {
