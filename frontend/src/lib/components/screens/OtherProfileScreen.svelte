@@ -118,6 +118,21 @@
     // Optionnel (si tu veux ouvrir un vishlist depuis ce screen)
     // const openWishlist = (wl) => dispatch('open-wishlist', { wishlistId: wl.id, profileId: profile?.id });
     // const openSubscriptionProfile = (sub) => dispatch('open-profile', { profileId: sub.id });
+
+    // Функция для открытия вишлиста 
+    const openWishlist = (wl) => {
+        dispatch('open-wishlist', { 
+            wishlistId: wl.id, 
+            profileId: profile?.id 
+        });
+    };
+
+    // Функция для открытия профиля подписки
+    const openSubscriptionProfile = (sub) => {
+        dispatch('open-profile', { 
+            profileId: sub.id 
+        });
+    };
 </script>
 
 <header class="app-header">
@@ -195,7 +210,7 @@
         <div class="wishlists-list">
             {#each publicWishlists as wl (wl.id ?? wl.title)}
                 <!-- Si tu veux rendre chaque ligne cliquable: remplace <article> par <button> et dispatch open-wishlist -->
-                <article class="wishlist-row">
+                <!-- <article class="wishlist-row">
                     <div class="wishlist-icon">
                         <img
                                 src={wl.iconUrl ?? '../../../../static/icons/gift-check.png'}
@@ -212,7 +227,29 @@
                             {/if}
                         </div>
                     </div>
-                </article>
+                </article> -->
+                <button 
+                    type="button" 
+                    class="wishlist-row clickable"
+                    on:click={() => openWishlist(wl)}
+                >
+                    <div class="wishlist-icon">
+                        <img
+                            src={wl.iconUrl ?? '../../../../static/icons/gift-check.png'}
+                            alt={wl.title}
+                            loading="lazy"
+                        />
+                    </div>
+                    <div class="wishlist-main">
+                        <div class="wishlist-title">{wl.title}</div>
+                        <div class="wishlist-meta">
+                            {wl.visibility === 'public' ? 'Виден всем' : 'Доступ ограничен'}
+                            {#if typeof wl.wishesCount === 'number'}
+                                · {wl.wishesCount} жел.
+                            {/if}
+                        </div>
+                    </div>
+                </button>
             {/each}
         </div>
     {/if}
@@ -229,18 +266,18 @@
                 {#if subscriptions.length}
                     <div class="mini-icons" aria-label="Иконки подписок">
                         {#each subscriptions.slice(0, 5) as sub (sub.id ?? sub.fullName)}
-<!--                            <div class="mini-icon">-->
-<!--                                <Avatar-->
-<!--                                        size={24}-->
-<!--                                        src={sub.avatarUrl}-->
-<!--                                        initials={(sub.fullName ?? '')-->
-<!--                    .split(' ')-->
-<!--                    .filter(Boolean)-->
-<!--                    .map((n) => n[0])-->
-<!--                    .join('')-->
-<!--                    .toUpperCase()}-->
-<!--                                />-->
-<!--                            </div>-->
+                           <div class="mini-icon">
+                               <Avatar
+                                    size={24}
+                                    src={sub.avatarUrl}
+                                    initials={(sub.fullName ?? '')
+                                        .split(' ')
+                                        .filter(Boolean)
+                                        .map((n) => n[0])
+                                        .join('')
+                                        .toUpperCase()}
+                                />
+                            </div> 
                         {/each}
                     </div>
                 {/if}
@@ -256,7 +293,7 @@
         <p class="empty-note">Этот пользователь пока ни на кого не подписан.</p>
     {:else}
         <div class="subs-list">
-            {#each subscriptions as sub (sub.id ?? sub.fullName)}
+            <!-- {#each subscriptions as sub (sub.id ?? sub.fullName)}
                 <article class="sub-row">
                     <Avatar
                             size={52}
@@ -278,6 +315,34 @@
                         </div>
                     </div>
                 </article>
+            {/each} -->
+            {#each subscriptions as sub (sub.id ?? sub.fullName)}
+                <!-- Добавляем обработчик клика по подписке -->
+                <button 
+                    type="button" 
+                    class="sub-row clickable"
+                    on:click={() => openSubscriptionProfile(sub)}
+                >
+                    <Avatar
+                        size={52}
+                        src={sub.avatarUrl}
+                        initials={(sub.fullName ?? '')
+                            .split(' ')
+                            .filter(Boolean)
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()}
+                    />
+                    <div class="sub-main">
+                        <div class="sub-name">{sub.fullName}</div>
+                        <div class="sub-meta">
+                            {sub.birthDate ?? '—'}
+                            {#if sub.wishlistTitle}
+                                · {sub.wishlistTitle}
+                            {/if}
+                        </div>
+                    </div>
+                </button>
             {/each}
         </div>
     {/if}

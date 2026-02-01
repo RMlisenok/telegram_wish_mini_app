@@ -424,15 +424,21 @@
                     
                     {:else if currentScreen === 'otherProfile'}
                         <OtherProfileScreen
+                            token={token}
                             profile={viewedProfile}
                             on:back={goBack}
                             on:toggle-subscribe={(e) => {
                                 const { profileId, value } = e.detail;
+                                // Обновляем локальное состояние
                                 viewedProfile = { ...viewedProfile, isSubscribed: value };
-                                const key = String(profileId);
-                                if (otherProfilesMock?.[key]) {
-                                    otherProfilesMock[key] = { ...otherProfilesMock[key], isSubscribed: value };
-                                }
+                            }}
+                            on:open-wishlist={(e) => {
+                                // Обработка открытия вишлиста
+                                navigate('wishes', { wishlistId: e.detail.wishlistId });
+                            }}
+                            on:open-profile={(e) => {
+                                // Рекурсивное открытие другого профиля
+                                openOtherProfileById(e.detail.profileId);
                             }}
                             on:show-all-wishlists={() => pushNavigate('wishlists')}
                             on:show-all-subscriptions={() => pushNavigate('subscriptions')}
