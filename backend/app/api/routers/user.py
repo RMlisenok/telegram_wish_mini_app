@@ -12,6 +12,7 @@ from app.services.subscription_service import SubscriptionService
 from app.services.user_service import UserService
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.block import BlockCreate, UpdateBlock
 
 logger = logging.getLogger(__name__)
 
@@ -126,23 +127,44 @@ async def get_user_by_id(
 
 @router.post("/block/{blocked_id}")
 async def block_user(
-    blocked_id: int,
+    block_data: BlockCreate,
     blocker_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
-    if blocker_id == blocked_id:
+    if blocker_id == block_data.blocked_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot block yourself "
         )
     service = UserService(db)
-    block = await service.block_user(blocker_id, blocked_id)
+    block = await service.block_user(blocker_id, block_data)
     if not block:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to block user"
         )
     return block
+
+
+@router.put("/block/{blocked_id}")
+async def update_block(
+    blocked_id: int,
+    update_block: UpdateBlock,
+    blocker_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db)
+):
+    service = UserService(db)
+    update = await service.update_block(
+        blocked_id=blocked_id,
+        blocker_id=blocker_id,
+        update_data=update_block
+    )
+    if not update:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to block user"
+        )
+    return update
 
 
 @router.delete("/block/{blocked_id}")
@@ -178,10 +200,10 @@ async def get_blocked_user_list(
     db: AsyncSession = Depends(get_db)
 ):
     service = UserService(db)
-    users = await service.get_user_block(blocker_id)
-    if not users:
+    list_blocked = await service.get_user_block(blocker_id)
+    if not list_blocked:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No bloked users found"
         )
-    return users
+    return list_blocked
