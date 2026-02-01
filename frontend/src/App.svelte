@@ -110,12 +110,6 @@
     }
     
     async function openOtherProfileById(profileId) {
-        // Проверяем, не открываем ли профиль текущего пользователя
-        if ($userStore && profileId.toString() === $userStore.id.toString()) {
-            navigate('main');
-            return;
-        }
-
         viewedProfile = {
             id: profileId,
             fullName: 'Загрузка...',
@@ -419,7 +413,16 @@
                     {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
                             token={token}
-                            on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
+                            on:open-profile={(e) => {
+                                const profileId = e.detail.profileId;
+                                
+                                // Проверяем, не открываем ли мы свой профиль
+                                if (profileId.toString() === $userStore.id.toString()) {
+                                    navigate('main');
+                                } else {
+                                    openOtherProfileById(profileId);
+                                }
+                            }}
                             on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
                         />
                     
