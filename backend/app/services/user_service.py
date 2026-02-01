@@ -14,6 +14,7 @@ from app.schemas.wishlist import WishlistShort, WishlistResponse
 from app.schemas.subscription import SubscriptionsResponse, SubscribersResponse
 from app.services.wishlist_service import WishlistService
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
+from app.schemas.block import BlockCreate, UpdateBlock, BlockListResponse, BlockListUser
 
 import logging
 logger = logging.getLogger(__name__)
@@ -105,14 +106,33 @@ class UserService:
             return UserResponse.model_validate(user)
         return None
 
+
+
+
+
     async def block_user(
         self,
         blocker_id: int,
-        blocked_id: int,
+        block_data: BlockCreate,
     ) -> Optional[BlockResponse]:
-        block = await self.rep_block.block_user(blocker_id, blocked_id)
+        block = await self.rep_block.block_user(blocker_id, block_data)
         if block:
             return BlockResponse.model_validate(block)
+        return None
+
+    async def update_block(
+        self,
+        blocker_id: int,
+        blocked_id: int,
+        update_data: UpdateBlock
+    ) -> Optional[BlockResponse]:
+        update_block = await self.rep_block.update_block(
+            blocker_id,
+            blocked_id,
+            update_data
+        )
+        if update_block:
+            return BlockResponse.model_validate(update_block)
         return None
 
     async def unblock_user(
@@ -132,6 +152,20 @@ class UserService:
     async def get_user_block(
         self,
         blocker_id: int
-    ) -> List[UserResponse]:
-        users = await self.rep_block.get_user_block(blocker_id)
-        return [UserResponse.model_validate(user) for user in users]
+    ) -> BlockListResponse:
+        # Теперь blocked_list - это список BlockedUser
+        blocked_list = await self.rep_block.get_user_block(blocker_id)
+        
+        list_update = []
+        for blocked_record in blocked_list:  # blocked_record - это BlockedUser
+            list_update.append(BlockListUser.model_validate({
+                "blocked_user": UserResponse.model_validate(blocked_record.blocked),
+                "block_profile": blocked_record.block_profile,
+                "block_wishlists": blocked_record.block_wishlists,
+                "blocked_at": blocked_record.created_at
+            }))
+        
+        return BlockListResponse(
+            blocked_users=list_update,
+            total=len(list_update)
+        )
