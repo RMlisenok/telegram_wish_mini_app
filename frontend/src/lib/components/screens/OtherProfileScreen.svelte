@@ -245,7 +245,7 @@
             <div class="section-title-main">
                 <span>ПОДПИСКИ · {subscriptions.length}</span>
 
-                {#if subscriptions.length}
+                <!-- {#if subscriptions.length}
                     <div class="mini-icons" aria-label="Иконки подписок">
                         {#each subscriptions.slice(0, 5) as sub (sub.id ?? sub.fullName)}
                            <div class="mini-icon">
@@ -262,7 +262,7 @@
                             </div> 
                         {/each}
                     </div>
-                {/if}
+                {/if} -->
             </div>
         </div>
 
@@ -275,29 +275,6 @@
         <p class="empty-note">Этот пользователь пока ни на кого не подписан.</p>
     {:else}
         <div class="subs-list">
-            <!-- {#each subscriptions as sub (sub.id ?? sub.fullName)}
-                <article class="sub-row">
-                    <Avatar
-                            size={52}
-                            src={sub.avatarUrl}
-                            initials={(sub.fullName ?? '')
-              .split(' ')
-              .filter(Boolean)
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()}
-                    />
-                    <div class="sub-main">
-                        <div class="sub-name">{sub.fullName}</div>
-                        <div class="sub-meta">
-                            {sub.birthDate ?? '—'}
-                            {#if sub.wishlistTitle}
-                                · {sub.wishlistTitle}
-                            {/if}
-                        </div>
-                    </div>
-                </article>
-            {/each} -->
             {#each subscriptions as sub (sub.id ?? sub.fullName)}
                 <button
                     type="button"
