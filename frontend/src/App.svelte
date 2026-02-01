@@ -108,16 +108,10 @@
             return null;
         }
     }
-
-    // Функция для проверки, является ли профиль текущим пользователем
-    function isMyOwnProfile(profileId) {
-        if (!$userStore || !profileId) return false;
-        return profileId.toString() === $userStore.id.toString();
-    }
     
     async function openOtherProfileById(profileId) {
         // Проверяем, не открываем ли профиль текущего пользователя
-        if (isMyOwnProfile(profileId)) {
+        if ($userStore && profileId.toString() === $userStore.id.toString()) {
             navigate('main');
             return;
         }
