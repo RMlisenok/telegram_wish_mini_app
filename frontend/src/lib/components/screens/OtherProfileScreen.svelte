@@ -210,12 +210,10 @@
         <div class="wishlists-list">
             {#each publicWishlists as wl (wl.id ?? wl.title)}
                 <!-- Si tu veux rendre chaque ligne cliquable: remplace <article> par <button> et dispatch open-wishlist -->
-                <article 
-                    class="wishlist-row clickable" 
+                <button
+                    type="button"
+                    class="wishlist-row"
                     on:click={() => openWishlist(wl)}
-                    role="button"
-                    tabindex="0"
-                    on:keydown={(e) => e.key === 'Enter' && openWishlist(wl)}
                 >
                     <div class="wishlist-icon">
                         <img
@@ -233,7 +231,7 @@
                             {/if}
                         </div>
                     </div>
-                </article>
+                </button>
             {/each}
         </div>
     {/if}
@@ -301,13 +299,10 @@
                 </article>
             {/each} -->
             {#each subscriptions as sub (sub.id ?? sub.fullName)}
-                <!-- Добавляем обработчик клика по подписке -->
-                <article 
-                    class="sub-row clickable"
+                <button
+                    type="button"
+                    class="sub-row"
                     on:click={() => openSubscriptionProfile(sub)}
-                    role="button"
-                    tabindex="0"
-                    on:keydown={(e) => e.key === 'Enter' && openSubscriptionProfile(sub)}
                 >
                     <Avatar
                         size={52}
@@ -328,7 +323,7 @@
                             {/if}
                         </div>
                     </div>
-                </article>
+                </button>
             {/each}
         </div>
     {/if}
