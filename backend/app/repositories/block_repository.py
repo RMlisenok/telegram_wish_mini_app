@@ -1,10 +1,10 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, and_
-
+from sqlalchemy import select, update, and_, func, desc
+from sqlalchemy.orm import joinedload
 from app.models.block import BlockedUser
 from app.models.user import User
-from app.schemas.block import BlockCreate, BlockResponse
+from app.schemas.block import BlockCreate, BlockResponse, UpdateBlock
 
 
 class BlockRepository:
@@ -31,20 +31,54 @@ class BlockRepository:
     async def block_user(
         self,
         blocker_id: int,
-        blocked_id: int
+        block_data: BlockCreate,
     ) -> Optional[BlockedUser]:
-        existing = await self.get_block(blocker_id, blocked_id)
+        existing = await self.get_block(blocker_id, block_data.blocked_id)
         if existing:
             return existing
 
         block = BlockedUser(
             blocker_id=blocker_id,
-            blocked_id=blocked_id
+            blocked_id=block_data.blocked_id,
+            block_profile=block_data.block_profile,
+            block_wishlists=block_data.block_wishlists
         )
         self.session.add(block)
         await self.session.commit()
         await self.session.refresh(block)
         return block
+
+    async def update_block(
+        self,
+        blocker_id: int,
+        blocked_id: int,
+        update_data: UpdateBlock
+    ) -> Optional[BlockedUser]:
+        existing = await self.get_block(blocker_id, blocked_id)
+        if not existing:
+            return None
+        stmt = (
+            update(BlockedUser)
+            .where(
+                and_(
+                    BlockedUser.blocked_id == blocked_id,
+                    BlockedUser.blocker_id == blocker_id
+                )
+            )
+            .values(
+                block_profile=update_data.block_profile,
+                block_wishlists=update_data.block_wishlists,
+                updated_at=func.now()
+            )
+            .returning(BlockedUser)
+        )
+
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        blocked = result.scalar_one_or_none()
+        if blocked:
+            await self.session.refresh(blocked)
+        return blocked
 
     async def unblock_user(
         self,
@@ -68,18 +102,12 @@ class BlockRepository:
     async def get_user_block(
         self,
         blocker_id: int
-    ) -> List[User]:
+    ) -> List[BlockedUser]:
         query = (
-            select(BlockedUser.blocked_id)
+            select(BlockedUser)
             .where(BlockedUser.blocker_id == blocker_id)
+            .options(joinedload(BlockedUser.blocked))
+            .order_by(desc(BlockedUser.updated_at))
         )
         result = await self.session.execute(query)
-        blocked_ids = [row[0] for row in result.all()]
-        if not blocked_ids:
-            return []
-        user_query = (
-            select(User)
-            .where(User.id.in_(blocked_ids))
-        )
-        user_res = await self.session.execute(user_query)
-        return list(user_res.scalars().all())
+        return list(result.scalars().all())
