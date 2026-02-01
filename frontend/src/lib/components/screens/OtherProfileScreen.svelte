@@ -8,6 +8,7 @@
 
     const dispatch = createEventDispatcher();
     let isLoading = false;
+    let currentIsSubscribed = false; // Локальное состояние
 
     // IMPORTANT: si "profile" change (quand tu viens de Subscribers/Subscriptions),
     // il faut recalculer isSubscribed.
@@ -17,6 +18,7 @@
     $: subscriptions = profile?.subscriptions ?? [];
 
     $: publicWishlistsWithIcon = publicWishlists.filter((wl) => !!wl.iconUrl);
+    $: currentIsSubscribed = !!profile?.isSubscribed;
 
     const goBack = () => dispatch('back');
 
@@ -30,21 +32,22 @@
         isLoading = true;
         
         try {
+            let newSubscribedState;
             if (isSubscribed) {
                 // Отписаться
                 await unsubscribeFromUser();
+                newSubscribedState = false;
             } else {
                 // Подписаться
                 await subscribeToUser();
+                newSubscribedState = true;
             }
-            
-            // Обновляем состояние подписки
-            isSubscribed = !isSubscribed;
+            currentIsSubscribed = newSubscribedState;
             
             // Отправляем событие родителю для обновления данных
             dispatch('toggle-subscribe', {
                 profileId: profile.id,
-                value: !isSubscribed
+                value: newSubscribedState
             });
             
         } catch (error) {
@@ -171,7 +174,7 @@
                             class="icon-16"
                             loading="lazy"
                         />
-                        <span>{isSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
+                        <span>{currentIsSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
                     {/if}
                 </Button>
             </div>
