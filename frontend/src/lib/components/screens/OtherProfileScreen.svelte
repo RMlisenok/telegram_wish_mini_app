@@ -405,15 +405,20 @@
         border-radius: 12px;
         background: #f9fafb;
         min-height: 44px;
-    }
-
-    .wishlist-row.clickable, .sub-row.clickable {
+        width: 100%;
+        border: none;
         cursor: pointer;
+        text-align: left;
         transition: background-color 0.2s;
     }
 
-    .wishlist-row.clickable:hover, .sub-row.clickable:hover {
+    .wishlist-row:hover, .sub-row:hover {
         background: #f3f4f6;
+    }
+
+    .wishlist-row:focus-visible, .sub-row:focus-visible {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
     }
 
     .wishlist-icon {
