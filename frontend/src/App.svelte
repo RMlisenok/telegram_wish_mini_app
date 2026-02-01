@@ -108,8 +108,18 @@
             return null;
         }
     }
+
+    function isMyOwnProfile(profileId) {
+        if (!profileId || !currentUserId) return false;
+        return profileId.toString() === currentUserId.toString();
+    }
     
     async function openOtherProfileById(profileId) {
+        if (isMyOwnProfile(profileId)) {
+            navigate('main');
+            return;
+        }
+
         viewedProfile = {
             id: profileId,
             fullName: 'Загрузка...',
@@ -223,6 +233,8 @@
         }
     });
 
+    let currentUserId: string | null = null;
+
     // Обработчик начала работы
     const handleStart = async () => {
         showStartScreen = false;
@@ -238,6 +250,8 @@
             console.log('Получен токен:', token);
         }
         const user = data.user;
+        // Сохраняем ID пользователя для проверок текущего пользователя с другими
+        currentUserId = user.id.toString();
         if (user.birth_date != null)
         {
             navigate('main');
@@ -248,6 +262,7 @@
         }
         userStore.set({
             id: token || 'demo-user-1',
+            user_id: user.id.toString(),
             fullName: user.name  || 'Гость',
             birthDate: formatDateToDDMMYYYY(user.birth_date),
             avatarUrl: user.photo || '/default-avatar.png',
@@ -413,16 +428,7 @@
                     {:else if currentScreen === 'subscriptions'}
                         <SubscriptionsScreen
                             token={token}
-                            on:open-profile={(e) => {
-                                const profileId = e.detail.profileId;
-                                
-                                // Проверяем, не открываем ли мы свой профиль
-                                if (profileId.toString() === $userStore.id.toString()) {
-                                    navigate('main');
-                                } else {
-                                    openOtherProfileById(profileId);
-                                }
-                            }}
+                            on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
                             on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
                         />
                     
