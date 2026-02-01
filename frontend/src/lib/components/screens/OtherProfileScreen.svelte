@@ -210,28 +210,12 @@
         <div class="wishlists-list">
             {#each publicWishlists as wl (wl.id ?? wl.title)}
                 <!-- Si tu veux rendre chaque ligne cliquable: remplace <article> par <button> et dispatch open-wishlist -->
-                <!-- <article class="wishlist-row">
-                    <div class="wishlist-icon">
-                        <img
-                                src={wl.iconUrl ?? '../../../../static/icons/gift-check.png'}
-                                alt={wl.title}
-                                loading="lazy"
-                        />
-                    </div>
-                    <div class="wishlist-main">
-                        <div class="wishlist-title">{wl.title}</div>
-                        <div class="wishlist-meta">
-                            {wl.visibility === 'public' ? 'Виден всем' : 'Доступ ограничен'}
-                            {#if typeof wl.wishesCount === 'number'}
-                                · {wl.wishesCount} жел.
-                            {/if}
-                        </div>
-                    </div>
-                </article> -->
-                <button 
-                    type="button" 
-                    class="wishlist-row clickable"
+                <article 
+                    class="wishlist-row clickable" 
                     on:click={() => openWishlist(wl)}
+                    role="button"
+                    tabindex="0"
+                    on:keydown={(e) => e.key === 'Enter' && openWishlist(wl)}
                 >
                     <div class="wishlist-icon">
                         <img
@@ -249,7 +233,7 @@
                             {/if}
                         </div>
                     </div>
-                </button>
+                </article>
             {/each}
         </div>
     {/if}
@@ -318,10 +302,12 @@
             {/each} -->
             {#each subscriptions as sub (sub.id ?? sub.fullName)}
                 <!-- Добавляем обработчик клика по подписке -->
-                <button 
-                    type="button" 
+                <article 
                     class="sub-row clickable"
                     on:click={() => openSubscriptionProfile(sub)}
+                    role="button"
+                    tabindex="0"
+                    on:keydown={(e) => e.key === 'Enter' && openSubscriptionProfile(sub)}
                 >
                     <Avatar
                         size={52}
@@ -342,7 +328,7 @@
                             {/if}
                         </div>
                     </div>
-                </button>
+                </article>
             {/each}
         </div>
     {/if}
@@ -424,6 +410,15 @@
         border-radius: 12px;
         background: #f9fafb;
         min-height: 44px;
+    }
+
+    .wishlist-row.clickable, .sub-row.clickable {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .wishlist-row.clickable:hover, .sub-row.clickable:hover {
+        background: #f3f4f6;
     }
 
     .wishlist-icon {
