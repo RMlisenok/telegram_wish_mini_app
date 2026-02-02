@@ -7,6 +7,8 @@ from .wish_reservation import WishReservation
 from .subscription import Subscription
 from .notification_settings import NotificationSettings
 from .questionnaire import UserForm
+from .access_request import AccessRequest
+
 
 __all__ = [
     "User",
@@ -16,5 +18,6 @@ __all__ = [
     "WishReservation",
     "Subscription",
     "NotificationSettings",
-    "UserForm"
+    "UserForm",
+    "AccessRequest"
 ]
