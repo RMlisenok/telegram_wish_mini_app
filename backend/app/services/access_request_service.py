@@ -157,6 +157,8 @@ class AccessRequestService():
             return True
         if wishlist.typeprivacy == TypePrivacyEnum.public:
             return True
+        if wishlist.typeprivacy == TypePrivacyEnum.private:
+            return False
         return await self.rep_access.has_access(
             wishlist_id,
             user_id
