@@ -212,9 +212,7 @@ class AccessRequestService():
         if access_request.requester_id == user_id:
             return True
 
-        wishlist = access_request.wishlist if hasattr(access_request, 'wishlist') else None
-        if not wishlist:
-            wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
+        wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
 
         if wishlist and wishlist.user_id == user_id:
             return True
