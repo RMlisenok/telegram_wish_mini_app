@@ -1,5 +1,5 @@
 from typing import Optional, List
-from sqlalchemy import ForeignKey, TIMESTAMP, BigInteger
+from sqlalchemy import ForeignKey, TIMESTAMP, BigInteger, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.base import Base
@@ -21,10 +21,24 @@ class BlockedUser(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
+    block_profile: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False
+    )
+    block_wishlists: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False
+    )
 
     created_at: Mapped[TIMESTAMP] = mapped_column(
         TIMESTAMP,
         server_default=func.now()
+    )
+
+    updated_at: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now()
     )
 
     blocker: Mapped["User"] = relationship(

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 from typing import AsyncGenerator
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
@@ -58,17 +58,26 @@ async def check_connection():
         return False
 
 
+def _sync_get_table_names(conn):
+    inspector = inspect(conn)
+    return inspector.get_table_names()
+
+
 async def create_tables():
     try:
         async with async_engine.begin() as conn:
+            existing_tables = await conn.run_sync(_sync_get_table_names)
 
-            table_count = len(Base.metadata.tables)
-            print(f"Found: {table_count} tables in metadata")
+            if existing_tables:
+                print(f'Tables are existing: {len(existing_tables)} tables')
+                print(f'Existing tables: {", ".join(existing_tables)}')
+                return False
+
             await conn.run_sync(Base.metadata.create_all)
             print('All tables created')
-
+            return True
     except Exception as e:
-        print(f'Error create: {e}')
+        print(f'Error create tables: {e}')
         raise
 
 
@@ -85,7 +94,5 @@ async def drop_tables():
 async def init_database():
     if not await check_connection():
         return False
-
-    print('START CREATED TABLES')
     await create_tables()
     return True
