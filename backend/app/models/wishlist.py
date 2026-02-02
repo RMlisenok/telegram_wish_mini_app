@@ -51,3 +51,9 @@ class Wishlist(Base):
         foreign_keys="[Subscription.target_wishlist_id]",
         back_populates="target_wishlist"
     )
+
+    access_requests: Mapped[List["AccessRequest"]] = relationship(
+        "AccessRequest",
+        back_populates="wishlist",
+        cascade="all, delete-orphan"
+    )
