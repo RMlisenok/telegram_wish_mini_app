@@ -6,6 +6,7 @@ from app.core.db import get_db
 from app.models.wishlist import Wishlist
 from app.core.dependencies import get_current_user_id
 from app.services.wishlist_service import WishlistService
+from app.services.access_request_service import AccessRequestService
 from app.schemas.wishlist import WishlistCreate, WishlistResponse, WishlistUpdate
 from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistResponse, WishWishlistUpdate, WishInWishlistResponse
 
@@ -129,11 +130,11 @@ async def update_wish_to_wishlist(
     return connection
 
 
-@router.get("/{wishlist_id}/wishes",
-            response_model=List[WishInWishlistResponse])
+@router.get("/{wishlist_id}/wishes")
 async def get_wishes_from_wishlist(
     wishlist_id: int,
     limit: int = 50,
+    user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = WishlistService(db)
@@ -143,6 +144,12 @@ async def get_wishes_from_wishlist(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="WIshlist not found"
         )
+
+    service_acces = AccessRequestService(db)
+    has_access = await service_acces.check_access(wishlist_id, user_id)
+    if not has_access:
+        return {"message": "you dont have access to this wishlist"}
+
     wishes = await service.get_wishes_from_wishlist(wishlist_id, limit)
     return wishes
 
