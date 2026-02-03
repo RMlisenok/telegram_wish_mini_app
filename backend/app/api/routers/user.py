@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
@@ -7,12 +8,13 @@ from app.core.db import get_db
 from app.core.security import (
     verify_jwt_token
 )
-from app.core.dependencies import get_current_user_id
+from app.core.dependencies import get_client_s3, get_current_user_id
 from app.services.subscription_service import SubscriptionService
 from app.services.user_service import UserService
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.schemas.block import BlockCreate, UpdateBlock
+from app.core.s3_client import S3Client
 
 logger = logging.getLogger(__name__)
 
