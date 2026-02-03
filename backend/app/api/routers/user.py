@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
@@ -7,12 +8,13 @@ from app.core.db import get_db
 from app.core.security import (
     verify_jwt_token
 )
-from app.core.dependencies import get_current_user_id
+from app.core.dependencies import get_client_s3, get_current_user_id
 from app.services.subscription_service import SubscriptionService
 from app.services.user_service import UserService
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.schemas.block import BlockCreate, UpdateBlock
+from app.core.s3_client import S3Client
 
 logger = logging.getLogger(__name__)
 
@@ -207,3 +209,26 @@ async def get_blocked_user_list(
             detail="No bloked users found"
         )
     return list_blocked
+
+
+@router.post("/file/")
+async def upload_file(
+    file: UploadFile,
+    s3_client: S3Client = Depends(get_client_s3)
+):
+    try:
+
+        file_url_save = await s3_client.upload_fastapi_file(file)
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "File uploaded successfully",
+                "filename": file.filename,
+                "file_url": file_url_save,
+                "content_type": file.content_type,
+                "size": file.size
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
