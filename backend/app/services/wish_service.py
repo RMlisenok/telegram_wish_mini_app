@@ -3,7 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wish_repository import WishRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
-from app.schemas.wish import WishCreate, WishResponse, WishUpdate, WishShort, WishResponseMoreInfo, WishCreateDb
+from app.schemas.wish import (
+    WishCreate,
+    WishResponse,
+    WishUpdate,
+    WishResponseMoreInfo,
+    WishCreateDb
+)
+from app.core.s3_client import S3Client
 
 
 class WishService:
@@ -62,6 +69,11 @@ class WishService:
     ) -> WishResponse:
         # data = wish_data.model_dump()
         # data["user_id"] = user_id
+        if not wish_data.photo:
+            wish_data.photo = (
+                "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
+                "selstorage.ru/d118dd34-8236-4e18-b22e-d7f03c1992c6.png"
+            )
         wish_data_wish_user = WishCreateDb(
             user_id=user_id,
             **wish_data.model_dump()
