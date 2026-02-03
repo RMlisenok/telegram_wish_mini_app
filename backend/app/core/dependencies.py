@@ -7,6 +7,7 @@ from app.core.db import get_db
 from app.core.security import verify_jwt_token
 from app.services.user_service import UserService
 from app.models.user import User
+from app.core.s3_client import S3Client, create_s3_client
 
 
 logger = logging.getLogger(__name__)
@@ -73,3 +74,8 @@ async def get_current_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail='Internal server error'
         )
+
+
+async def get_client_s3() -> S3Client:
+    client = create_s3_client()
+    return client
