@@ -27,6 +27,15 @@ async def get_current_user_id(
             detail="Invalid Token"
         )
     user_id = int(payload.get("sub"))
+    user_service = UserService(db)
+    user = await user_service.get_user(user_id)
+
+    if not user:
+        logger.warning(f'User not found: {user_id}')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='User not found'
+        )
     return user_id
 
 

@@ -209,26 +209,3 @@ async def get_blocked_user_list(
             detail="No bloked users found"
         )
     return list_blocked
-
-
-@router.post("/file/")
-async def upload_file(
-    file: UploadFile,
-    s3_client: S3Client = Depends(get_client_s3)
-):
-    try:
-
-        file_url_save = await s3_client.upload_fastapi_file(file)
-
-        return JSONResponse(
-            status_code=200,
-            content={
-                "message": "File uploaded successfully",
-                "filename": file.filename,
-                "file_url": file_url_save,
-                "content_type": file.content_type,
-                "size": file.size
-            }
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
