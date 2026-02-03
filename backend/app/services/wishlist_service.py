@@ -5,8 +5,18 @@ from app.repositories.wishlist_repository import WishlistRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
 from app.models.wishlist import Wishlist
 from app.models.wish_wishlist import WishWishlist
-from app.schemas.wishlist import WishlistCreate, WishlistCreateDb, WishlistResponse, WishlistUpdate
-from app.schemas.wish_wishlist import WishWishlistCreate, WishWishlistUpdate, WishWishlistResponse, WishInWishlistResponse
+from app.schemas.wishlist import (
+    WishlistCreate,
+    WishlistCreateDb,
+    WishlistResponse,
+    WishlistUpdate
+)
+from app.schemas.wish_wishlist import (
+    WishWishlistCreate,
+    WishWishlistUpdate,
+    WishWishlistResponse,
+    WishInWishlistResponse
+)
 
 
 import logging
@@ -29,7 +39,11 @@ class WishlistService:
         wishlist = await self.rep_wishlist.get(wishlist_id)
         if wishlist:
             response = WishlistResponse.model_validate(wishlist)
-            response.wishes_count = await self.rep_wish_wishlist.count_wishes_in_wishlist(wishlist_id)
+            response.wishes_count = (
+                await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                    wishlist_id
+                )
+            )
             return response
         return None
 
@@ -38,6 +52,12 @@ class WishlistService:
         user_id: int,
         wishlist_data: WishlistCreate
     ) -> WishlistResponse:
+        if not wishlist_data.photo:
+            default_photo = (
+                "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
+                "selstorage.ru/9bcb1b11-c7cd-4787-ad2d-60c6b49ce9ca.svg"
+            )
+            wishlist_data.photo = default_photo
         wishlist_with_user = WishlistCreateDb(
             user_id=user_id,
             **wishlist_data.model_dump()
@@ -52,7 +72,6 @@ class WishlistService:
         wishlist_id: int,
         wishlist_data: WishlistUpdate
     ) -> Optional[WishlistResponse]:
-
         update_data = wishlist_data.model_dump(exclude_unset=True)
         wishlist = await self.rep_wishlist.update(wishlist_id, update_data)
         if wishlist:
@@ -74,7 +93,6 @@ class WishlistService:
         is_desc: bool = False,
         limit: int = 10
     ) -> List[WishlistResponse]:
-        logger.warning("INFO|                   START WORK IN WISHLIST SERVICE")
         wishlists = await self.rep_wishlist.get_user_wishlist(
             user_id,
             is_desc,
@@ -107,7 +125,10 @@ class WishlistService:
                 name=connection.wish.name,
                 photo=connection.wish.photo,
                 url_gift=connection.wish.url_gift,
-                price=float(connection.wish.price) if connection.wish.price else None,
+                price=(
+                    float(connection.wish.price)
+                    if connection.wish.price else None
+                ),
                 currency=connection.wish.currency,
                 description=connection.wish.description,
                 is_booked=connection.wish.is_booked,

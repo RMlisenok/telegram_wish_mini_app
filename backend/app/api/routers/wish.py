@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
+from pydantic import Json
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.core.db import get_db
@@ -36,6 +37,7 @@ async def get_wishes_sorted(
 ):
     service = WishService(db)
     return await service.get_user_wish_sorted(user_id, is_finish, limit)
+
 
 @router.get("/{wish_id}", response_model=WishResponseMoreInfo)
 async def get_wish(
