@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    ACCESS_KEY: str
+    SECRET_KEY: str
+    ENDPOINT_URL: str
+    BUCKET_NAME: str
+    URL_DATA_SAVE: str
+
     @property
     def DATABASE_URL_asyncpg(self):
         base_url = f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@"
