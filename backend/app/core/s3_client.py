@@ -5,9 +5,12 @@ from contextlib import asynccontextmanager
 import aiofiles
 from botocore.config import Config
 from fastapi import UploadFile, HTTPException, status
-from typing import Optional, BinaryIO
+from typing import Optional, BinaryIO, Tuple
 import uuid
+import io
 from .config import settings
+from PIL import Image
+
 
 class S3Client:
 
@@ -37,7 +40,12 @@ class S3Client:
             'jpg', 'jpeg', 'png',
             'gif', 'webp', 'svg'
         }
-        self.max_size_file = 100 * 1024 * 1024  # 100 MB
+        self.max_size_file = 10 * 1024 * 1024  # 10 MB
+        self.max_image_resolution = (4096, 4096)
+        self.min_image_resolution = (50, 50)
+        self.resolution_check_types = {
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp'
+        }
 
     @asynccontextmanager
     async def get_client(self):
@@ -103,6 +111,10 @@ class S3Client:
         if not object_name:
             object_name = f"{uuid.uuid4()}.{ext}" if ext else str(uuid.uuid4())
 
+        width, height = await self.check_image_resolution(
+            content,
+            upload_file.content_type
+        )
         return await self.upload_from_memory(
             content,
             object_name,
@@ -129,6 +141,46 @@ class S3Client:
             return None
         except Exception:
             return None
+
+    async def check_image_resolution(
+        self,
+        file_content: bytes,
+        content_type: str
+    ) -> Tuple[int, int]:
+
+        if content_type == "image/svg+xml":
+            return (0, 0)
+        if content_type not in self.resolution_check_types:
+            return (0, 0)
+        try:
+            image = Image.open(io.BytesIO(file_content))
+            width, height = image.size
+            if width > self.max_image_resolution[0] or height > self.max_image_resolution[1]:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"File uncorrect image ({width}x{height}) "
+                        f"Max allowed ({self.max_image_resolution[0]}x{self.max_image_resolution[1]})"
+                        )
+                )
+            if width < self.min_image_resolution[0] or height < self.min_image_resolution[1]:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"File uncorrect image ({width}x{height}) "
+                        f"Min allowed ({self.min_image_resolution[0]}x{self.min_image_resolution[1]})"
+                        )
+                )
+            image.close()
+            return width, height
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"Dont check image resolution: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Dont check image resolution, please check valid file"
+            )
 
     async def delete_file(self, object_name_url: str) -> bool:
         object_name = self.get_object_name(object_name_url)
