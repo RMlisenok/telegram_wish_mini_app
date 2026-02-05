@@ -1,8 +1,9 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishlistsStore } from '../../stores/data.js';
+    //import { wishlistsStore } from '../../stores/data.js';
     import { wishesStore, loadWishes, deleteWish } from '../../../types/wishes.ts';
+    import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
         addMultipleWishesToWishlist, 
         getWishesFromWishlist, 
@@ -353,11 +354,22 @@
     let targetWishlists = new Set(); // Выбранные вишлисты для копирования/перемещения
     let wishToCopyMove = null;
 
-    const openCopyMoveModal = (wishId, type) => {
+    const openCopyMoveModal = async (wishId, type) => {
         wishToCopyMove = wishId;
         actionType = type;
         targetWishlists = new Set();
-        showCopyMoveModal = true;
+        try {
+            // Загружаем вишлисты
+            await loadWishlists();
+            
+            // Загружаем информацию о желании для получения списка вишлистов, где оно уже есть
+            await loadWishDetails(wishId);
+            
+            showCopyMoveModal = true;
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            showNotification('Не удалось загрузить данные');
+        }
     };
     //выполнить перемещение/копирование
     const executeCopyMove = async () => {
@@ -544,17 +556,16 @@
         }
     };
 
-    const getWishlistIdsWithWish = (wishId) => {
-        const wish = $wishesStore.find(w => w.id === wishId);
-        if (!wish || !wish.wishlists) return [];
+    const getWishlistIdsWithWishFromDB = () => {
+        if (!selectedWish || !selectedWish.wishlists) return [];
         
-        return wish.wishlists.map(w => w.id);
+        return selectedWish.wishlists.map(w => w.id);
     };
 
-    $: availableWishlistsForCopyMove = $wishWishlistsStore.filter(wl => {
+    $: availableWishlistsForCopyMove = $wishlistsStore.filter(wl => {
         if (wishlistId && wl.id === wishlistId) return false;
-        
-        const wishlistIdsWithWish = wishToCopyMove ? getWishlistIdsWithWish(wishToCopyMove) : [];
+    
+        const wishlistIdsWithWish = getWishlistIdsWithWishFromDB();
         
         if (actionType === 'copy') {
             return !wishlistIdsWithWish.includes(wl.id);
