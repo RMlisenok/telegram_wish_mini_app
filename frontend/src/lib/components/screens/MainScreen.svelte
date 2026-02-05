@@ -435,6 +435,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: var(--tg-theme-text-color, #111827);
     }
 
     .wishlist-meta-small {
@@ -489,6 +490,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: var(--tg-theme-text-color, #111827);
     }
 
     .subs-meta {

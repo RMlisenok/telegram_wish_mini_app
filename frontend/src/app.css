@@ -172,21 +172,24 @@ img, svg, canvas, video {
 .h1 {
     font-size: 22px;
     font-weight: 700;
+    color: var(--tg-theme-text-color, #111827);
 }
 
 .h2 {
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 8px;
+    color: var(--tg-theme-text-color, #111827);
 }
 
 /* Cartes de section avec coins visibles */
 .section-card {
-    background: #ffffff;
+    background: var(--tg-theme-secondary-bg-color, #ffffff);
     border-radius: 18px;
     padding: 12px 16px 14px;
     margin-bottom: 12px;
     box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.06); /* trait très léger */
+    color: var(--tg-theme-text-color, #111827);
 }
 
 /* Texte normal un peu plus grand */
