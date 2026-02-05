@@ -62,8 +62,17 @@ img, svg, canvas, video {
     --tg-theme-link-color: #60a5fa;
 }
 
+[data-theme="dark"] .app-root {
+    background: var(--tg-theme-bg-color);
+}
+
+[data-theme="dark"] .app-scroll {
+    background: var(--tg-theme-bg-color);
+}
+
 [data-theme="dark"] .section-card {
     background: #1e293b;
+    color: #f1f5f9;
     box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
@@ -85,6 +94,34 @@ img, svg, canvas, video {
 [data-theme="dark"] .item-subtitle,
 [data-theme="dark"] .item-arrow {
     color: #cccccc !important;
+}
+
+[data-theme="dark"] .big-blue-btn {
+    background: rgba(96, 165, 250, 0.1) !important;
+    color: #60a5fa !important;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .tab-item {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .tab-item.active {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .tab-item.active .tab-dot {
+    background: #60a5fa;
+}
+
+/* Исправление для текста в карточках */
+[data-theme="dark"] .section-card *:not(.h1):not(.h2):not(.item-title) {
+    color: #cbd5e1 !important;
+}
+
+/* Иконки для темной темы */
+[data-theme="dark"] .tab-icon {
+    filter: brightness(0.9);
 }
 
 /*2002_3_Dass_20.12.2025 <--*/
