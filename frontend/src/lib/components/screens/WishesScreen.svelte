@@ -558,7 +558,7 @@
 
     const getWishlistIdsWithWishFromDB = () => {
         if (!selectedWish) return [];
-        
+    
         if (selectedWish.wishlists && selectedWish.wishlists.length > 0) {
             return selectedWish.wishlists.map(w => w.id);
         }
@@ -589,15 +589,14 @@
     });
     
     $: availableWishlistsForCopyMove = wishlistsWithCount.filter(wl => {
+        // Исключаем текущий вишлист
         if (wishlistId && wl.id === wishlistId) return false;
         
+        // Получаем ID вишлистов, где уже есть это желание
         const wishlistIdsWithWish = getWishlistIdsWithWishFromDB();
         
-        if (actionType === 'copy') {
-            return !wishlistIdsWithWish.includes(wl.id);
-        } else {
-            return true;
-        }
+        // Фильтруем - показываем только вишлисты, где ЭТОГО желания еще нет
+        return !wishlistIdsWithWish.includes(wl.id);
     });
 </script>
 
