@@ -400,19 +400,23 @@
                 }
             }
             
-            //обновление данных
-            if (wishlistId && actionType === 'move') {
-                wishWishlistsStore.update(items => 
-                    items.filter(item => item.id !== wishToCopyMove.toString())
-                );
-                
-                await loadWishes(token);
-            } else if (wishlistId && actionType === 'copy') {
-                if (targetWishlists.has(wishlistId)) {
-                    await updateWishesInWishlist();
+            await loadWishes(token);
+        
+            await loadWishlists(token);
+            
+            if (wishlistId) {
+                if (actionType === 'move') {
+                    wishWishlistsStore.update(items => 
+                        items.filter(item => item.id !== wishToCopyMove.toString())
+                    );
                 }
+                // Обновляем список желаний в вишлисте
+                await updateWishesInWishlist();
             }
             
+            if (selectedWish) {
+                await loadWishDetails(wishToCopyMove);
+            }
             
             closeCopyMoveModal();
         } catch (error) {
