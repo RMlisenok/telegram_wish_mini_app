@@ -558,16 +558,8 @@
 
     const getWishlistIdsWithWishFromDB = () => {
         if (!selectedWish) return [];
-    
-        if (selectedWish.wishlists && selectedWish.wishlists.length > 0) {
-            return selectedWish.wishlists.map(w => w.id);
-        }
         
-        if (selectedWish.wishlistIds && Array.isArray(selectedWish.wishlistIds)) {
-            return selectedWish.wishlistIds;
-        }
-        
-        return [];
+        return selectedWish.wishlistIds || [];
     };
 
     $: wishlistsWithCount = $wishlistsStore.map(wishlist => {
@@ -588,15 +580,29 @@
         };
     });
     
-    $: availableWishlistsForCopyMove = wishlistsWithCount.filter(wl => {
-        // Исключаем текущий вишлист
+    $: availableWishlistsForCopyMove = $wishlistsStore
+    .filter(wl => {
+        // исключаем текущий вишлист
         if (wishlistId && wl.id === wishlistId) return false;
         
-        // Получаем ID вишлистов, где уже есть это желание
+        // получаем ID вишлистов, где уже есть желание
         const wishlistIdsWithWish = getWishlistIdsWithWishFromDB();
         
-        // Фильтруем - показываем только вишлисты, где ЭТОГО желания еще нет
-        return !wishlistIdsWithWish.includes(wl.id);
+        return !wishlistIdsWithWish.includes(wl.id.toString());
+    })
+    .map(wl => {
+        // Добавляем количество желаний для отображения
+        const wishesCount = $wishesStore.filter(wish => {
+            if (wish.wishlistIds && Array.isArray(wish.wishlistIds)) {
+                return wish.wishlistIds.includes(wl.id);
+            }
+            return false;
+        }).length;
+        
+        return {
+            ...wl,
+            count: wishesCount
+        };
     });
 </script>
 
