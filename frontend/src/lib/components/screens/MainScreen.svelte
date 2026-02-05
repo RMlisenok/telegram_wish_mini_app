@@ -411,7 +411,7 @@
         width: 52px;
         height: 52px;
         border-radius: 16px;
-        background: #f3f4f6;
+        background: var(--tg-theme-secondary-bg-color, #f3f4f6);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -439,7 +439,7 @@
 
     .wishlist-meta-small {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--tg-theme-hint-color, #6b7280);
         margin-top: 2px;
         display: flex;
         align-items: center;
@@ -493,7 +493,7 @@
 
     .subs-meta {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--tg-theme-hint-color, #6b7280);
         margin-top: 2px;
     }
 

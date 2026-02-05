@@ -124,6 +124,22 @@ img, svg, canvas, video {
     filter: brightness(0.9);
 }
 
+[data-theme="dark"] .empty-note {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .wishlist-cover-small {
+    background: #334155 !important;
+}
+
+[data-theme="dark"] .privacy-chip span {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .icon-btn img {
+    filter: brightness(0) invert(1);
+}
+
 /*2002_3_Dass_20.12.2025 <--*/
 
 /* Racine de l’app */
