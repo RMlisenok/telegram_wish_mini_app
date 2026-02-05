@@ -136,3 +136,27 @@ export async function updateWish(
         throw error;
     }
 }
+
+export async function deleteWish(token: string, wishId: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/v1/wishes/${wishId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Желание не найдено');
+            }
+            throw new Error('Ошибка удаления желания');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Ошибка удаления желания:', error);
+        throw error;
+    }
+}
