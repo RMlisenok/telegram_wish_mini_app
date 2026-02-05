@@ -96,50 +96,6 @@ img, svg, canvas, video {
     color: #cccccc !important;
 }
 
-[data-theme="dark"] .big-blue-btn {
-    background: rgba(96, 165, 250, 0.1) !important;
-    color: #60a5fa !important;
-    border: 1px solid rgba(96, 165, 250, 0.3);
-}
-
-[data-theme="dark"] .tab-item {
-    color: #94a3b8;
-}
-
-[data-theme="dark"] .tab-item.active {
-    color: #60a5fa;
-}
-
-[data-theme="dark"] .tab-item.active .tab-dot {
-    background: #60a5fa;
-}
-
-/* Исправление для текста в карточках */
-[data-theme="dark"] .section-card *:not(.h1):not(.h2):not(.item-title) {
-    color: #cbd5e1 !important;
-}
-
-/* Иконки для темной темы */
-[data-theme="dark"] .tab-icon {
-    filter: brightness(0.9);
-}
-
-[data-theme="dark"] .empty-note {
-    color: #94a3b8 !important;
-}
-
-[data-theme="dark"] .wishlist-cover-small {
-    background: #334155 !important;
-}
-
-[data-theme="dark"] .privacy-chip span {
-    color: #cbd5e1 !important;
-}
-
-[data-theme="dark"] .icon-btn img {
-    filter: brightness(0) invert(1);
-}
-
 /*2002_3_Dass_20.12.2025 <--*/
 
 /* Racine de l’app */
@@ -172,24 +128,21 @@ img, svg, canvas, video {
 .h1 {
     font-size: 22px;
     font-weight: 700;
-    color: var(--tg-theme-text-color, #111827);
 }
 
 .h2 {
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 8px;
-    color: var(--tg-theme-text-color, #111827);
 }
 
 /* Cartes de section avec coins visibles */
 .section-card {
-    background: var(--tg-theme-secondary-bg-color, #ffffff);
+    background: #ffffff;
     border-radius: 18px;
     padding: 12px 16px 14px;
     margin-bottom: 12px;
     box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.06); /* trait très léger */
-    color: var(--tg-theme-text-color, #111827);
 }
 
 /* Texte normal un peu plus grand */
