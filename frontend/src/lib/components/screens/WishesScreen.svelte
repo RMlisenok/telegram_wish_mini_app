@@ -403,7 +403,7 @@
                 }
             }
             
-            /*await loadWishes(token);
+            await loadWishes(token);
         
             await loadWishlists(token);
             
@@ -417,11 +417,8 @@
                 await updateWishesInWishlist();
             }
             
-            if (selectedWish) {
-                await loadWishDetails(wishToCopyMove);
-            }*/
-            
             closeCopyMoveModal();
+            closeDetailModal();
         } catch (error) {
             console.error('Ошибка при выполнении операции:', error);
             showNotification('Произошла ошибка при выполнении операции');
