@@ -7,7 +7,8 @@
         addMultipleWishesToWishlist, 
         getWishesFromWishlist, 
         wishWishlistsStore,
-        toggleWishPinInWishlist 
+        toggleWishPinInWishlist,
+        removeWishFromWishlist 
     } from '../../../types/wish_wishlist.ts';
 
     const dispatch = createEventDispatcher();
@@ -333,12 +334,22 @@
     const handleRemoveFromWishlist = (wishId) => {
         if (!wishlistId) return;
         //2006_7_Dass_25.12.2025
-        deleteOption = 'fromwishlists';
-        
-        const wish = $wishesStore.find(w => w.id === wishId);
-        if (wish) {
-            selectedWish = wish;
-            showFromWishlistDeleteModal = true;
+        if (wishlistId) {
+            const wish = $wishWishlistsStore.find(item => item.id === wishId);
+            if (wish) {
+                selectedWish = {
+                    id: wish.id,
+                    name: wish.name,
+                    connection_id: wish.connection_id
+                };
+                showFromWishlistDeleteModal = true;
+            }
+        } else {
+            const wish = $wishesStore.find(w => w.id === wishId);
+            if (wish) {
+                selectedWish = wish;
+                showFullDeleteModal = true;
+            }
         }
     };
     // 2009_2_Dass_25.12.2025 <--
@@ -415,6 +426,10 @@
     
         try {
             await deleteWish(token, selectedWish.id);
+
+            wishesStore.update(wishes => 
+                wishes.filter(wish => wish.id !== selectedWish.id)
+            );
             
             //если в режиме вишлиста
             if (wishlistId) {
