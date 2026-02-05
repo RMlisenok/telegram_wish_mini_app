@@ -557,14 +557,40 @@
     };
 
     const getWishlistIdsWithWishFromDB = () => {
-        if (!selectedWish || !selectedWish.wishlists) return [];
+        if (!selectedWish) return [];
         
-        return selectedWish.wishlists.map(w => w.id);
+        if (selectedWish.wishlists && selectedWish.wishlists.length > 0) {
+            return selectedWish.wishlists.map(w => w.id);
+        }
+        
+        if (selectedWish.wishlistIds && Array.isArray(selectedWish.wishlistIds)) {
+            return selectedWish.wishlistIds;
+        }
+        
+        return [];
     };
 
-    $: availableWishlistsForCopyMove = $wishlistsStore.filter(wl => {
-        if (wishlistId && wl.id === wishlistId) return false;
+    $: wishlistsWithCount = $wishlistsStore.map(wishlist => {
+        // Получаем количество желаний в вишлисте
+        const wishesCount = $wishesStore.filter(wish => {
+            if (wish.wishlistIds && Array.isArray(wish.wishlistIds)) {
+                return wish.wishlistIds.includes(wishlist.id);
+            }
+            if (selectedWish?.wishlists) {
+                return selectedWish.wishlists.some(w => w.id === wishlist.id);
+            }
+            return false;
+        }).length;
+        
+        return {
+            ...wishlist,
+            count: wishesCount
+        };
+    });
     
+    $: availableWishlistsForCopyMove = wishlistsWithCount.filter(wl => {
+        if (wishlistId && wl.id === wishlistId) return false;
+        
         const wishlistIdsWithWish = getWishlistIdsWithWishFromDB();
         
         if (actionType === 'copy') {
@@ -941,9 +967,8 @@
                                 <div class="wishlist-selection-info">
                                     <div class="wishlist-selection-title">{wishlist.title}</div>
                                     <div class="wishlist-selection-count">
-                                        {$wishesStore.filter(w => 
-                                            (w.wishlistIds || []).includes(wishlist.id)
-                                        ).length} желаний
+                                        {wishlist.count} {wishlist.count === 1 ? 'желание' : 
+                                        wishlist.count >= 2 && wishlist.count <= 4 ? 'желания' : 'желаний'}
                                     </div>
                                 </div>
                                 
