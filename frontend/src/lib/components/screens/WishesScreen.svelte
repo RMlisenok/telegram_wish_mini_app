@@ -170,11 +170,6 @@
     };
 
     // открытие вишлиста 2009/0_Dass_25.12.2025
-    // $: filteredWishes = wishlistId 
-    //     ? $wishesStore.filter(wish => 
-    //         (wish.wishlistIds || []).includes(wishlistId)
-    //       )
-    //     : $wishesStore;
     $: filteredWishes = wishlistId 
         ? $wishWishlistsStore.map(item => ({
             id: item.id.toString(),
@@ -440,9 +435,6 @@
         }
         targetWishlists = newSet;
     };
-    $: availableWishlists = $wishlistsStore.filter(wl => 
-        !wishlistId || wl.id !== wishlistId
-    );
     // 2009_3_Dass_25.12.2025 <--
 
     //2006_7_Dass_25.12.2025 -->
