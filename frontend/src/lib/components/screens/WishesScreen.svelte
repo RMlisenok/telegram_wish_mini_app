@@ -558,37 +558,20 @@
 
     const getWishlistIdsWithWishFromDB = () => {
         if (!selectedWish) return [];
-        
-        return selectedWish.wishlistIds || [];
+        console.log('selectedWish.wishlistIds:', selectedWish.wishlistIds);
+        return selectedWish.wishlistIds.map(id => id.toString());
     };
-
-    $: wishlistsWithCount = $wishlistsStore.map(wishlist => {
-        // Получаем количество желаний в вишлисте
-        const wishesCount = $wishesStore.filter(wish => {
-            if (wish.wishlistIds && Array.isArray(wish.wishlistIds)) {
-                return wish.wishlistIds.includes(wishlist.id);
-            }
-            if (selectedWish?.wishlists) {
-                return selectedWish.wishlists.some(w => w.id === wishlist.id);
-            }
-            return false;
-        }).length;
-        
-        return {
-            ...wishlist,
-            count: wishesCount
-        };
-    });
     
     $: availableWishlistsForCopyMove = $wishlistsStore
     .filter(wl => {
-        // исключаем текущий вишлист
-        if (wishlistId && wl.id === wishlistId) return false;
-        
         // получаем ID вишлистов, где уже есть желание
         const wishlistIdsWithWish = getWishlistIdsWithWishFromDB();
+        const currentWishlistId = wl.id.toString();
+        const isAlreadyInWishlist = wishlistIdsWithWish.some(id => 
+            id.toString() === currentWishlistId
+        );
         
-        return !wishlistIdsWithWish.includes(wl.id.toString());
+        return !isAlreadyInWishlist;
     })
     .map(wl => {
         // Добавляем количество желаний для отображения
