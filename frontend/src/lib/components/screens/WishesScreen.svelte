@@ -360,34 +360,58 @@
         showCopyMoveModal = true;
     };
     //выполнить перемещение/копирование
-    const executeCopyMove = () => {
+    const executeCopyMove = async () => {
         if (!wishToCopyMove || targetWishlists.size === 0) return;
         
-        $wishesStore = $wishesStore.map(wish => {
-            if (wish.id === wishToCopyMove) {
-                const existingWishlistIds = wish.wishlistIds || [];
-                let newWishlistIds = [...existingWishlistIds];
-                // Добавляем выбранные вишлисты
-                targetWishlists.forEach(wishlistId => {
-                    if (!newWishlistIds.includes(wishlistId)) {
-                        newWishlistIds.push(wishlistId);
+        try {
+            const targetWishlistIds = Array.from(targetWishlists);
+            
+            for (const targetWishlistId of targetWishlistIds) {
+                if (actionType === 'copy') {
+                    await addWishToWishlist(
+                        token, 
+                        targetWishlistId, 
+                        wishToCopyMove, 
+                        {
+                            is_pinned: false,
+                            order_position: 0
+                        }
+                    );
+                } else if (actionType === 'move') {
+                    if (wishlistId) {
+                        await removeWishFromWishlist(token, wishlistId, wishToCopyMove);
                     }
-                });
-                // Если это перемещение, удаляем текущий вишлист
-                if (actionType === 'move' && wishlistId) {
-                    newWishlistIds = newWishlistIds.filter(id => id !== wishlistId);
+                    await addWishToWishlist(
+                        token, 
+                        targetWishlistId, 
+                        wishToCopyMove,
+                        {
+                            is_pinned: false,
+                            order_position: 0
+                        }
+                    );
                 }
-                return {
-                    ...wish,
-                    wishlistIds: newWishlistIds
-                };
             }
-            return wish;
-        });
-        
-        // Закрываем модальные окна
-        closeCopyMoveModal();
-        closeDetailModal();
+            
+            //обновление данных
+            if (wishlistId && actionType === 'move') {
+                wishWishlistsStore.update(items => 
+                    items.filter(item => item.id !== wishToCopyMove.toString())
+                );
+                
+                await loadWishes(token);
+            } else if (wishlistId && actionType === 'copy') {
+                if (targetWishlists.has(wishlistId)) {
+                    await updateWishesInWishlist();
+                }
+            }
+            
+            
+            closeCopyMoveModal();
+        } catch (error) {
+            console.error('Ошибка при выполнении операции:', error);
+            showNotification('Произошла ошибка при выполнении операции');
+        }
     };
     const closeCopyMoveModal = () => {
         showCopyMoveModal = false;
@@ -519,6 +543,25 @@
             console.error('Ошибка загрузки деталей желания:', error);
         }
     };
+
+    const getWishlistIdsWithWish = (wishId) => {
+        const wish = $wishesStore.find(w => w.id === wishId);
+        if (!wish || !wish.wishlists) return [];
+        
+        return wish.wishlists.map(w => w.id);
+    };
+
+    $: availableWishlistsForCopyMove = $wishlistsStore.filter(wl => {
+        if (wishlistId && wl.id === wishlistId) return false;
+        
+        const wishlistIdsWithWish = wishToCopyMove ? getWishlistIdsWithWish(wishToCopyMove) : [];
+        
+        if (actionType === 'copy') {
+            return !wishlistIdsWithWish.includes(wl.id);
+        } else {
+            return true;
+        }
+    });
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -865,13 +908,13 @@
                         ' Текущий вишлист будет удален из списка.'}
                 </p>
                 
-                {#if availableWishlists.length === 0}
+                {#if availableWishlistsForCopyMove.length === 0}
                     <p class="empty-message">
                         Нет доступных вишлистов для {actionType === 'copy' ? 'копирования' : 'перемещения'}
                     </p>
                 {:else}
                     <div class="wishlists-selection-list">
-                        {#each availableWishlists as wishlist (wishlist.id)}
+                        {#each availableWishlistsForCopyMove as wishlist (wishlist.id)}
                             <div 
                                 class="wishlist-selection-item {targetWishlists.has(wishlist.id) ? 'selected' : ''}"
                                 on:click={() => toggleWishlistSelection(wishlist.id)}
