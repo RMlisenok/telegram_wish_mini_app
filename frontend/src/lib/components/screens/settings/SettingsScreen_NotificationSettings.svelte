@@ -13,16 +13,92 @@
     let newFollowers = $notificationSettingsStore.newFollowers;
     let postBirthdayNotifications = $notificationSettingsStore.postBirthdayNotifications;
     let wishlistAccessRequests = $notificationSettingsStore.wishlistAccessRequests;
+    
+    export let token;
+    import { onMount } from 'svelte';
 
-    function saveSettings() {
-        notificationSettingsStore.set({
-            birthdayReminders,
-            newFollowers,
-            postBirthdayNotifications,
-            wishlistAccessRequests
-        });
-        // Здесь будет запрос к API для сохранения настроек
-        goBack();
+    onMount(async () => {
+        await fetchNotificationSettings();
+    });
+
+    async function fetchNotificationSettings() {
+        if (!token) return;
+        
+        try {
+            const response = await fetch('/api/v1/settings/notifications', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки настроек');
+            }
+            
+            const data = await response.json();
+            
+            // Маппинг полей из API
+            newFollowers = data.new_followers;
+            wishlistAccessRequests = data.access_requests;
+            postBirthdayNotifications = data.birt_after;
+            birthdayReminders = data.birt_before;
+            
+            // Обновляем стор
+            notificationSettingsStore.set({
+                birthdayReminders: data.birt_before,
+                newFollowers: data.new_followers,
+                postBirthdayNotifications: data.birt_after,
+                wishlistAccessRequests: data.access_requests
+            });
+            
+        } catch (err) {
+            error = err.message;
+            console.error('Ошибка загрузки настроек:', err);
+        }
+    }
+    
+    async function saveSettings() {
+        if (!token) return;
+        
+        try {
+            const settingsData = {
+                new_followers: newFollowers,
+                access_requests: wishlistAccessRequests,
+                birt_after: postBirthdayNotifications,
+                birt_before: birthdayReminders
+            };
+            
+            const response = await fetch('/api/v1/settings/notifications', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(settingsData)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка сохранения настроек');
+            }
+            
+            const result = await response.json();
+            
+            // Обновляем стор с серверными данными
+            notificationSettingsStore.set({
+                birthdayReminders: result.update_data.birt_before,
+                newFollowers: result.update_data.new_followers,
+                postBirthdayNotifications: result.update_data.birt_after,
+                wishlistAccessRequests: result.update_data.access_requests
+            });
+            
+            goBack();
+            
+        } catch (err) {
+            error = err.message;
+            console.error('Ошибка сохранения настроек:', err);
+        }
     }
 
     function handleSettingKeydown(event, settingName) {

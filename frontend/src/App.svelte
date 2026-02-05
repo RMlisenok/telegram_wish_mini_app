@@ -357,6 +357,7 @@
                     
                     {:else if currentScreen === 'notifficationSettings'}
                         <SettingsScreenNotificationSettings
+                            token={token}
                             onGoBack={() => navigate('settings')}
                         />
                     
