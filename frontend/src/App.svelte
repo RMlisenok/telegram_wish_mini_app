@@ -566,35 +566,5 @@
         width: 24px !important;
         height: 24px !important;
     }
-    .app-root[data-theme="dark"] {
-        background: #0f172a !important;
-        color: #f1f5f9 !important;
-    }
 
-    .app-root[data-theme="dark"] .app-scroll {
-        background: #0f172a !important;
-    }
-
-    .app-root[data-theme="dark"] .tab-bar {
-        background: #0f172a !important;
-        border-top: 1px solid #334155 !important;
-    }
-
-    .app-root[data-theme="dark"] .tab-item {
-        color: #94a3b8 !important;
-    }
-
-    .app-root[data-theme="dark"] .tab-item.active {
-        color: #60a5fa !important;
-    }
-
-    .app-root[data-theme="dark"] .section-card {
-        background: #1e293b !important;
-        color: #f1f5f9 !important;
-    }
-
-    .app-root[data-theme="dark"] .big-blue-btn {
-        background: rgba(96, 165, 250, 0.1) !important;
-        color: #60a5fa !important;
-    }
 </style>
