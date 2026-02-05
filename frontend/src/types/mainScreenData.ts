@@ -112,7 +112,7 @@ export async function loadMainScreenData(token: string) {
         mainSubscriptionsStore.set(transformedSubscriptions);
         
         // Обновляем подписчиков
-        const transformedSubscribers = data.subsсribers.subscribers.map((sub: any) => ({
+        const transformedSubscribers = data.subscribers.subscribers.map((sub: any) => ({
             name: sub.name,
             photo: sub.photo,
             birth_date: formatDateToDDMMYYYY(sub.birth_date)
@@ -122,7 +122,7 @@ export async function loadMainScreenData(token: string) {
 
         totalWishesStore.set(data.total_wish || 0);
         totalWishlistsStore.set(data.total_wishlist || 0);
-        totalSubscribersStore.set(data.subscribers?.total || 0);
+        //totalSubscribersStore.set(data.subscribers?.total || 0);
         totalSubscriptionsStore.set(data.subscription.subscription?.total || 0);
         
         return {
@@ -131,7 +131,7 @@ export async function loadMainScreenData(token: string) {
             subscribers: transformedSubscribers,
             totalWish: data.total_wish,
             totalWishlist: data.total_wishlist,
-            totalSubscribers: data.subscribers.total,
+            //totalSubscribers: data.subscribers.total,
             totalSubscription: data.subscription.subscription.total
         };
         
