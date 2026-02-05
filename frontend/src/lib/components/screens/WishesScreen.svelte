@@ -360,7 +360,7 @@
         targetWishlists = new Set();
         try {
             // Загружаем вишлисты
-            await loadWishlists();
+            await loadWishlists(token);
             
             // Загружаем информацию о желании для получения списка вишлистов, где оно уже есть
             await loadWishDetails(wishId);
