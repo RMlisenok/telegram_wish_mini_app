@@ -400,7 +400,7 @@
                 }
             }
             
-            await loadWishes(token);
+            /*await loadWishes(token);
         
             await loadWishlists(token);
             
@@ -416,7 +416,7 @@
             
             if (selectedWish) {
                 await loadWishDetails(wishToCopyMove);
-            }
+            }*/
             
             closeCopyMoveModal();
         } catch (error) {
