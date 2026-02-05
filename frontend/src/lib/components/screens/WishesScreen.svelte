@@ -427,9 +427,7 @@
         try {
             await deleteWish(token, selectedWish.id);
 
-            wishesStore.update(wishes => 
-                wishes.filter(wish => wish.id !== selectedWish.id)
-            );
+            await loadWishes(token);
             
             //если в режиме вишлиста
             if (wishlistId) {
