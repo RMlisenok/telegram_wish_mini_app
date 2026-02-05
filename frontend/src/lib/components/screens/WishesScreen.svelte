@@ -9,7 +9,8 @@
         getWishesFromWishlist, 
         wishWishlistsStore,
         toggleWishPinInWishlist,
-        removeWishFromWishlist 
+        removeWishFromWishlist,
+        addWishToWishlist 
     } from '../../../types/wish_wishlist.ts';
 
     const dispatch = createEventDispatcher();
