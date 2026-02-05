@@ -372,8 +372,10 @@
         
         try {
             const targetWishlistIds = Array.from(targetWishlists);
-            
+            console.log(targetWishlists);
+            console.log(targetWishlistIds);
             for (const targetWishlistId of targetWishlistIds) {
+                console.log(targetWishlistId);
                 if (actionType === 'copy') {
                     await addWishToWishlist(
                         token, 
