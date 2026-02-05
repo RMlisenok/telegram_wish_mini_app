@@ -2,7 +2,7 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     import { wishlistsStore } from '../../stores/data.js';
-    import { wishesStore, loadWishes } from '../../../types/wishes.ts';
+    import { wishesStore, loadWishes, deleteWish } from '../../../types/wishes.ts';
     import { 
         addMultipleWishesToWishlist, 
         getWishesFromWishlist, 
@@ -410,34 +410,49 @@
     let showFullDeleteModal = false;
     let showFromWishlistDeleteModal = false;  
 
-    const executeFullDelete = () => {
-        if (!selectedWish) return;
-        // Удалить полностью из всех вишлистов
-        $wishesStore = $wishesStore.filter(wish => wish.id !== selectedWish.id);
-        console.log('Желание полностью удалено:', selectedWish.id);
-        // Закрываем модальные окна
-        closeFullDeleteModal();
-        closeDetailModal();
-    };
+    const executeFullDelete = async () => {
+        if (!selectedWish || !token) return;
+    
+        try {
+            await deleteWish(token, selectedWish.id);
+            
+            //если в режиме вишлиста
+            if (wishlistId) {
+                wishWishlistsStore.update(items => 
+                    items.filter(item => item.id !== selectedWish.id)
+                );
+            }
+            
+            console.log('Желание полностью удалено:', selectedWish.id);
+            
+            // Закрываем модальные окна
+            closeFullDeleteModal();
+            closeDetailModal();
+            
+            // Показываем уведомление об успехе
+            showNotification('Желание успешно удалено');
+        } catch (error) {
+            console.error('Ошибка при удалении желания:', error);
+        }
+    }
 
-    const executeFromWishlistDelete = () => {
+    const executeFromWishlistDelete = async () => {
         if (!selectedWish || !wishlistId) return;
         // Удалить только из текущего вишлиста
-        $wishesStore = $wishesStore.map(wish => {
-            if (wish.id === selectedWish.id) {
-                const existingWishlistIds = wish.wishlistIds || [];
-                const newWishlistIds = existingWishlistIds.filter(id => id !== wishlistId);
-                return {
-                    ...wish,
-                    wishlistIds: newWishlistIds
-                };
-            }
-            return wish;
-        });
-        console.log('Желание удалено из вишлиста:', selectedWish.id);
-        // Закрываем модальные окна
-        closeFromWishlistDeleteModal();
-        closeDetailModal();
+        try {
+            await removeWishFromWishlist(token, wishlistId, selectedWish.id);
+
+            wishWishlistsStore.update(items => 
+                items.filter(item => item.id !== selectedWish.id)
+            );
+        
+            console.log('Желание удалено из вишлиста:', selectedWish.id);
+            // Закрываем модальные окна
+            closeFromWishlistDeleteModal();
+            closeDetailModal();
+        } catch (error) {
+            console.error('Ошибка при удалении из вишлиста:', error);
+        }
     };
 
     const closeFullDeleteModal = () => {

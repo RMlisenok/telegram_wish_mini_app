@@ -153,6 +153,10 @@ export async function deleteWish(token: string, wishId: string): Promise<boolean
             }
             throw new Error('Ошибка удаления желания');
         }
+
+        wishesStore.update(wishes => 
+            wishes.filter(wish => wish.id !== wishId)
+        );
         
         return true;
     } catch (error) {
