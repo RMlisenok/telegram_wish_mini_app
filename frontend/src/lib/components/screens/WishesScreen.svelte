@@ -572,20 +572,6 @@
         );
         
         return !isAlreadyInWishlist;
-    })
-    .map(wl => {
-        // Добавляем количество желаний для отображения
-        const wishesCount = $wishesStore.filter(wish => {
-            if (wish.wishlistIds && Array.isArray(wish.wishlistIds)) {
-                return wish.wishlistIds.includes(wl.id);
-            }
-            return false;
-        }).length;
-        
-        return {
-            ...wl,
-            count: wishesCount
-        };
     });
 </script>
 
