@@ -504,49 +504,5 @@
         margin-left: auto;
         flex-shrink: 0;
     }
-    /* Стили для темной темы */
-    [data-theme="dark"] .wishlist-row,
-    [data-theme="dark"] .subs-row {
-        background: #1e293b !important;
-        border-color: #334155 !important;
-    }
 
-    [data-theme="dark"] .wishlist-title-small,
-    [data-theme="dark"] .subs-name {
-        color: #f1f5f9 !important;
-    }
-
-    [data-theme="dark"] .wishlist-meta-small,
-    [data-theme="dark"] .subs-meta {
-        color: #94a3b8 !important;
-    }
-
-    [data-theme="dark"] .wishlist-cover-small {
-        background: #334155 !important;
-    }
-
-    [data-theme="dark"] .ghost-link,
-    [data-theme="dark"] .tiny-link {
-        color: #60a5fa !important;
-    }
-
-    [data-theme="dark"] .empty-note {
-        color: #94a3b8 !important;
-    }
-
-    [data-theme="dark"] .profile-birth {
-        color: #94a3b8 !important;
-    }
-
-    [data-theme="dark"] .profile-name {
-        color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .icon-btn img {
-        filter: brightness(0.9);
-    }
-
-    [data-theme="dark"] .wishlist-arrow {
-        filter: brightness(0.8);
-    }
 </style>
