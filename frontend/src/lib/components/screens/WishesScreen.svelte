@@ -551,7 +551,7 @@
         return wish.wishlists.map(w => w.id);
     };
 
-    $: availableWishlistsForCopyMove = $wishlistsStore.filter(wl => {
+    $: availableWishlistsForCopyMove = $wishWishlistsStore.filter(wl => {
         if (wishlistId && wl.id === wishlistId) return false;
         
         const wishlistIdsWithWish = wishToCopyMove ? getWishlistIdsWithWish(wishToCopyMove) : [];
