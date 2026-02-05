@@ -118,6 +118,7 @@ export async function loadMainScreenData(token: string) {
             birth_date: formatDateToDDMMYYYY(sub.birth_date)
         }));
         mainSubscribersStore.set(transformedSubscribers);
+        console.log(data.subscribers.total);
 
         totalWishesStore.set(data.total_wish || 0);
         totalWishlistsStore.set(data.total_wishlist || 0);
