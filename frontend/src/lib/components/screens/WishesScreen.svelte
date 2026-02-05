@@ -176,7 +176,7 @@
     //     : $wishesStore;
     $: filteredWishes = wishlistId 
         ? $wishWishlistsStore.map(item => ({
-            id: item.id,
+            id: item.id.toString(),
             name: item.name,
             photo: item.photo,
             price: item.price,
@@ -334,22 +334,15 @@
     const handleRemoveFromWishlist = (wishId) => {
         if (!wishlistId) return;
         //2006_7_Dass_25.12.2025
-        if (wishlistId) {
-            const wish = $wishWishlistsStore.find(item => item.id === wishId);
-            if (wish) {
-                selectedWish = {
-                    id: wish.id,
-                    name: wish.name,
-                    connection_id: wish.connection_id
-                };
-                showFromWishlistDeleteModal = true;
-            }
-        } else {
-            const wish = $wishesStore.find(w => w.id === wishId);
-            if (wish) {
-                selectedWish = wish;
-                showFullDeleteModal = true;
-            }
+        const wish = $wishWishlistsStore.find(item => item.id === wishId.toString());
+    
+        if (wish) {
+            selectedWish = {
+                id: wish.id,
+                name: wish.name,
+                connection_id: wish.connection_id
+            };
+            showFromWishlistDeleteModal = true;
         }
     };
     // 2009_2_Dass_25.12.2025 <--
@@ -456,8 +449,10 @@
             await removeWishFromWishlist(token, wishlistId, selectedWish.id);
 
             wishWishlistsStore.update(items => 
-                items.filter(item => item.id !== selectedWish.id)
+                items.filter(item => item.id !== selectedWish.id.toString())
             );
+            
+            await loadWishes(token);
         
             console.log('Желание удалено из вишлиста:', selectedWish.id);
             // Закрываем модальные окна
