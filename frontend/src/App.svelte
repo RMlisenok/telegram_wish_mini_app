@@ -392,6 +392,7 @@
                     
                     {:else if currentScreen === 'wishesEdit'}
                         <WishesScreenEdit
+                            token={token}
                             wishId={selectedWishId}
                             onGoBack={() => {
                                 selectedWishId = null;

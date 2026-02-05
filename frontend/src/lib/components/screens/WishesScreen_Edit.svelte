@@ -1,13 +1,21 @@
 <!-- 2006/2_Dass_24.12.2025 -->
 <script>
-    import { wishesStore } from '../../../types/wishes.ts';
-    import { wishlistsStore } from '../../../types/wishlists.ts';
+    import { wishesStore, updateWish } from '../../../types/wishes.ts';
+    import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
+    import { 
+        addWishToWishlist, 
+        removeWishFromWishlist,
+        getWishesFromWishlist,
+        addMultipleWishesToWishlist 
+    } from '../../../types/wish_wishlist.ts';
 
     import { onMount } from 'svelte';
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
     export let onGoBack;
     export let wishId;
+    export let token;
+
     function goBack() {
         if (onGoBack) {
             onGoBack();
@@ -37,19 +45,49 @@
         { value: 'KZT', label: '₸' }
     ];
 
-    onMount(() => {
-        // Находим желание по ID
-        if (wishId) {
-            const wish = $wishesStore.find(w => w.id === wishId);
-            if (wish) {
-                // Инициализируем значения формы
-                title = wish.title || '';
-                description = wish.description || '';
-                link = wish.link || '';
-                price = wish.price ? wish.price.toString() : '';
-                currency = wish.currency || '';
-                photoPreview = wish.imageUrl || null;
-                selectedWishlists = wish.wishlistIds || [];
+    onMount(async () => {
+        if (token) {
+            try {
+                await loadWishlists(token); // загружаем вишлисты
+            } catch (error) {
+                console.error('Ошибка загрузки вишлистов:', error);
+            }
+        }
+
+        // загружаем данные желания для редактирования
+        if (wishId && token) {
+            try {
+                const response = await fetch(`/api/v1/wishes/${wishId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const wishData = await response.json();
+                    
+                    title = wishData.name || '';
+                    description = wishData.description || '';
+                    link = wishData.url_gift || '';
+                    price = wishData.price ? wishData.price.toString() : '';
+                    currency = wishData.currency || '';
+                    
+                    if (wishData.photo) {
+                        photoPreview = wishData.photo;
+                    }
+                    
+                    // Получаем список вишлистов, в которые добавлено желание
+                    if (wishData.wishlists && Array.isArray(wishData.wishlists)) {
+                        selectedWishlists = wishData.wishlists.map(w => w.id.toString());
+                    }
+                    
+                } else {
+                    console.error('Ошибка загрузки данных желания');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки желания:', error);
             }
         }
     });
@@ -73,7 +111,7 @@
     }
 
     // Сохранение желания
-    function saveWish() {
+    async function saveWish() {
         // Валидация
         if (!title.trim()) {
             error = 'Пожалуйста, заполните название желания';
@@ -82,27 +120,119 @@
         
         error = '';
         
-        // Создание объекта желания
-        wishesStore.update(wishes => {
-            return wishes.map(wish => {
-                if (wish.id === wishId) {
-                    return {
-                        ...wish,
-                        title: title.trim(),
-                        description: description.trim(),
-                        price: price ? parseFloat(price) : null,
-                        currency: currency || null,
-                        link: link.trim(),
-                        imageUrl: photoPreview || wish.imageUrl,
-                        wishlistIds: selectedWishlists.map(id => parseInt(id))
-                    };
-                }
-                return wish;
+        try {
+            // Подготовка данных для отправки
+            const wishData = {
+                name: title.trim(),
+                description: description.trim(),
+                photo: photoPreview || '',
+                url_gift: link.trim(),
+                price: price ? parseFloat(price) : 0,
+                currency: currency || null,
+                is_booked: false,
+                status_is_finished: false
+            };
+            
+            // Обновление желания через API
+            const response = await fetch(`/api/v1/wishes/${wishId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(wishData)
             });
-        });
-        
-        // Возвращаемся назад
-        goBack();
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Ошибка обновления желания');
+            }
+            
+            const updatedWish = await response.json();
+            console.log('Желание обновлено:', updatedWish);
+
+            // Обработка изменений в вишлистах
+            await updateWishlistConnections(updatedWish.id);
+            
+            // Возвращаемся назад
+            goBack();
+            
+        } catch (err) {
+            console.error('Ошибка сохранения желания:', err); 
+        }
+    }
+
+    // Функция для обновления связей с вишлистами
+    async function updateWishlistConnections(wishId) {
+        try {
+            // Получаем текущие связи с вишлистами
+            const currentConnections = await getCurrentWishlistConnections(wishId);
+            const currentWishlistIds = currentConnections.map(wishlist => wishlist.id.toString());
+
+            // Вишлисты, которые нужно добавить
+            const toAdd = selectedWishlists.filter(id => !currentWishlistIds.includes(id));
+            
+            // Вишлисты, которые нужно удалить
+            const toRemove = currentWishlistIds.filter(id => !selectedWishlists.includes(id));
+
+            if (toAdd.length > 0) {
+                try {
+                    // Преобразуем массив в формат для функции addMultipleWishesToWishlist
+                    const addPromises = toAdd.map(async (wishlistId) => {
+                        await addWishToWishlist(token, wishlistId, wishId, {
+                            is_pinned: false,
+                            order_position: 0
+                        });
+                    });
+                    
+                    await Promise.all(addPromises);
+                    console.log(`Добавлены связи с ${toAdd.length} вишлистами`);
+                } catch (addError) {
+                    console.warn('Ошибка при добавлении связей:', addError);
+                }
+            }
+
+            for (const wishlistId of toRemove) {
+                try {
+                    await removeWishFromWishlist(token, wishlistId, wishId);
+                    console.log(`Удалена связь с вишлистом ${wishlistId}`);
+                } catch (removeError) {
+                    console.warn(`Не удалось удалить связь с вишлистом ${wishlistId}:`, removeError);
+                }
+            }
+            
+        } catch (error) {
+            console.error('Ошибка обновления связей с вишлистами:', error);
+        }
+    }
+
+    // Функция для получения текущих связей с вишлистами
+    async function getCurrentWishlistConnections(wishId) {
+        try {
+            const response = await fetch(`/api/v1/wishes/${wishId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.warn('Не удалось получить информацию о желании');
+                return [];
+            }
+
+            const data = await response.json();
+            
+            if (data.wishlists && Array.isArray(data.wishlists)) {
+                return data.wishlists;
+            }
+            
+            return [];
+        } catch (error) {
+            console.error('Ошибка получения текущих связей:', error);
+            return [];
+        }
     }
     
 </script>
