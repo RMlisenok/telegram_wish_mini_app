@@ -7,7 +7,9 @@
     import {userStore } from '../../stores/data.js';
 
 
-    let user = $userStore;
+    export let user;
+    export let otherProfile;
+    $: profileToShare = otherProfile || user;
 
     const dispatch = createEventDispatcher();
     const goBack = () => dispatch('back');
@@ -55,13 +57,13 @@
     };
 
     const copyLink = async () => {
-        const url = makeProfileTgUrl(user.id); // lien carte
+        const url = makeProfileTgUrl(profileToShare.id); // lien carte
         const ok = await copyText(url);
         notify(ok ? 'Ссылка на профиль скопирована' : 'Не удалось скопировать ссылку');
     };
 
     const shareInTelegram = () => {
-        const shareUrl = makeProfileShareUrl(user.id, user.fullName); // share wrapper
+        const shareUrl = makeProfileShareUrl(profileToShare.id, profileToShare.fullName); // share wrapper
 
         if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
         else if (tg?.openLink) tg.openLink(shareUrl);
@@ -70,9 +72,9 @@
 
 
     const shareOtherWays = async () => {
-        const url = makeProfileTgUrl(user.id);
+        const url = makeProfileTgUrl(profileToShare.id);
         const title = 'Подари мне — профиль';
-        const text = `Профиль: ${user.fullName}`;
+        const text = `Профиль: ${profileToShare.fullName}`;
 
         if (navigator.share) {
             try {
@@ -97,12 +99,12 @@
     <div class="share-header">
         <Avatar
                 size={56}
-                src={user.avatarUrl}
-                initials={user.fullName.split(' ').map((n) => n[0]).join('').toUpperCase()}
+                src={profileToShare.avatarUrl}
+                initials={profileToShare.fullName.split(' ').map((n) => n[0]).join('').toUpperCase()}
         />
         <div class="share-main">
-            <div class="share-name">{user.fullName}</div>
-            <div class="share-id">ID: {user.id}</div>
+            <div class="share-name">{profileToShare.fullName}</div>
+            <div class="share-id">ID: {profileToShare.id}</div>
         </div>
     </div>
 

@@ -212,104 +212,38 @@
     }
     
     async function openOtherProfileById(profileId) {
-        if (isMyOwnProfile(profileId)) {
-            navigate('main');
-            return;
-        }
-
-        viewedProfile = {
-            id: profileId,
-            fullName: 'Загрузка...',
-            birthDate: '—',
-            avatarUrl: '',
-            isSubscribed: false,
-            publicWishlists: [],
-            subscriptions: [],
-            questionnaire: { interests: [], noGifts: [] },
-            subscriptionsArePrivate: false
-        };
-        
-        pushNavigate('otherProfile');
-        
-        // Загружаем данные профиля
-        const profileData = await loadUserProfileById(profileId);
-        
-        if (profileData) {
-            // Загружаем дополнительные данные
-            try {
-                // Загружаем публичные вишлисты пользователя
-                const wishlistsResponse = await fetch(`/api/v1/users/${profileId}/wishlists`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (wishlistsResponse.ok) {
-                    const wishlistsData = await wishlistsResponse.json();
-                    profileData.publicWishlists = wishlistsData
-                        .filter((wl: any) => wl.typeprivacy === 'public')
-                        .map((wl: any) => ({
-                            id: wl.id,
-                            title: wl.name,
-                            iconUrl: wl.photo,
-                            visibility: wl.typeprivacy,
-                            wishesCount: wl.wishes_count
-                        }));
-                }
-                
-                // Загружаем подписки пользователя (если они публичные)
-                const subscriptionsResponse = await fetch(`/api/v1/subscriptions/users/${profileId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (subscriptionsResponse.ok) {
-                    const subscriptionsData = await subscriptionsResponse.json();
-                    profileData.subscriptions = subscriptionsData.subscriptions
-                        .filter((sub: any) => sub.type === 'user')
-                        .map((sub: any) => ({
-                            id: sub.user_id,
-                            fullName: sub.name,
-                            avatarUrl: sub.photo,
-                            birthDate: formatDateToDDMMYYYY(sub.birth_date)
-                        }));
-                }
-                
-                // Загружаем анкету пользователя
-                const questionnaireResponse = await fetch(`/api/v1/questionnaire/${profileId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (questionnaireResponse.ok) {
-                    const questionnaireData = await questionnaireResponse.json();
-                    profileData.questionnaire = {
-                        interests: questionnaireData.interests || [],
-                        noGifts: questionnaireData.avoid_gifts || []
-                    };
-                }
-                
-                // Проверяем подписку текущего пользователя
-                const subscriptionCheckResponse = await fetch(`/api/v1/subscriptions/check/user/${profileId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (subscriptionCheckResponse.ok) {
-                    const checkData = await subscriptionCheckResponse.json();
-                    profileData.isSubscribed = checkData.is_subscribed;
-                }
-                
-            } catch (error) {
-                console.error('Ошибка загрузки дополнительных данных:', error);
-            }
-            
-            viewedProfile = profileData;
-        }
+    if (isMyOwnProfile(profileId)) {
+        navigate('main');
+        return;
     }
+
+    viewedProfile = {
+        id: profileId,
+        fullName: 'Загрузка...',
+        birthDate: '—',
+        avatarUrl: '',
+        isSubscribed: false,
+        publicWishlists: [],
+        subscriptions: [],
+        questionnaire: { interests: [], noGifts: [] }
+    };
+    
+    pushNavigate('otherProfile');
+    
+    // Загружаем данные профиля с помощью loadUserProfileById
+    const profileData = await loadUserProfileById(profileId);
+    
+    if (profileData) {
+        viewedProfile = profileData;
+    } else {
+        // Если не удалось загрузить, показываем профиль с ошибкой
+        viewedProfile = {
+            ...viewedProfile,
+            fullName: 'Ошибка загрузки',
+            error: true
+        };
+    }
+}
     
     function navigate(screen, params = {}) {
         currentScreen = screen;
@@ -587,6 +521,7 @@
                     {:else if currentScreen === 'shareProfile'}
                         <ShareProfileScreen 
                             user={$userStore} 
+                            otherProfile={viewedProfile}
                             on:back={() => navigate('main')}
                         />
                     
@@ -673,7 +608,7 @@
                             }}
                             on:show-all-wishlists={() => pushNavigate('wishlists')}
                             on:show-all-subscriptions={() => pushNavigate('subscriptions')}
-                            on:openShareProfile={(e) => {
+                            on:share-profile={(e) => {
                                 const profileId = e.detail.profileId;
                                 navigate('shareProfile', { profileData: viewedProfile });
                             }}
