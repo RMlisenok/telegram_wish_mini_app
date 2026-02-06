@@ -20,6 +20,8 @@
     $: publicWishlistsWithIcon = publicWishlists.filter((wl) => !!wl.iconUrl);
     $: currentIsSubscribed = !!profile?.isSubscribed;
 
+    $: subscriptionsArePrivate = profile?.subscriptionsArePrivate ?? false;
+
     const goBack = () => dispatch('back');
 
     // Функция подписки/отписки
@@ -115,7 +117,9 @@
     };
 
     const showAllSubscriptions = () => {
-        dispatch('show-all-subscriptions', { profileId: profile?.id });
+        if (!subscriptionsArePrivate && subscriptions.length > 0) {
+            dispatch('show-all-subscriptions', { profileId: profile?.id });
+        }
     };
 
     // Optionnel (si tu veux ouvrir un vishlist depuis ce screen)
@@ -254,25 +258,6 @@
             <img src="../../../../static/icons/follow.png" alt="" class="section-icon" loading="lazy" />
             <div class="section-title-main">
                 <span>ПОДПИСКИ · {subscriptions.length}</span>
-
-                <!-- {#if subscriptions.length}
-                    <div class="mini-icons" aria-label="Иконки подписок">
-                        {#each subscriptions.slice(0, 5) as sub (sub.id ?? sub.fullName)}
-                           <div class="mini-icon">
-                               <Avatar
-                                    size={24}
-                                    src={sub.avatarUrl}
-                                    initials={(sub.fullName ?? '')
-                                        .split(' ')
-                                        .filter(Boolean)
-                                        .map((n) => n[0])
-                                        .join('')
-                                        .toUpperCase()}
-                                />
-                            </div> 
-                        {/each}
-                    </div>
-                {/if} -->
             </div>
         </div>
 
@@ -281,7 +266,9 @@
         </button>
     </div>
 
-    {#if subscriptions.length === 0}
+    {#if subscriptionsArePrivate}
+        <p class="empty-note">Пользователь скрыл свои подписки.</p>
+    {:else if subscriptions.length === 0}
         <p class="empty-note">Этот пользователь пока ни на кого не подписан.</p>
     {:else}
         <div class="subs-list">
