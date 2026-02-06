@@ -91,6 +91,7 @@
         }
 
         try {
+            // Загрузка основного профиля
             const response = await fetch(`/api/v1/users/${profileId}`, {
                 method: 'GET',
                 headers: {
@@ -105,98 +106,99 @@
             
             const userData = await response.json();
             
-            // Преобразуем данные в формат, ожидаемый OtherProfileScreen
-        const profileData = {
-            id: userData.id,
-            fullName: userData.name,
-            birthDate: formatDateToDDMMYYYY(userData.birth_date),
-            avatarUrl: userData.photo || '/default-avatar.png',
-            isSubscribed: false,
-            publicWishlists: [],
-            subscriptions: [],
-            questionnaire: { interests: [], noGifts: [] },
-            // Добавляем флаг приватности подписок из ответа API
-            showSub: userData.show_sub ?? true
-        };
-        
-        // Загружаем дополнительные данные
-        try {
             // Загружаем публичные вишлисты пользователя
-            const wishlistsResponse = await fetch(`/api/v1/users/${profileId}/wishlists`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (wishlistsResponse.ok) {
-                const wishlistsData = await wishlistsResponse.json();
-                profileData.publicWishlists = wishlistsData
-                    .filter((wl: any) => wl.typeprivacy === 'public')
-                    .map((wl: any) => ({
+            let publicWishlists = [];
+            try {
+                const wishlistsResponse = await fetch(`/api/v1/users/${profileId}/wishlists?visibility=public`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (wishlistsResponse.ok) {
+                    const wishlistsData = await wishlistsResponse.json();
+                    publicWishlists = wishlistsData.map((wl: any) => ({
                         id: wl.id,
                         title: wl.name,
                         iconUrl: wl.photo,
                         visibility: wl.typeprivacy,
                         wishesCount: wl.wishes_count
                     }));
+                }
+            } catch (e) {
+                console.warn('Не удалось загрузить вишлисты:', e);
             }
             
-            // Загружаем подписки пользователя (только если они публичные)
+            // Загружаем подписки пользователя (только публичные данные)
+            let subscriptions = [];
             try {
-                const subscriptionsResponse = await fetch(`/api/v1/subscriptions/users/${profileId}`, {
+                // Вместо GET /api/v1/subscriptions/users/{id} используем эндпоинт для публичных подписок
+                const subsResponse = await fetch(`/api/v1/users/${profileId}/public-subscriptions`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 
-                if (subscriptionsResponse.ok) {
-                    const subscriptionsData = await subscriptionsResponse.json();
-                    profileData.subscriptions = subscriptionsData.subscriptions
-                        .filter((sub: any) => sub.type === 'user')
-                        .map((sub: any) => ({
-                            id: sub.user_id,
-                            fullName: sub.name,
-                            avatarUrl: sub.photo,
-                            birthDate: formatDateToDDMMYYYY(sub.birth_date)
-                        }));
-                } else if (subscriptionsResponse.status === 403) {
-                    // Подписки приватные - устанавливаем пустой массив
-                    profileData.subscriptions = [];
-                    // Добавляем флаг для отображения сообщения
-                    profileData.subscriptionsArePrivate = true;
+                if (subsResponse.ok) {
+                    const subsData = await subsResponse.json();
+                    subscriptions = subsData.map((sub: any) => ({
+                        id: sub.user_id,
+                        fullName: sub.name,
+                        avatarUrl: sub.photo,
+                        birthDate: formatDateToDDMMYYYY(sub.birth_date)
+                    }));
                 }
-                
-            } catch (error) {
-                console.error('Ошибка загрузки подписок:', error);
-                profileData.subscriptions = [];
-            }
-            
-            // Загружаем анкету пользователя
-            const questionnaireResponse = await fetch(`/api/v1/questionnaire/${profileId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (questionnaireResponse.ok) {
-                const questionnaireData = await questionnaireResponse.json();
-                profileData.questionnaire = {
-                    interests: questionnaireData.interests || [],
-                    noGifts: questionnaireData.avoid_gifts || []
-                };
+            } catch (e) {
+                console.warn('Не удалось загрузить подписки:', e);
             }
             
             // Проверяем подписку текущего пользователя
-            const subscriptionCheckResponse = await fetch(`/api/v1/subscriptions/check/user/${profileId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            let isSubscribed = false;
+            try {
+                const checkResponse = await fetch(`/api/v1/subscriptions/check/user/${profileId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (checkResponse.ok) {
+                    const checkData = await checkResponse.json();
+                    isSubscribed = checkData.is_subscribed;
                 }
-            });
+            } catch (e) {
+                console.warn('Не удалось проверить подписку:', e);
+            }
             
-            if (subscriptionCheckResponse.ok) {
-                const checkData = await subscriptionCheckResponse.json();
-                profileData.isSubscribed = checkData.is_subscribed;
-            }            
+            // Загружаем анкету пользователя (публичную часть)
+            let questionnaire = { interests: [], noGifts: [] };
+            try {
+                const questResponse = await fetch(`/api/v1/users/${profileId}/public-questionnaire`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (questResponse.ok) {
+                    const questData = await questResponse.json();
+                    questionnaire = {
+                        interests: questData.interests || [],
+                        noGifts: questData.avoid_gifts || []
+                    };
+                }
+            } catch (e) {
+                console.warn('Не удалось загрузить анкету:', e);
+            }
+            
+            return {
+                id: userData.id,
+                fullName: userData.name,
+                birthDate: formatDateToDDMMYYYY(userData.birth_date),
+                avatarUrl: userData.photo || '/default-avatar.png',
+                isSubscribed: isSubscribed,
+                publicWishlists: publicWishlists,
+                subscriptions: subscriptions,
+                questionnaire: questionnaire
+            };
             
         } catch (error) {
             console.error('Ошибка загрузки профиля пользователя:', error);
