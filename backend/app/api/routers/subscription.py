@@ -92,14 +92,14 @@ async def unsubscribe_from_user(
 
 @router.delete("/wishlists/{target_wishlist_id}")
 async def unsubscribe_from_wishlist(
-    wishlist_id: int,
+    target_wishlist_id: int,
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     service = SubscriptionService(db)
     success = await service.unsubscribe_from_wishlist(
         user_id=user_id,
-        target_wishlist_id=wishlist_id
+        target_wishlist_id=target_wishlist_id
     )
     if not success:
         raise HTTPException(
