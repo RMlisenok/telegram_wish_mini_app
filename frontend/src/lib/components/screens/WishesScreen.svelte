@@ -5,6 +5,11 @@
     import { wishesStore, loadWishes, deleteWish } from '../../../types/wishes.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
+        checkWishlistSubscription,
+        subscribeToWishlist,
+        unsubscribeFromWishlist 
+    } from '../../../types/subscription.ts';
+    import { 
         addMultipleWishesToWishlist, 
         getWishesFromWishlist, 
         wishWishlistsStore,
@@ -20,8 +25,15 @@
     const iconPinned = '../../../../static/icons/pinned.svg';
     const iconPinnedOff = '../../../../static/icons/pinned-off.svg';
     export let wishlistId = null; //2009/0_Dass_25.12.2025
+    export let isExternalWishlist = false; //является ли вишлист внешним
 
     export let token;
+
+    let isLoading = false;
+    let isSubscribedToWishlist = false; // Состояние подписки на вишлист
+    let wishlistOwnerId = null; // ID владельца вишлиста
+    let isCurrentUserOwner = false; // Является ли текущий пользователь владельцем
+
     onMount(async () => {
         if (token) {
             await fetchWishes();
@@ -32,11 +44,91 @@
             try {
                 const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
                 wishWishlistsStore.set(wishesInWishlist);
+
+                // Проверяем подписку на вишлист (только для внешних вишлистов)
+                if (isExternalWishlist && token) {
+                    await checkWishlistSubscriptionStatus();
+                }
+                
+                // Загружаем информацию о владельце вишлиста
+                await loadWishlistOwnerInfo();
             } catch (error) {
                 console.error('Ошибка загрузки желаний вишлиста:', error);
             }
         }
     });
+
+    // Функция загрузки информации о владельце вишлиста
+    async function loadWishlistOwnerInfo() {
+        if (!token || !wishlistId) return;
+        
+        try {
+            // Здесь нужно загрузить информацию о вишлисте, включая owner_id
+            const response = await fetch(`/api/v1/wishlists/${wishlistId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                wishlistOwnerId = data.owner_id;
+                
+                // Проверяем, является ли текущий пользователь владельцем
+                // Для этого нужно получить ID текущего пользователя
+                const userResponse = await fetch('/api/v1/users/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    isCurrentUserOwner = userData.id.toString() === wishlistOwnerId?.toString();
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки информации о владельце вишлиста:', error);
+        }
+    }
+
+    // Функция проверки подписки на вишлист
+    async function checkWishlistSubscriptionStatus() {
+        if (!token || !wishlistId) return;
+        
+        try {
+            isSubscribedToWishlist = await checkWishlistSubscription(token, parseInt(wishlistId));
+        } catch (error) {
+            console.error('Ошибка проверки подписки на вишлист:', error);
+        }
+    }
+
+    // Функция подписки/отписки от вишлиста
+    async function toggleWishlistSubscription() {
+        if (!token || !wishlistId || isLoading) return;
+        
+        isLoading = true;
+        try {
+            if (isSubscribedToWishlist) {
+                // Отписаться от вишлиста
+                await unsubscribeFromWishlist(token, parseInt(wishlistId));
+                isSubscribedToWishlist = false;
+            } else {
+                // Подписаться на вишлист
+                await subscribeToWishlist(token, parseInt(wishlistId));
+                isSubscribedToWishlist = true;
+            }
+        } catch (error) {
+            console.error('Ошибка подписки/отписки от вишлиста:', error);
+            showNotification(error.message || 'Произошла ошибка');
+        } finally {
+            isLoading = false;
+        }
+    }
 
     async function fetchWishes() {
         if (!token) {
@@ -651,10 +743,33 @@
         <Button full on:click={openForm}>+ Новое желание</Button>
     </div>
 <!--2009_1_Dass_25.12.2025-->
-{:else}
+{:else if wishlistId && !isExternalWishlist && isCurrentUserOwner}  
     <div style="padding:0 16px 12px;">
         <Button full on:click={openAddExistingModal}>
             + Добавить существующее желание
+        </Button>
+    </div>
+{:else if wishlistId && isExternalWishlist}
+    <!-- Если это чужой вишлист - кнопка подписки/отписки -->
+    <div style="padding:0 16px 12px;">
+        <Button 
+            full 
+            kind="ghost"
+            on:click={toggleWishlistSubscription}
+            disabled={isLoading || !wishlistId}
+        >
+            {#if isLoading}
+                <span>Загрузка...</span>
+            {:else}
+                <img
+                    src={isSubscribedToWishlist ? '../../../../static/icons/bell-on.png' : '../../../../static/icons/bell-off.png'}
+                    alt=""
+                    class="icon-16"
+                    loading="lazy"
+                    style="margin-right: 8px;"
+                />
+                <span>{isSubscribedToWishlist ? 'Вы подписаны' : 'Подписаться на вишлист'}</span>
+            {/if}
         </Button>
     </div>
 {/if}
@@ -1704,6 +1819,12 @@
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         animation: fadeIn 0.3s ease-out;
+    }
+
+    .icon-16 {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
     }
     
     @keyframes slideDown {

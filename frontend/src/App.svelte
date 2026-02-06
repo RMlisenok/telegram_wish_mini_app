@@ -36,6 +36,7 @@
     let screenStack = [];
     
     let currentWishlistId = null;
+    let currentWishlistIsExternal = false;
     let selectedWishlistId = null;
     let selectedWishId = null;
     
@@ -217,8 +218,14 @@
         currentScreen = screen;
         if (params.wishlistId) {
             currentWishlistId = params.wishlistId;
+            if (params.isExternal) {
+                currentWishlistIsExternal = true;
+            } else {
+                currentWishlistIsExternal = false;
+            }
         } else {
             currentWishlistId = null;
+            currentWishlistIsExternal = false;
         }
     }
     export const userStore = writable<User>({
@@ -371,6 +378,7 @@
                         <WishesScreen 
                             token={token}
                             wishlistId={currentWishlistId}
+                            isExternalWishlist={currentWishlistIsExternal}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                             on:openEditWishes={(e) => {
                                 selectedWishId = e.detail.id;
@@ -431,7 +439,12 @@
                         <SubscriptionsScreen
                             token={token}
                             on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
-                            on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
+                            on:openWishlistDetail={(e) => 
+                                navigate('wishes', { 
+                                    wishlistId: e.detail.wishlistId,
+                                    isExternal: true 
+                                })
+                            }
                         />
                     
                     {:else if currentScreen === 'subscribers'}
@@ -451,7 +464,10 @@
                             }}
                             on:open-wishlist={(e) => {
                                 // Обработка открытия вишлиста
-                                navigate('wishes', { wishlistId: e.detail.wishlistId });
+                                navigate('wishes', { 
+                                    wishlistId: e.detail.wishlistId,
+                                    isExternal: true 
+                                });
                             }}
                             on:open-profile={(e) => {
                                 // Рекурсивное открытие другого профиля
