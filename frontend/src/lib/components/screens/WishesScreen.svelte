@@ -17,6 +17,10 @@
         removeWishFromWishlist,
         addWishToWishlist 
     } from '../../../types/wish_wishlist.ts';
+    import { 
+        makeWishlistTgUrl, 
+        makeWishlistShareUrl 
+    } from '../../stores/data.js';
 
     const dispatch = createEventDispatcher();
 
@@ -661,33 +665,124 @@
         
         return !isAlreadyInWishlist;
     });
+
+    const shareWishlist = () => {
+        if (!wishlistId || !currentWishlist) return;
+        
+        const url = makeWishlistShareUrl(wishlistId, currentWishlist.title);
+        if (tg?.openTelegramLink) {
+            tg.openTelegramLink(url);
+        } else if (tg?.openLink) {
+            tg.openLink(url);
+        } else {
+            window.open(url, '_blank');
+        }
+    };
+
+    const copyWishlistLink = async () => {
+        if (!wishlistId) return;
+        
+        const url = makeWishlistTgUrl(wishlistId);
+        try {
+            await navigator.clipboard.writeText(url);
+            showNotification('Ссылка на вишлист скопирована');
+        } catch (error) {
+            console.error('Ошибка копирования:', error);
+            showNotification('Не удалось скопировать ссылку');
+        }
+    };
+
+    let showShareOptions = false;
+    
+    const toggleShareOptions = () => {
+        showShareOptions = !showShareOptions;
+    };
+
+    const closeShareOptions = () => {
+        showShareOptions = false;
+    };
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
 {#if wishlistId && currentWishlist}
     <!-- Шапка для режима просмотра вишлиста -->
     <header class="app-header">
-        <div class="h1">{currentWishlist.title}</div>
-        <div class="wishlist-subtitle">
-            {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
-            filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="flex: 1;">
+                <div class="h1">{currentWishlist.title}</div>
+                <div class="wishlist-subtitle">
+                    {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
+                    filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+                </div>
+            </div>
+            {#if !isExternalWishlist || isCurrentUserOwner}
+                <div style="position: relative;">
+                    <Button 
+                        kind="ghost" 
+                        on:click={toggleShareOptions}
+                        title="Поделиться вишлистом"
+                    >
+                        <img src="../../../../static/icons/share.png" alt="Поделиться" class="icon-16" />
+                    </Button>
+                    
+                    <!-- Выпадающее меню с опциями -->
+                    {#if showShareOptions}
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
+                        <div class="dropdown-backdrop" on:click={closeShareOptions}>
+                            <div class="dropdown-menu" on:click|stopPropagation>
+                                <button class="dropdown-item" on:click={shareWishlist}>
+                                    <img src="../../../../static/icons/telegram.png" alt="Telegram" class="dropdown-icon" />
+                                    Поделиться в Telegram
+                                </button>
+                                <button class="dropdown-item" on:click={copyWishlistLink}>
+                                    <img src="../../../../static/icons/link.png" alt="Ссылка" class="dropdown-icon" />
+                                    Скопировать ссылку
+                                </button>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
         </div>
-            <Button 
-                kind="ghost" 
-                on:click={() => {
-                    const shareUrl = makeWishlistShareUrl(wishlistId, currentWishlist.title);
-                    if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
-                    else window.open(shareUrl, '_blank');
-                }}
-                style="margin-top: 8px;"
-            >
-                Поделиться вишлистом
-            </Button>
     </header>
 {:else}
     <!-- Стандартная шапка -->
-    <header class="app-header">
-        <div class="h1">Все ваши желания</div>
+     <header class="app-header">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="flex: 1;">
+                <div class="h1">Все ваши желания</div>
+            </div>
+            {#if !isExternalWishlist || isCurrentUserOwner}
+                <div style="position: relative;">
+                    <Button 
+                        kind="ghost" 
+                        on:click={toggleShareOptions}
+                        title="Поделиться вишлистом"
+                    >
+                        <img src="../../../../static/icons/share.png" alt="Поделиться" class="icon-16" />
+                    </Button>
+                    
+                    <!-- Выпадающее меню с опциями -->
+                    {#if showShareOptions}
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
+                        <div class="dropdown-backdrop" on:click={closeShareOptions}>
+                            <div class="dropdown-menu" on:click|stopPropagation>
+                                <button class="dropdown-item" on:click={shareWishlist}>
+                                    <img src="../../../../static/icons/telegram.png" alt="Telegram" class="dropdown-icon" />
+                                    Поделиться в Telegram
+                                </button>
+                                <button class="dropdown-item" on:click={copyWishlistLink}>
+                                    <img src="../../../../static/icons/link.png" alt="Ссылка" class="dropdown-icon" />
+                                    Скопировать ссылку
+                                </button>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
     </header>
 {/if}
 
@@ -1852,6 +1947,64 @@
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
+    }
+
+    /* Стили для выпадающего меню */
+    .dropdown-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        min-width: 220px;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 12px 16px;
+        background: none;
+        border: none;
+        text-align: left;
+        font-size: 14px;
+        color: #374151;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background: #f9fafb;
+    }
+
+    .dropdown-icon {
+        width: 20px;
+        height: 20px;
+        opacity: 0.8;
+    }
+
+    /* Для кнопки поделиться в шапке */
+    .app-header {
+        position: relative;
+    }
+
+    .app-header .h1 {
+        flex: 1;
     }
 
 
