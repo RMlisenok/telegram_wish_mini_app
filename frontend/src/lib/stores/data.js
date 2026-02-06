@@ -347,6 +347,12 @@ export const makeProfileTgUrl = (userId) =>
         `profile_${userId}`
     )}`;
 
+// Создание ссылки на вишлист
+export const makeWishlistTgUrl = (wishlistId) =>
+    `https://t.me/${BOT_USERNAME}/?startapp=${encodeURIComponent(
+        `wishlist_${wishlistId}`
+    )}`;
+
 // URL de partage Telegram (ouvre la fenêtre "choisir un chat")
 // On partage TOUJOURS l’URL Telegram ci-dessus (pas ngrok, pas localhost)
 export const makeProfileShareUrl = (userId, fullName = '') => {
@@ -357,7 +363,28 @@ export const makeProfileShareUrl = (userId, fullName = '') => {
     )}`;
 };
 
+// URL для поделиться вишлистом
+export const makeWishlistShareUrl = (wishlistId, wishlistName = '') => {
+    const url = makeWishlistTgUrl(wishlistId);
+    const text = wishlistName ? `Вишлист: ${wishlistName}` : `Вишлист в «${APP_NAME}»`;
+    return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
+        text
+    )}`;
+};
 
+// Функция для извлечения параметров из startapp
+export const parseStartParam = (startParam) => {
+    if (!startParam) return null;
+    
+    const [type, id] = startParam.split('_');
+    
+    if (!type || !id) return null;
+    
+    return {
+        type: type, // 'profile' или 'wishlist'
+        id: parseInt(id, 10)
+    };
+};
 
 export const otherProfilesMock = {
     "1": {

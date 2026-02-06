@@ -672,6 +672,17 @@
             {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
             filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
         </div>
+            <Button 
+                kind="ghost" 
+                on:click={() => {
+                    const shareUrl = makeWishlistShareUrl(wishlistId, currentWishlist.title);
+                    if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+                    else window.open(shareUrl, '_blank');
+                }}
+                style="margin-top: 8px;"
+            >
+                Поделиться вишлистом
+            </Button>
     </header>
 {:else}
     <!-- Стандартная шапка -->

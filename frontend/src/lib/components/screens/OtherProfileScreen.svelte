@@ -140,6 +140,16 @@
 
 <header class="app-header">
     <div class="h1">Профиль</div>
+    <Button 
+        kind="ghost" 
+        on:click={() => {
+            const shareUrl = makeProfileShareUrl(profile.id, profile.fullName);
+            if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+            else window.open(shareUrl, '_blank');
+        }}
+    >
+        Поделиться профилем
+    </Button>
 </header>
 
 <section class="section-card profile-card">

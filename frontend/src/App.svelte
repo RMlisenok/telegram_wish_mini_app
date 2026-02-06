@@ -30,6 +30,7 @@
 
     // Импорты stores (нужно будет создать или импортировать)
     // import { otherProfilesMock } from './lib/stores/data';
+    import { parseStartParam } from './lib/stores/data.js';
 
     let currentScreen = 'start';
     let viewedProfile = null;
@@ -43,6 +44,7 @@
     let showStartScreen = true; // Состояние для отображения стартового экрана
     let tg = null;
     let token = null; //токен важно!
+    let startParamData = null;
     //let userStore = null;
     
     onMount(() => {
@@ -50,7 +52,18 @@
         
         if (!tg) {
             console.warn('Приложение запущено вне Telegram');
-            // Можно показать заглушку для браузера
+            return;
+        }
+
+        // Проверяем start_param из Telegram
+        const initDataUnsafe = tg.initDataUnsafe;
+        if (initDataUnsafe?.start_param) {
+            const startParam = initDataUnsafe.start_param;
+            console.log('Получен start_param:', startParam);
+            
+            // Парсим параметр
+            startParamData = parseStartParam(startParam);
+            console.log('Распарсенные данные:', startParamData);
         }
     });
     
@@ -280,7 +293,94 @@
             }
         });
         console.log(userStore);
+
+        // Проверяем, есть ли deep link для открытия
+        if (startParamData) {
+            await handleDeepLink(startParamData);
+        } else if (user.birth_date != null) {
+            navigate('main');
+        } else {
+            navigate('editProfileBirthDate');
+        }
     };
+
+    // Обработка deep link
+    async function handleDeepLink(data) {
+        if (!data || !data.type || !data.id) return;
+        
+        if (data.type === 'profile') {
+            // Открываем профиль пользователя
+            await openOtherProfileById(data.id);
+        } else if (data.type === 'wishlist') {
+            // Открываем вишлист
+            await openWishlistById(data.id);
+        }
+    }
+    
+    async function openWishlistById(wishlistId) {
+        if (!token || !wishlistId) return;
+        
+        try {
+            // Загружаем информацию о вишлисте
+            const response = await fetch(`/api/v1/wishlists/${wishlistId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const wishlistData = await response.json();
+                
+                // Проверяем, кто владелец вишлиста
+                const currentUser = $userStore;
+                const isExternalWishlist = wishlistData.user_id.toString() !== currentUser.user_id;
+                
+                if (isExternalWishlist) {
+                    // Если это чужой вишлист, проверяем подписку
+                    const subscriptionCheck = await checkWishlistSubscription(token, wishlistId);
+                    
+                    // Переходим на экран желаний с флагом внешнего вишлиста
+                    navigate('wishes', { 
+                        wishlistId: wishlistId.toString(),
+                        isExternal: true 
+                    });
+                } else {
+                    // Если это наш вишлист
+                    navigate('wishes', { 
+                        wishlistId: wishlistId.toString(),
+                        isExternal: false 
+                    });
+                }
+            } else {
+                console.error('Вишлист не найден');
+                navigate('main');
+            }
+        } catch (error) {
+            console.error('Ошибка открытия вишлиста:', error);
+            navigate('main');
+        }
+    }
+
+    // Функция проверки подписки на вишлист
+    async function checkWishlistSubscription(token, wishlistId) {
+        try {
+            const response = await fetch(`/api/v1/subscriptions/check/wishlist/${wishlistId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.is_subscribed;
+            }
+            return false;
+        } catch (error) {
+            console.error('Ошибка проверки подписки:', error);
+            return false;
+        }
+    }
+
     function formatDateToDDMMYYYY(dateString: string): string {
         if (!dateString) return '';
         
