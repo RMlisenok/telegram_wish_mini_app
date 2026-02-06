@@ -8,14 +8,17 @@
 
     const dispatch = createEventDispatcher();
     let isLoading = false;
-    
-    // Используем только реактивную переменную
+    let currentIsSubscribed = false; // Локальное состояние
+
+    // IMPORTANT: si "profile" change (quand tu viens de Subscribers/Subscriptions),
+    // il faut recalculer isSubscribed.
     $: isSubscribed = !!profile?.isSubscribed;
-    
-    // Вычисляемые данные
+
     $: publicWishlists = profile?.publicWishlists ?? [];
     $: subscriptions = profile?.subscriptions ?? [];
+
     $: publicWishlistsWithIcon = publicWishlists.filter((wl) => !!wl.iconUrl);
+    $: currentIsSubscribed = !!profile?.isSubscribed;
 
     const goBack = () => dispatch('back');
 
@@ -39,12 +42,7 @@
                 await subscribeToUser();
                 newSubscribedState = true;
             }
-            
-            // Обновляем локальный объект профиля
-            profile = {
-                ...profile,
-                isSubscribed: newSubscribedState
-            };
+            currentIsSubscribed = newSubscribedState;
             
             // Отправляем событие родителю для обновления данных
             dispatch('toggle-subscribe', {
@@ -120,6 +118,10 @@
         dispatch('show-all-subscriptions', { profileId: profile?.id });
     };
 
+    // Optionnel (si tu veux ouvrir un vishlist depuis ce screen)
+    // const openWishlist = (wl) => dispatch('open-wishlist', { wishlistId: wl.id, profileId: profile?.id });
+    // const openSubscriptionProfile = (sub) => dispatch('open-profile', { profileId: sub.id });
+
     // Функция для открытия вишлиста 
     const openWishlist = (wl) => {
         dispatch('open-wishlist', { 
@@ -134,7 +136,6 @@
             profileId: sub.id 
         });
     };
-    
     const shareProfile = () => {
         dispatch('share-profile', { profileId: profile?.id });
     };
@@ -176,7 +177,7 @@
                             class="icon-16"
                             loading="lazy"
                         />
-                        <span>{isSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
+                        <span>{currentIsSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
                     {/if}
                 </Button>
                 <Button kind="ghost" on:click={shareProfile}>
@@ -199,12 +200,9 @@
                 {#if publicWishlistsWithIcon.length}
                     <div class="mini-icons" aria-label="Иконки вишлистов">
                         {#each publicWishlistsWithIcon.slice(0, 5) as wl (wl.id ?? wl.title)}
-                            <!-- Раскомментируйте, если нужны иконки -->
-                            <!-- 
-                            <div class="mini-icon">
-                                <img src={wl.iconUrl} alt={wl.title} loading="lazy" />
-                            </div>
-                            -->
+<!--                            <div class="mini-icon">-->
+<!--                                <img src={wl.iconUrl} alt={wl.title} loading="lazy" />-->
+<!--                            </div>-->
                         {/each}
                     </div>
                 {/if}
@@ -221,6 +219,7 @@
     {:else}
         <div class="wishlists-list">
             {#each publicWishlists as wl (wl.id ?? wl.title)}
+                <!-- Si tu veux rendre chaque ligne cliquable: remplace <article> par <button> et dispatch open-wishlist -->
                 <button
                     type="button"
                     class="wishlist-row"
@@ -255,6 +254,25 @@
             <img src="../../../../static/icons/follow.png" alt="" class="section-icon" loading="lazy" />
             <div class="section-title-main">
                 <span>ПОДПИСКИ · {subscriptions.length}</span>
+
+                <!-- {#if subscriptions.length}
+                    <div class="mini-icons" aria-label="Иконки подписок">
+                        {#each subscriptions.slice(0, 5) as sub (sub.id ?? sub.fullName)}
+                           <div class="mini-icon">
+                               <Avatar
+                                    size={24}
+                                    src={sub.avatarUrl}
+                                    initials={(sub.fullName ?? '')
+                                        .split(' ')
+                                        .filter(Boolean)
+                                        .map((n) => n[0])
+                                        .join('')
+                                        .toUpperCase()}
+                                />
+                            </div> 
+                        {/each}
+                    </div>
+                {/if} -->
             </div>
         </div>
 
