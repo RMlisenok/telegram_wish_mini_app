@@ -195,7 +195,7 @@ export async function unsubscribeFromWishlist(
     wishlistId: number
 ): Promise<{ message: string }> {
     try {
-        const response = await fetch(`/api/v1/subscriptions/wishlists/${wishlistId}`, {
+        const response = await fetch(`/api/v1/subscriptions/wishlists?wishlist_id=${wishlistId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
