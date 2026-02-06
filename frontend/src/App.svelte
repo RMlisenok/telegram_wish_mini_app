@@ -296,11 +296,25 @@
 
         // Проверяем, есть ли deep link для открытия
         if (startParamData) {
-            await handleDeepLink(startParamData);
-        } else if (user.birth_date != null) {
-            navigate('main');
+            // Обрабатываем deep link
+            if (startParamData.type === 'profile') {
+                if (startParamData.id.toString() === currentUserId) {
+                    // Если это профиль текущего пользователя
+                    navigate('main');
+                } else {
+                    // Если это чужой профиль
+                    await openOtherProfileById(startParamData.id);
+                }
+            } else if (startParamData.type === 'wishlist') {
+                await openWishlistById(startParamData.id);
+            }
         } else {
-            navigate('editProfileBirthDate');
+            // Обычный запуск
+            if (user.birth_date != null) {
+                navigate('main');
+            } else {
+                navigate('editProfileBirthDate');
+            }
         }
     };
 
