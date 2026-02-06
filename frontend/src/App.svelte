@@ -589,6 +589,7 @@
                             }}
                             on:show-all-wishlists={() => pushNavigate('wishlists')}
                             on:show-all-subscriptions={() => pushNavigate('subscriptions')}
+                            on:openShareProfile={() => navigate('shareProfile')}
                         />
                     {:else if currentScreen === 'editProfileBirthDate'}
                         <SettingsScreenEditProfile

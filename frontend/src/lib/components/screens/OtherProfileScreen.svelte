@@ -136,20 +136,13 @@
             profileId: sub.id 
         });
     };
+    const shareProfile = () => {
+        dispatch('share-profile', { profileId: profile?.id });
+    };
 </script>
 
 <header class="app-header">
     <div class="h1">Профиль</div>
-    <Button 
-        kind="ghost" 
-        on:click={() => {
-            const shareUrl = makeProfileShareUrl(profile.id, profile.fullName);
-            if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
-            else window.open(shareUrl, '_blank');
-        }}
-    >
-        Поделиться профилем
-    </Button>
 </header>
 
 <section class="section-card profile-card">
@@ -186,6 +179,10 @@
                         />
                         <span>{currentIsSubscribed ? 'Вы подписаны' : 'Подписаться'}</span>
                     {/if}
+                </Button>
+                <Button kind="ghost" on:click={shareProfile}>
+                    <img src="../../../../static/icons/share.png" alt="" class="btn-icon" />
+                    <span>Поделиться профилем</span>
                 </Button>
             </div>
         </div>
@@ -368,6 +365,12 @@
 
     .profile-actions { display: flex; flex-wrap: wrap; gap: 6px; }
     .icon-16 { width: 16px; height: 16px; margin-right: 4px; }
+
+    .btn-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+    }
 
     .section-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
     .section-title-with-icon { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; text-transform: uppercase; }
