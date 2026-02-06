@@ -110,7 +110,7 @@ class SubscriptionService:
         return await self.rep_subs.delete_by_target(
             subscriber_id=user_id,
             type_sub=False,
-            target_user_id=target_wishlist_id
+            target_wishlist_id=target_wishlist_id
         )
 
     async def get_my_subscription(
