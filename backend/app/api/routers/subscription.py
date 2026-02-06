@@ -61,7 +61,7 @@ async def visit_subscibe(
     service = SubscriptionService(db)
     success = await service.update_visit(
         user_id=user_id,
-        subscribe_id=user_id
+        subscribe_id=subscribe_id
     )
     if success is None:
         raise HTTPException(
