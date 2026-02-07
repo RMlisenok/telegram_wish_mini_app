@@ -12,7 +12,10 @@
     $: profileToShare = otherProfile || user;
 
     const dispatch = createEventDispatcher();
-    const goBack = () => dispatch('back');
+    const goBack = () => {
+    profileToShare = null;
+    dispatch('back');
+};
 
     let tg = null;
 
@@ -22,11 +25,9 @@
         }
     });
 
-    // ТОЛЬКО ЭТУ ФУНКЦИЮ ДОБАВЬТЕ:
     function getUserIdForShare(profile) {
         if (!profile || !profile.id) return null;
         
-        // Если в id токен (JWT), извлекаем sub
         const idValue = profile.id;
         if (typeof idValue === 'string' && 
         idValue.includes('.') && 
@@ -34,12 +35,12 @@
             try {
                 const payload = idValue.split('.')[1];
                 const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-                return decoded.sub; // "1" из вашего токена
+                return decoded.sub;
             } catch {
-                return profile.id; // fallback
+                return profile.id;
             }
         }
-        return profile.id; // если не токен
+        return profile.id;
     }
 
     const notify = (message) => {
