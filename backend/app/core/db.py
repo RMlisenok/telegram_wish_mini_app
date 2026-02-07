@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text, inspect
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Set
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from app.core.base import Base
@@ -58,9 +58,43 @@ async def check_connection():
         return False
 
 
-def _sync_get_table_names(conn):
+def _sync_get_table_names(conn) -> Set[str]:
     inspector = inspect(conn)
-    return inspector.get_table_names()
+    tables_name = inspector.get_table_names()
+
+    return set(tables_name)
+
+
+def _sync_get_expected_tables(conn) -> Set[str]:
+    metadata = Base.metadata
+    return {table.name for table in metadata.tables.values()}
+
+
+async def create_missing_tables():
+    try:
+        async with async_engine.begin() as conn:
+            existing_tables = await conn.run_sync(_sync_get_table_names)
+
+            expected_tables = await conn.run_sync(_sync_get_expected_tables)
+
+            missing_tables = expected_tables - existing_tables
+            if not missing_tables:
+                print(f'All tables existing: {len(existing_tables)} tables')
+                print(f'Exists tables: {", ".join(sorted(existing_tables))}')
+                return False
+
+            print(f'Find missiong tables: {", ".join(sorted(missing_tables))}')
+
+            metadata = Base.metadata
+            for table_name in missing_tables:
+                table = metadata.tables[table_name]
+                print(f'Create table: {table_name}')
+                await conn.run_sync(table.create)
+
+            print(f'Create {len(missing_tables)} missing tables')
+            return True
+    except Exception as e:
+        print(f"Error create tables: {e}")
 
 
 async def create_tables():
@@ -94,5 +128,6 @@ async def drop_tables():
 async def init_database():
     if not await check_connection():
         return False
-    await create_tables()
+    # await create_tables()
+    await create_missing_tables()
     return True
