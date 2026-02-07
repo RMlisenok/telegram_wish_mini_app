@@ -62,6 +62,10 @@
         }
     });
 
+    let wishlistOwnerData = null;
+    let wishlistOwnerName = '';
+    let wishlistOwnerAvatar = '';
+
     // Функция загрузки информации о владельце вишлиста
     async function loadWishlistOwnerInfo() {
         if (!token || !wishlistId) return;
@@ -79,6 +83,17 @@
             if (response.ok) {
                 const data = await response.json();
                 wishlistOwnerId = data.owner_id;
+                wishlistOwnerName = data.owner_name || '';
+                wishlistOwnerAvatar = data.owner_photo || '';
+
+                currentWishlist = {
+                    ...data,
+                    title: data.name,
+                    photo: data.photo,
+                    description: data.description,
+                    typeprivacy: data.typeprivacy,
+                    count: data.wishes_count || 0
+                };
                 
                 // Проверяем, является ли текущий пользователь владельцем
                 // Для этого нужно получить ID текущего пользователя
@@ -538,7 +553,6 @@
     // 2009_3_Dass_25.12.2025 <--
 
     //2006_7_Dass_25.12.2025 -->
-    let deleteOption = null;  
     let showFullDeleteModal = false;
     let showFromWishlistDeleteModal = false;  
 
@@ -666,47 +680,43 @@
         return !isAlreadyInWishlist;
     });
 
-    const shareWishlist = () => {
+    const handleShareWishlist = () => {
         if (!wishlistId || !currentWishlist) return;
         
-        const url = makeWishlistShareUrl(wishlistId, currentWishlist.title);
-        if (tg?.openTelegramLink) {
-            tg.openTelegramLink(url);
-        } else if (tg?.openLink) {
-            tg.openLink(url);
-        } else {
-            window.open(url, '_blank');
+        // Проверяем, можно ли делиться этим вишлистом
+        if (currentWishlist.typeprivacy === 'private') {
+            // Для приватных вишлистов проверяем, владелец ли это
+            if (isExternalWishlist && !isCurrentUserOwner) {
+                showNotification('Это приватный вишлист, нельзя поделиться');
+                return;
+            }
         }
-    };
-
-    const copyWishlistLink = async () => {
-        if (!wishlistId) return;
         
-        const url = makeWishlistTgUrl(wishlistId);
-        try {
-            await navigator.clipboard.writeText(url);
-            showNotification('Ссылка на вишлист скопирована');
-        } catch (error) {
-            console.error('Ошибка копирования:', error);
-            showNotification('Не удалось скопировать ссылку');
-        }
+        // Используем данные из currentWishlist согласно интерфейсу Wishlist
+        const shareData = {
+            id: parseInt(wishlistId),
+            title: currentWishlist.title || currentWishlist.name || 'Вишлист',
+            photo: currentWishlist.photo || '',
+            description: currentWishlist.description || '',
+            typeprivacy: currentWishlist.typeprivacy || 'private',
+            count: currentWishlist.count || filteredWishes.length,
+            wishesCount: filteredWishes.length,
+            isExternalWishlist: isExternalWishlist || false,
+            isCurrentUserOwner: isCurrentUserOwner || false,
+            ownerName: wishlistOwnerName || '',
+            ownerAvatar: wishlistOwnerAvatar || ''
+        };
+        
+        console.log('Данные для шаринга вишлиста:', shareData);
+        dispatch('shareWishlist', shareData);
     };
 
-    let showShareOptions = false;
-    
-    const toggleShareOptions = () => {
-        showShareOptions = !showShareOptions;
-    };
-
-    const closeShareOptions = () => {
-        showShareOptions = false;
-    };
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
-{#if wishlistId && currentWishlist}
+<!-- {#if wishlistId && currentWishlist} -->
     <!-- Шапка для режима просмотра вишлиста -->
-    <header class="app-header">
+    <!-- <header class="app-header">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="flex: 1;">
                 <div class="h1">{currentWishlist.title}</div>
@@ -715,76 +725,49 @@
                     filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
                 </div>
             </div>
-            {#if !isExternalWishlist || isCurrentUserOwner}
-                <div style="position: relative;">
-                    <Button 
-                        kind="ghost" 
-                        on:click={toggleShareOptions}
-                        title="Поделиться вишлистом"
-                    >
-                        <img src="../../../../static/icons/share.png" alt="Поделиться" class="icon-16" />
-                    </Button>
-                    
-                    <!-- Выпадающее меню с опциями -->
-                    {#if showShareOptions}
-                        <!-- svelte-ignore a11y_click_events_have_key_events -->
-                        <!-- svelte-ignore a11y_no_static_element_interactions -->
-                        <div class="dropdown-backdrop" on:click={closeShareOptions}>
-                            <div class="dropdown-menu" on:click|stopPropagation>
-                                <button class="dropdown-item" on:click={shareWishlist}>
-                                    <img src="../../../../static/icons/telegram.png" alt="Telegram" class="dropdown-icon" />
-                                    Поделиться в Telegram
-                                </button>
-                                <button class="dropdown-item" on:click={copyWishlistLink}>
-                                    <img src="../../../../static/icons/link.png" alt="Ссылка" class="dropdown-icon" />
-                                    Скопировать ссылку
-                                </button>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
-            {/if}
         </div>
     </header>
-{:else}
+{:else} -->
     <!-- Стандартная шапка -->
      <header class="app-header">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="flex: 1;">
                 <div class="h1">Все ваши желания</div>
             </div>
-            {#if !isExternalWishlist || isCurrentUserOwner}
-                <div style="position: relative;">
-                    <Button 
-                        kind="ghost" 
-                        on:click={toggleShareOptions}
-                        title="Поделиться вишлистом"
-                    >
-                        <img src="../../../../static/icons/share.png" alt="Поделиться" class="icon-16" />
-                    </Button>
-                    
-                    <!-- Выпадающее меню с опциями -->
-                    {#if showShareOptions}
-                        <!-- svelte-ignore a11y_click_events_have_key_events -->
-                        <!-- svelte-ignore a11y_no_static_element_interactions -->
-                        <div class="dropdown-backdrop" on:click={closeShareOptions}>
-                            <div class="dropdown-menu" on:click|stopPropagation>
-                                <button class="dropdown-item" on:click={shareWishlist}>
-                                    <img src="../../../../static/icons/telegram.png" alt="Telegram" class="dropdown-icon" />
-                                    Поделиться в Telegram
-                                </button>
-                                <button class="dropdown-item" on:click={copyWishlistLink}>
-                                    <img src="../../../../static/icons/link.png" alt="Ссылка" class="dropdown-icon" />
-                                    Скопировать ссылку
-                                </button>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
+            <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
+            {#if currentWishlist.typeprivacy !== 'private'}
+                <button 
+                    class="share-button"
+                    on:click={handleShareWishlist}
+                    aria-label="Поделиться вишлистом"
+                    title="Поделиться вишлистом"
+                >
+                    <img 
+                        src="../../../../static/icons/share.png" 
+                        alt="Поделиться" 
+                        width="24" 
+                        height="24"
+                    />
+                </button>
+            {:else if !isExternalWishlist || isCurrentUserOwner}
+                <!-- Для приватных вишлистов показываем кнопку только владельцу -->
+                <button 
+                    class="share-button"
+                    on:click={handleShareWishlist}
+                    aria-label="Поделиться вишлистом"
+                    title="Поделиться вишлистом"
+                >
+                    <img 
+                        src="../../../../static/icons/share.png" 
+                        alt="Поделиться" 
+                        width="24" 
+                        height="24"
+                    />
+                </button>
             {/if}
         </div>
     </header>
-{/if}
+<!-- {/if} -->
 
 <section class="section-card">
     <!--2009/0_Dass_25.12.2025-->
@@ -1949,55 +1932,6 @@
         to { opacity: 1; }
     }
 
-    /* Стили для выпадающего меню */
-    .dropdown-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999;
-    }
-
-    .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 8px;
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        min-width: 220px;
-        z-index: 1000;
-        overflow: hidden;
-    }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        padding: 12px 16px;
-        background: none;
-        border: none;
-        text-align: left;
-        font-size: 14px;
-        color: #374151;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .dropdown-item:hover {
-        background: #f9fafb;
-    }
-
-    .dropdown-icon {
-        width: 20px;
-        height: 20px;
-        opacity: 0.8;
-    }
-
     /* Для кнопки поделиться в шапке */
     .app-header {
         position: relative;
@@ -2005,6 +1939,27 @@
 
     .app-header .h1 {
         flex: 1;
+    }
+
+    .share-button {
+        background: none;
+        border: none;
+        padding: 8px;
+        margin: -8px;
+        cursor: pointer;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .share-button:hover {
+        background-color: #f3f4f6;
+    }
+
+    .share-button:active {
+        background-color: #e5e7eb;
     }
 
 

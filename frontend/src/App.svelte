@@ -6,6 +6,7 @@
     // Импорты экранов
     import MainScreen from './lib/components/screens/MainScreen.svelte';
     import ShareProfileScreen from './lib/components/screens/ShareProfileScreen.svelte';
+    import ShareWishlistScreen from './lib/components/screens/ShareWishlistScreen.svelte';
     import OtherProfileScreen from './lib/components/screens/OtherProfileScreen.svelte';
     
     import SettingsScreen from './lib/components/screens/settings/SettingsScreen.svelte'; 
@@ -46,6 +47,7 @@
     let token = null; //токен важно!
     let startParamData = null;
     //let userStore = null;
+    let currentWishlistForShare = null;
     
     onMount(() => {
         tg = initializeTelegram();
@@ -318,17 +320,9 @@
         }
     };
 
-    // Обработка deep link
-    async function handleDeepLink(data) {
-        if (!data || !data.type || !data.id) return;
-        
-        if (data.type === 'profile') {
-            // Открываем профиль пользователя
-            await openOtherProfileById(data.id);
-        } else if (data.type === 'wishlist') {
-            // Открываем вишлист
-            await openWishlistById(data.id);
-        }
+    function openShareWishlist(wishlistData) {
+        currentWishlistForShare = wishlistData;
+        pushNavigate('shareWishlist');
     }
     
     async function openWishlistById(wishlistId) {
@@ -498,6 +492,9 @@
                                 selectedWishId = e.detail.id;
                                 navigate('wishesEdit'); 
                             }}
+                            on:shareWishlist={(e) => {
+                                openShareWishlist(e.detail);
+                            }}
                         />
                     
                     {:else if currentScreen === 'shareProfile'}
@@ -507,6 +504,16 @@
                             on:back={() => navigate('main')}
                             on:back={() => {
                                 viewedProfile = null;
+                                navigate('main');
+                            }}
+                        />
+
+                    {:else if currentScreen === 'shareWishlist'}
+                        <ShareWishlistScreen 
+                            user={$userStore} 
+                            wishlist={currentWishlistForShare}
+                            on:back={() => {
+                                currentWishlistForShare = null;
                                 navigate('main');
                             }}
                         />
