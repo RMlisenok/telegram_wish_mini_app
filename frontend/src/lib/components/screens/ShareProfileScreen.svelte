@@ -28,7 +28,9 @@
         
         // Если в id токен (JWT), извлекаем sub
         const token = profile.id;
-        if (token.includes('.') && token.split('.').length === 3) {
+        if (typeof idValue === 'string' && 
+        idValue.includes('.') && 
+        idValue.split('.').length === 3) {
             try {
                 const payload = token.split('.')[1];
                 const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
