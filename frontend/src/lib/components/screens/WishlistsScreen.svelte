@@ -19,6 +19,9 @@
 
     //add response all wishlists -->
     export let token;
+    export let isExternalUser = false; // режим внешнего пользователя
+    export let externalProfileId = null; // ID внешнего пользователя
+    export let externalUserWishlists = []; // Вишлисты внешнего пользователя
     onMount(async () => {
         if (token) {
             await fetchWishlists();
@@ -38,6 +41,10 @@
         }
     }
     // <--
+
+    $: displayedWishlists = isExternalUser 
+        ? externalUserWishlists 
+        : $wishlistsStore;
 
     const openCreateWishlists = () => {
         dispatch('openCreateWishlists');
@@ -186,17 +193,27 @@
 </script>
 
 <header class="app-header">
-    <div class="h1">Все ваши вишлисты</div>
+    <div class="h1">
+        {#if isExternalUser}
+            Вишлисты пользователя
+        {:else}
+            Все ваши вишлисты
+        {/if}
+    </div>
 </header>
 
 <section class="section-card">
-    {#if $wishlistsStore.length === 0}
+    {#if $displayedWishlists.length === 0}
         <p class="empty-note">
-            У вас пока нет вишлистов. Создайте первый, чтобы сгруппировать свои желания.
+            {#if isExternalUser}
+                У этого пользователя пока нет публичных вишлистов.
+            {:else}
+                У вас пока нет вишлистов. Создайте первый, чтобы сгруппировать свои желания.
+            {/if}
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each $wishlistsStore as wishlist (wishlist.id)}
+            {#each $displayedWishlists as wishlist (wishlist.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">

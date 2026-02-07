@@ -113,7 +113,7 @@
     }
 
     const showAllWishlists = () => {
-        dispatch('show-all-wishlists', { profileId: profile?.id });
+        dispatch('show-all-wishlists', { profileId: profile?.id,  isExternalProfile: true });
     };
 
     const showAllSubscriptions = () => {

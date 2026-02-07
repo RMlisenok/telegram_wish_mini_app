@@ -228,6 +228,64 @@
             viewedProfile = profileData;
         }
     }
+
+    async function showAllWishlistsForUser(profileId: number, isExternalProfile: boolean = true) {
+        if (!token || !profileId) return;
+        
+        try {
+            // Загружаем вишлисты указанного пользователя
+            const response = await fetch(`/api/v1/users/${profileId}/wishlists`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const wishlistsData = await response.json();
+                
+                // Преобразуем данные для отображения
+                const userWishlists = wishlistsData
+                    .filter((wl: any) => wl.typeprivacy === 'public' || wl.typeprivacy === 'protected')
+                    .map((wl: any) => ({
+                        id: wl.id.toString(),
+                        name: wl.name,
+                        title: wl.name,
+                        photo: wl.photo,
+                        description: wl.description,
+                        typeprivacy: wl.typeprivacy,
+                        count: wl.wishes_count || 0,
+                        wishesCount: wl.wishes_count || 0,
+                        isExternal: isExternalProfile,
+                        ownerId: profileId
+                    }));
+                
+                // Сохраняем загруженные вишлисты
+                wishlistsForExternalUser = userWishlists;
+                currentExternalProfileId = profileId;
+                
+                // Переходим на экран вишлистов с флагом внешнего пользователя
+                navigate('wishlists', { 
+                    isExternalUser: true,
+                    externalProfileId: profileId
+                });
+                
+            } else {
+                console.error('Не удалось загрузить вишлисты пользователя');
+                showNotification('Не удалось загрузить вишлисты пользователя');
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки вишлистов пользователя:', error);
+            showNotification('Произошла ошибка при загрузке вишлистов');
+        }
+    }
+
+    let wishlistsForExternalUser = [];
+    let currentExternalProfileId = null;
+
+    function handleShowAllWishlists(event) {
+        const { profileId, isExternalProfile } = event.detail;
+        showAllWishlistsForUser(profileId, isExternalProfile);
+    }
     
     function navigate(screen, params = {}) {
         currentScreen = screen;
@@ -545,11 +603,20 @@
                             token={token}
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
-                            on:openWishlistDetail={(e) => navigate('wishes', { wishlistId: e.detail.wishlistId })}
+                            on:openWishlistDetail={(e) => {
+                                const isExternal = e.detail.isExternal || false;
+                                navigate('wishes', { 
+                                    wishlistId: e.detail.wishlistId,
+                                    isExternal: isExternal
+                                });
+                            }}
                             on:openEditWishlists={(e) => {
                                 selectedWishlistId = e.detail.id;
                                 navigate('wishlistsEdit'); 
                             }}
+                            isExternalUser={isExternalUser || false}
+                            externalProfileId={externalProfileId}
+                            externalUserWishlists={wishlistsForExternalUser}
                         />
                     
                     {:else if currentScreen === 'wishlistsEdit'}
