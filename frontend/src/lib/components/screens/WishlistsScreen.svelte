@@ -24,6 +24,10 @@
     export let externalUserWishlists = []; // Вишлисты внешнего пользователя
     onMount(async () => {
         if (token) {
+            console.log('WishlistsScreen mounted with props:');
+            console.log('- isExternalUser:', isExternalUser);
+            console.log('- externalProfileId:', externalProfileId);
+            console.log('- externalUserWishlists:', externalUserWishlists);
             await fetchWishlists();
         }
     });

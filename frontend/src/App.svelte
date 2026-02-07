@@ -41,6 +41,8 @@
     let currentWishlistIsExternal = false;
     let selectedWishlistId = null;
     let selectedWishId = null;
+    let isExternalUser = false;
+    let externalProfileId = null;
     
     let showStartScreen = true; // Состояние для отображения стартового экрана
     let tg = null;
@@ -262,12 +264,11 @@
                 // Сохраняем загруженные вишлисты
                 wishlistsForExternalUser = userWishlists;
                 currentExternalProfileId = profileId;
+                externalProfileId = profileId;
+                isExternalUser = true;
                 
                 // Переходим на экран вишлистов с флагом внешнего пользователя
-                navigate('wishlists', { 
-                    isExternalUser: true,
-                    externalProfileId: profileId
-                });
+                navigate('wishlists');
                 
             } else {
                 console.error('Не удалось загрузить вишлисты пользователя');
@@ -604,7 +605,7 @@
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
                             on:openWishlistDetail={(e) => {
-                                const isExternal = e.detail.isExternal || false;
+                                const isExternal = e.detail.isExternal || isExternalUser || false;
                                 navigate('wishes', { 
                                     wishlistId: e.detail.wishlistId,
                                     isExternal: isExternal
@@ -614,7 +615,7 @@
                                 selectedWishlistId = e.detail.id;
                                 navigate('wishlistsEdit'); 
                             }}
-                            isExternalUser={isExternalUser || false}
+                            isExternalUser={isExternalUser}
                             externalProfileId={externalProfileId}
                             externalUserWishlists={wishlistsForExternalUser}
                         />
