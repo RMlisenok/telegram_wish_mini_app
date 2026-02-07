@@ -9,7 +9,8 @@
 
     export let user;
     export let otherProfile;
-    $: profileToShare = otherProfile || user;
+    // $: profileToShare = otherProfile || user;
+    $: profileToShare = (otherProfile && otherProfile.id) ? otherProfile : user;
 
     const dispatch = createEventDispatcher();
     const goBack = () => {

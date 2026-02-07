@@ -505,6 +505,10 @@
                             user={$userStore} 
                             otherProfile={viewedProfile}
                             on:back={() => navigate('main')}
+                            on:back={() => {
+                                viewedProfile = null;
+                                navigate('main');
+                            }}
                         />
                     
                     {:else if currentScreen === 'wishesCreate'}
