@@ -125,7 +125,7 @@
         />
         <div class="share-main">
             <div class="share-name">{profileToShare.fullName}</div>
-            <div class="share-id">ID: {profileToShare.id}</div>
+            <div class="share-id">ID: {getUserIdForShare(profileToShare)}</div>
         </div>
     </div>
 
