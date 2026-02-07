@@ -27,12 +27,12 @@
         if (!profile || !profile.id) return null;
         
         // Если в id токен (JWT), извлекаем sub
-        const token = profile.id;
+        const idValue = profile.id;
         if (typeof idValue === 'string' && 
         idValue.includes('.') && 
         idValue.split('.').length === 3) {
             try {
-                const payload = token.split('.')[1];
+                const payload = idValue.split('.')[1];
                 const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
                 return decoded.sub; // "1" из вашего токена
             } catch {
