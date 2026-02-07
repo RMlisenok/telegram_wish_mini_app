@@ -22,6 +22,24 @@
         }
     });
 
+    // ТОЛЬКО ЭТУ ФУНКЦИЮ ДОБАВЬТЕ:
+    function getUserIdForShare(profile) {
+        if (!profile || !profile.id) return null;
+        
+        // Если в id токен (JWT), извлекаем sub
+        const token = profile.id;
+        if (token.includes('.') && token.split('.').length === 3) {
+            try {
+                const payload = token.split('.')[1];
+                const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+                return decoded.sub; // "1" из вашего токена
+            } catch {
+                return profile.id; // fallback
+            }
+        }
+        return profile.id; // если не токен
+    }
+
     const notify = (message) => {
         if (tg?.showPopup) {
             tg.showPopup({
@@ -57,13 +75,15 @@
     };
 
     const copyLink = async () => {
-        const url = makeProfileTgUrl(profileToShare.id); // lien carte
+        const userId = getUserIdForShare(profileToShare);
+        const url = makeProfileTgUrl(userId); // lien carte
         const ok = await copyText(url);
         notify(ok ? 'Ссылка на профиль скопирована' : 'Не удалось скопировать ссылку');
     };
 
     const shareInTelegram = () => {
-        const shareUrl = makeProfileShareUrl(profileToShare.id, profileToShare.fullName); // share wrapper
+        const userId = getUserIdForShare(profileToShare);
+        const shareUrl = makeProfileShareUrl(userId, profileToShare.fullName); // share wrapper
 
         if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
         else if (tg?.openLink) tg.openLink(shareUrl);
@@ -72,7 +92,8 @@
 
 
     const shareOtherWays = async () => {
-        const url = makeProfileTgUrl(profileToShare.id);
+        const userId = getUserIdForShare(profileToShare);
+        const url = makeProfileTgUrl(userId);
         const title = 'Подари мне — профиль';
         const text = `Профиль: ${profileToShare.fullName}`;
 
