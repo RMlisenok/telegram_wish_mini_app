@@ -114,19 +114,24 @@
     };
 
     const handleOpenWishlist = (wishlist) => {
-        console.log('Открытие вишлиста:', wishlist.id);
+        if (!wishlist) {
+            console.error('handleOpenWishlist: wishlist is null or undefined');
+            return;
+        }
+        console.log('Открытие вишлиста:', wishlist?.id);
         console.log('Wishlist properties:', {
-            id: wishlist.id,
-            typeprivacy: wishlist.typeprivacy,
-            name: wishlist.name,
-            title: wishlist.title
+            id: wishlist?.id,
+            typeprivacy: wishlist?.typeprivacy,
+            name: wishlist?.name,
+            title: wishlist?.title,
+            isObject: typeof wishlist === 'object',
+            hasTypeprivacy: 'typeprivacy' in wishlist
         });
         
         if (!wishlist || !wishlist.id) {
             console.error('Invalid wishlist object:', wishlist);
             return;
         }
-        // TODO: Реализовать переход в вишлист
         dispatch('openWishlistDetail', { 
             wishlistId: wishlist.id, 
             isExternal: isExternalUser 
@@ -363,7 +368,11 @@
                         <!-- Интерактивная стрелка для перехода -->
                         <button
                             class="action-button arrow-button"
-                            on:click|stopPropagation={() => handleOpenWishlist(item)}
+                            on:click|stopPropagation={() => {
+                                console.log('Button clicked, current item:', wishlist);
+                                console.log('Item has typeprivacy?', wishlist?.typeprivacy !== undefined);
+                                handleOpenWishlist(item)
+                                }}
                             aria-label="Открыть вишлист"
                         >
                             <img src={ICON_ARROW} alt=">" />
