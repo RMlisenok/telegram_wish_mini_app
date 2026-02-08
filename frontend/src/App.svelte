@@ -337,6 +337,7 @@
             } else {
                 currentWishlistIsExternal = false;
             }
+            console.log(currentWishlistId);
         } else {
             currentWishlistId = null;
             currentWishlistIsExternal = false;
