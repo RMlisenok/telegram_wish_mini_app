@@ -82,6 +82,14 @@
         screenStack = screenStack.slice(0, -1);
         currentScreen = prev ?? 'main';
     }
+
+    function handleBackToWishlist(event) {
+        const { wishlistId } = event.detail;
+        navigate('wishes', { 
+            wishlistId: wishlistId,
+            isExternal: currentWishlistIsExternal 
+        });
+    }
     
     function openOtherProfile(profile) {
         viewedProfile = profile;
@@ -613,10 +621,7 @@
                         <ShareWishlistScreen 
                             user={$userStore} 
                             wishlist={currentWishlistForShare}
-                            on:back={() => {
-                                currentWishlistForShare = null;
-                                navigate('main');
-                            }}
+                            on:backToWishlist={handleBackToWishlist}
                         />
                     
                     {:else if currentScreen === 'wishesCreate'}

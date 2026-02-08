@@ -11,7 +11,9 @@
     const dispatch = createEventDispatcher();
     
     const goBack = () => {
-        dispatch('back');
+        dispatch('backToWishlist', { 
+            wishlistId: wishlist.id 
+        });
     };
 
     let tg = null;
