@@ -96,3 +96,19 @@ async def delete_wish(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Wish not found"
             )
+
+
+@router.delete("/wishlists/{wish_id}",
+               status_code=status.HTTP_204_NO_CONTENT)
+async def delete_wish(
+    wish_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    async with db.begin():
+        service = WishService(db)
+        delete_status = await service.delete_wish_in_wishlists(wish_id)
+        if not delete_status:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Wish not found"
+            )
