@@ -743,6 +743,8 @@
             <script>
                 $: {
                     console.log('currentWishlist:', currentWishlist);
+                    console.log('currentWishlist.privacy:', currentWishlist.privacy);
+                    console.log('privacy type:', typeof currentWishlist.privacy);
                 }
             </script>
              {#if currentWishlist}
