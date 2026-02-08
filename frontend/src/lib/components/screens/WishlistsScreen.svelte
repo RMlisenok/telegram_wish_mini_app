@@ -106,8 +106,19 @@
 
     const handleOpenWishlist = (wishlistId) => {
         console.log('Открытие вишлиста:', wishlistId);
+        console.log('Wishlist properties:', {
+            id: wishlist.id,
+            typeprivacy: wishlist.typeprivacy,
+            name: wishlist.name,
+            title: wishlist.title
+        });
+        
+        if (!wishlist || !wishlist.id) {
+            console.error('Invalid wishlist object:', wishlist);
+            return;
+        }
         // TODO: Реализовать переход в вишлист
-        dispatch('openWishlistDetail', { wishlistId }); //2009/0_Dass_25.12.2025
+        dispatch('openWishlistDetail', { wishlistId, isExternal: isExternalUser }); //2009/0_Dass_25.12.2025
     };
 
     const handleOpenOwnerProfile = (ownerId) => {
@@ -331,7 +342,7 @@
                         <!-- Интерактивная стрелка для перехода -->
                         <button
                             class="action-button arrow-button"
-                            on:click|stopPropagation={() => handleOpenWishlist(wishlist.id)}
+                            on:click|stopPropagation={() => handleOpenWishlist(wishlist)}
                             aria-label="Открыть вишлист"
                         >
                             <img src={ICON_ARROW} alt=">" />
