@@ -738,7 +738,7 @@
                 <div class="h1">Все ваши желания</div>
             </div>
             <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
-            {#if currentWishlist.privacy !== 'private'}
+            {#if currentWishlist.privacy !== 'private' && currentWishlist}
                 <button 
                     class="share-button"
                     on:click={handleShareWishlist}
