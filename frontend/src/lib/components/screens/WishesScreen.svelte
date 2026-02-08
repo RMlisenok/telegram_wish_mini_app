@@ -47,6 +47,7 @@
         if (wishlistId) {
             try {
                 const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
+                console.log(wishesInWishlist);
                 wishWishlistsStore.set(wishesInWishlist);
 
                 // Проверяем подписку на вишлист (только для внешних вишлистов)
