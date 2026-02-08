@@ -14,6 +14,8 @@ export interface AvailableTag {
   type_tags: boolean;
 }
 
+export const questionnaireStore = writable<QuestionnaireData[]>([]);
+
 // Загружает анкету текущего пользователя
 export const loadQuestionnaire = async (token: string): Promise<QuestionnaireData> => {
   const response = await fetch('/api/v1/questionnaire', {

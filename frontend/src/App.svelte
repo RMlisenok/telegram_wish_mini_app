@@ -587,6 +587,7 @@
                     {:else if currentScreen === 'questionnaire'}
                         <QuestionnaireScreen 
                             user={$userStore} 
+                            token={token}
                             on:back={() => navigate('main')} 
                         />
                     
