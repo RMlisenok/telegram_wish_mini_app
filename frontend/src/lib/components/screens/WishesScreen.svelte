@@ -97,6 +97,7 @@
                     privacy: data.typeprivacy,
                     count: data.wishes_count || 0
                 };
+                console.log(currentWishlist);
                 
                 // Проверяем, является ли текущий пользователь владельцем
                 // Для этого нужно получить ID текущего пользователя
@@ -739,6 +740,11 @@
             </div>
             <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
             <!-- {#if currentWishlist.privacy !== 'private' && currentWishlist} -->
+            <script>
+                $: {
+                    console.log('currentWishlist:', currentWishlist);
+                }
+            </script>
              {#if currentWishlist}
                 <button 
                     class="share-button"
