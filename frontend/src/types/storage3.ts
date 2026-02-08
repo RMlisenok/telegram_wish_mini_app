@@ -35,10 +35,10 @@ export async function uploadFile(file: File, token: string): Promise<FileUploadR
 /*замена файла*/
 export async function replaceFile(oldFileUrl: string, newFile: File, token: string): Promise<FileUploadResponse> {
     const formData = new FormData();
-    formData.append('file_url', oldFileUrl);
     formData.append('file', newFile);
     
-    const response = await fetch('/api/v1/s3/file/replace', {
+    // Добавляем file_url в URL как query-параметр
+    const response = await fetch(`/api/v1/s3/file/replace?file_url=${encodeURIComponent(oldFileUrl)}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`
