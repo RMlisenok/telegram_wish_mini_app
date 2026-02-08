@@ -4,7 +4,7 @@
     import Button from '../../ui/Button.svelte';
     import TextField from '../../ui/TextField.svelte';
     import { formatDateToDDMMYYYY } from '../../../../types/mainScreenData.ts'
-    import { uploadFile, replaceFile, deleteFile } from '../../../../types/storage.ts';
+    import { uploadFile, replaceFile, deleteFile } from '../../../../types/storage3.ts';
 
     // import { userStore } from '../../../stores/data';
 
