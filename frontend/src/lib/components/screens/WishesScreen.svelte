@@ -724,9 +724,9 @@
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
-<!-- {#if wishlistId && currentWishlist} -->
+{#if wishlistId && currentWishlist}
     <!-- Шапка для режима просмотра вишлиста -->
-    <!-- <header class="app-header">
+    <header class="app-header">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="flex: 1;">
                 <div class="h1">{currentWishlist.title}</div>
@@ -734,51 +734,52 @@
                     {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
                     filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
                 </div>
+                {#if currentWishlist.privacy !== 'private'}
+                    <button 
+                        class="share-button"
+                        on:click={handleShareWishlist}
+                        aria-label="Поделиться вишлистом"
+                        title="Поделиться вишлистом"
+                    >
+                        <img 
+                            src="../../../../static/icons/share.png" 
+                            alt="Поделиться" 
+                            width="24" 
+                            height="24"
+                        />
+                    </button>
+                {:else if !isExternalWishlist || isCurrentUserOwner}
+                    <!-- Для приватных вишлистов показываем кнопку только владельцу -->
+                    <button 
+                        class="share-button"
+                        on:click={handleShareWishlist}
+                        aria-label="Поделиться вишлистом"
+                        title="Поделиться вишлистом"
+                    >
+                        <img 
+                            src="../../../../static/icons/share.png" 
+                            alt="Поделиться" 
+                            width="24" 
+                            height="24"
+                        />
+                    </button>
+                {/if}
             </div>
         </div>
+        <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
+            
     </header>
-{:else} -->
+{:else}
     <!-- Стандартная шапка -->
      <header class="app-header">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
             <div style="flex: 1;">
                 <div class="h1">Все ваши желания</div>
             </div>
-            <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
-            <!-- {#if currentWishlist.privacy !== 'private' && currentWishlist} -->
-            {#if currentWishlist}
-                <button 
-                    class="share-button"
-                    on:click={handleShareWishlist}
-                    aria-label="Поделиться вишлистом"
-                    title="Поделиться вишлистом"
-                >
-                    <img 
-                        src="../../../../static/icons/share.png" 
-                        alt="Поделиться" 
-                        width="24" 
-                        height="24"
-                    />
-                </button>
-            {:else if !isExternalWishlist || isCurrentUserOwner}
-                <!-- Для приватных вишлистов показываем кнопку только владельцу -->
-                <button 
-                    class="share-button"
-                    on:click={handleShareWishlist}
-                    aria-label="Поделиться вишлистом"
-                    title="Поделиться вишлистом"
-                >
-                    <img 
-                        src="../../../../static/icons/share.png" 
-                        alt="Поделиться" 
-                        width="24" 
-                        height="24"
-                    />
-                </button>
-            {/if}
+            
         </div>
     </header>
-<!-- {/if} -->
+{/if}
 
 <section class="section-card">
     <!--2009/0_Dass_25.12.2025-->
