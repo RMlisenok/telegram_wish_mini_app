@@ -102,7 +102,8 @@ async def delete_wish(
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_wish(
     wish_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user_id: AsyncSession = Depends(get_current_user_id)
 ):
     async with db.begin():
         service = WishService(db)
