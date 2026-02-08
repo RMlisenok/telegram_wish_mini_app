@@ -79,10 +79,10 @@
     let displayedWishlists = [];
     $: {
         if (isExternalUser) {
-            displayedWishlists = externalUserWishlists || [];
+            displayedWishlists = (externalUserWishlists || []).filter(wl => wl && wl.id != null);
             console.log('Using external wishlists:', displayedWishlists);
         } else {
-            displayedWishlists = userWishlists || [];
+            displayedWishlists = (userWishlists || []).filter(wl => wl && wl.id != null);
             console.log('Using own wishlists:', displayedWishlists);
         }
     }
@@ -114,24 +114,13 @@
     };
 
     const handleOpenWishlist = (wishlist) => {
-        if (!wishlist) {
-            console.error('handleOpenWishlist: wishlist is null or undefined');
-            return;
-        }
-        console.log('Открытие вишлиста:', wishlist?.id);
-        console.log('Wishlist properties:', {
-            id: wishlist?.id,
-            typeprivacy: wishlist?.typeprivacy,
-            name: wishlist?.name,
-            title: wishlist?.title,
-            isObject: typeof wishlist === 'object',
-            hasTypeprivacy: 'typeprivacy' in wishlist
-        });
-        
         if (!wishlist || !wishlist.id) {
             console.error('Invalid wishlist object:', wishlist);
             return;
         }
+        console.log('Открытие вишлиста:', wishlist?.id);
+        
+        
         dispatch('openWishlistDetail', { 
             wishlistId: wishlist.id, 
             isExternal: isExternalUser 
@@ -171,6 +160,14 @@
 
     // Получить текст и иконку для статуса приватности
     const getPrivacyInfo = (wishlist) => {
+        if (!wishlist || typeof wishlist !== 'object') {
+            console.warn('getPrivacyInfo received invalid wishlist:', wishlist);
+            return {
+                icon: ICON_PRIVATE,
+                text: 'Виден только вам'
+            };
+        }
+
         const privacyValue = wishlist?.typeprivacy || wishlist?.privacy || 'private';
     
         console.log('getPrivacyInfo called with:', {
@@ -290,7 +287,7 @@
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each displayedWishlists as item (item.id)}
+            {#each displayedWishlists.filter(i => i && i.id != null) as item (item.id) as item (item.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
@@ -369,6 +366,10 @@
                         <button
                             class="action-button arrow-button"
                             on:click|stopPropagation={() => {
+                                if (!item || !item.id) {
+                                    console.error('Invalid item in arrow click handler:', item);
+                                    return;
+                                }
                                 console.log('Button clicked, current item:', item);
                                 console.log('Item has typeprivacy?', item?.typeprivacy !== undefined);
                                 handleOpenWishlist(item)
