@@ -39,12 +39,14 @@
     let isCurrentUserOwner = false; // Является ли текущий пользователь владельцем
 
     onMount(async () => {
+        console.log(1);
         if (token) {
             await fetchWishes();
         }
 
         // Если мы в режиме вишлиста, загружаем его желания
         if (wishlistId) {
+            console.log(2);
             try {
                 const wishesInWishlist = await getWishesFromWishlist(token, wishlistId);
                 console.log(wishesInWishlist);
