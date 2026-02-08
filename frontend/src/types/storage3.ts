@@ -16,7 +16,7 @@ export async function uploadFile(file: File, token: string): Promise<FileUploadR
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await fetch('/api/v1/file/', {
+    const response = await fetch('/api/v1/s3/file/', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -38,7 +38,7 @@ export async function replaceFile(oldFileUrl: string, newFile: File, token: stri
     formData.append('file_url', oldFileUrl);
     formData.append('file', newFile);
     
-    const response = await fetch('/api/v1/file/replace', {
+    const response = await fetch('/api/v1/s3/file/replace', {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -59,7 +59,7 @@ export async function deleteFile(fileUrl: string, token: string): Promise<FileDe
     const params = new URLSearchParams();
     params.append('file_url', fileUrl);
     
-    const response = await fetch(`/api/v1/file/delete?${params.toString()}`, {
+    const response = await fetch(`/api/v1/s3/file/delete?${params.toString()}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`,
