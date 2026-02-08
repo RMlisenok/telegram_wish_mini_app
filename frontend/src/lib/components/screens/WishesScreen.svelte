@@ -98,6 +98,8 @@
                     count: data.wishes_count || 0
                 };
                 console.log(currentWishlist);
+                console.log('currentWishlist.privacy:', currentWishlist.privacy);
+                console.log('privacy type:', typeof currentWishlist.privacy);
                 
                 // Проверяем, является ли текущий пользователь владельцем
                 // Для этого нужно получить ID текущего пользователя
