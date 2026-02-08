@@ -137,6 +137,7 @@
 
     // Функция для определения, чей это вишлист
     function getWishlistOwnerText() {
+        console.log("getWishlistOwnerText wishlist: " + wishlist)
         if (wishlist.isExternalWishlist && !wishlist.isCurrentUserOwner) {
             return `Вишлист ${getOwnerName()}`;
         } else {
