@@ -137,12 +137,26 @@
 
     // Функция для определения, чей это вишлист
     function getWishlistOwnerText() {
-        console.log("getWishlistOwnerText wishlist: " + wishlist)
+        console.log('wishlist object in getWishlistOwnerText:', wishlist);
+        console.log('wishlist properties:', {
+            id: wishlist?.id,
+            title: wishlist?.title,
+            ownerName: wishlist?.ownerName,
+            isExternalWishlist: wishlist?.isExternalWishlist,
+            isCurrentUserOwner: wishlist?.isCurrentUserOwner,
+            typeprivacy: wishlist?.typeprivacy
+        });
         if (wishlist.isExternalWishlist && !wishlist.isCurrentUserOwner) {
             return `Вишлист ${getOwnerName()}`;
         } else {
             return 'Ваш вишлист';
         }
+    }
+
+    $: {
+        console.log('wishlist updated:', wishlist);
+        console.log('Current wishlist owner text:', getWishlistOwnerText());
+        console.log('Current wishlist owner name:', getOwnerName());
     }
 </script>
 
