@@ -86,15 +86,16 @@
     const handleEditWishlist = (wishlistId) => {
         console.log('Редактирование вишлиста:', wishlistId);
         // TODO: Реализовать редактирование вишлиста
-        dispatch('openEditWishlists', { id: wishlistId,
-                                        token: token
-         }) //2008_3_Dass_24.12.2025
+        dispatch('openEditWishlists', { 
+            id: wishlistId,
+            token: token
+         }); //2008_3_Dass_24.12.2025
     };
 
     const handleDeleteWishlist = (wishlistId) => {
         console.log('Удаление вишлиста:', wishlistId);
         //2008_4_Dass_25.12.2025
-        const wishlist = $wishlistsStore.find(wl => wl.id === wishlistId);
+        const wishlist = userWishlists.find(wl => wl.id === wishlistId);
         if (!wishlist) return;
         
         wishesInWishlist = wishlist.count;
@@ -264,14 +265,14 @@
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each displayedWishlists as wishlist (wishlist.id)}
+            {#each displayedWishlists as item (item.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
-                        {#if wishlist.photo}
+                        {#if item.photo}
                             <img 
-                                src={wishlist.photo} 
-                                alt={wishlist.title}
+                                src={item.photo} 
+                                alt={item.title}
                                 class="cover-image"
                             />
                         {:else}
@@ -286,34 +287,34 @@
                     <!-- Основная информация -->
                     <div class="wishlist-info">
                         <!-- Название -->
-                        <div class="wishlist-title" title={wishlist.title}>
-                            {wishlist.title}
+                        <div class="wishlist-title" title={item.title}>
+                            {item.title}
                         </div>
 
                         <!-- Статус приватности -->
                         <div class="wishlist-privacy">
                             <img 
-                                src={getPrivacyInfo(wishlist.typeprivacy || wishlist.privacy).icon} 
+                                src={getPrivacyInfo(item.typeprivacy || item.privacy).icon} 
                                 alt="" 
                                 class="privacy-icon"
                             />
-                            <span>{getPrivacyInfo(wishlist.typeprivacy || wishlist.privacy).text}</span>
+                            <span>{getPrivacyInfo(item.typeprivacy || item.privacy).text}</span>
                         </div>
 
                         <!-- Количество желаний -->
                         <div class="wishlist-count">
-                            {wishlist.count} {getWishesWord(wishlist.count)}
+                            {item.count} {getWishesWord(item.count)}
                         </div>
 
                         <!-- Владелец -->
                         <div 
                             class="wishlist-owner"
-                            on:click|stopPropagation={() => handleOpenOwnerProfile(getWishlistOwner(wishlist).id)}
+                            on:click|stopPropagation={() => handleOpenOwnerProfile(getWishlistOwner(item).id)}
                             role="button"
                             tabindex="0"
-                            on:keydown={(e) => e.key === 'Enter' && handleOpenOwnerProfile(getWishlistOwner(wishlist).id)}
+                            on:keydown={(e) => e.key === 'Enter' && handleOpenOwnerProfile(getWishlistOwner(item).id)}
                         >
-                            Владелец: {getWishlistOwner(wishlist).name}
+                            Владелец: {getWishlistOwner(item).name}
                         </div>
                     </div>
 
@@ -323,7 +324,7 @@
                             <!-- Кнопка редактирования -->
                             <button
                                 class="action-button edit-button"
-                                on:click|stopPropagation={() => handleEditWishlist(wishlist.id)}
+                                on:click|stopPropagation={() => handleEditWishlist(item.id)}
                                 aria-label="Редактировать вишлист"
                             >
                                 <img src={ICON_EDIT} alt="Редактировать" />
@@ -332,7 +333,7 @@
                             <!-- Кнопка удаления -->
                             <button
                                 class="action-button delete-button"
-                                on:click|stopPropagation={() => handleDeleteWishlist(wishlist.id)}
+                                on:click|stopPropagation={() => handleDeleteWishlist(item.id)}
                                 aria-label="Удалить вишлист"
                             >
                                 <img src={ICON_TRASH} alt="Удалить" />
@@ -342,7 +343,7 @@
                         <!-- Интерактивная стрелка для перехода -->
                         <button
                             class="action-button arrow-button"
-                            on:click|stopPropagation={() => handleOpenWishlist(wishlist)}
+                            on:click|stopPropagation={() => handleOpenWishlist(item)}
                             aria-label="Открыть вишлист"
                         >
                             <img src={ICON_ARROW} alt=">" />
