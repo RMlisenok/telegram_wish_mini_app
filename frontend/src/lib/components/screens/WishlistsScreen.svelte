@@ -22,13 +22,29 @@
     export let isExternalUser = false; // режим внешнего пользователя
     export let externalProfileId = null; // ID внешнего пользователя
     export let externalUserWishlists = []; // Вишлисты внешнего пользователя
+
+    let userWishlists = [];
+
     onMount(async () => {
-        if (token) {
-            console.log('WishlistsScreen mounted with props:');
-            console.log('- isExternalUser:', isExternalUser);
-            console.log('- externalProfileId:', externalProfileId);
-            console.log('- externalUserWishlists:', externalUserWishlists);
-            await fetchWishlists();
+        console.log('WishlistsScreen mounted:', {
+            isExternalUser,
+            externalProfileId,
+            externalUserWishlistsLength: externalUserWishlists?.length
+        });
+        if (token && !isExternalUser) {
+            try {
+                await fetchWishlists();
+                // Подписываемся на store только для своих вишлистов
+                const unsubscribe = wishlistsStore.subscribe(value => {
+                    console.log('WishlistsStore updated:', value);
+                    userWishlists = value;
+                });
+                
+                // Отписка при уничтожении компонента
+                return unsubscribe;
+            } catch (err) {
+                console.error('Ошибка загрузки вишлистов:', err);
+            }
         }
     });
 
@@ -46,9 +62,16 @@
     }
     // <--
 
-    $: displayedWishlists = isExternalUser 
-        ? externalUserWishlists 
-        : $wishlistsStore;
+    let displayedWishlists = [];
+    $: {
+        if (isExternalUser) {
+            displayedWishlists = externalUserWishlists || [];
+            console.log('Using external wishlists:', displayedWishlists);
+        } else {
+            displayedWishlists = userWishlists || [];
+            console.log('Using own wishlists:', displayedWishlists);
+        }
+    }
 
     const openCreateWishlists = () => {
         dispatch('openCreateWishlists');

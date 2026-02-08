@@ -36,12 +36,13 @@ export async function loadWishlists(token: string) {
             description: wishlist.description,
             photo: wishlist.photo,
             privacy: mapPrivacy(wishlist.typeprivacy),
+            // typeprivacy: wishlist.typeprivacy,
             count: wishlist.wishes_count || 0
         }));
         
         wishlistsStore.set(transformedWishlists);
         
-        return data;
+        return transformedWishlists;
     } catch (error) {
         console.error('Ошибка загрузки вишлистов:', error);
         wishlistsStore.set([]);

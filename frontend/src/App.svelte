@@ -232,7 +232,11 @@
     }
 
     async function showAllWishlistsForUser(profileId: number, isExternalProfile: boolean = true) {
-        if (!token || !profileId) return;
+        console.log('showAllWishlistsForUser called with:', { profileId, isExternalProfile });
+        if (!token || !profileId) {
+            console.error('No token or profileId');
+            return;
+        }
         
         try {
             // Загружаем вишлисты указанного пользователя
@@ -244,6 +248,7 @@
             
             if (response.ok) {
                 const wishlistsData = await response.json();
+                console.log('Loaded wishlists:', wishlistsData);
                 
                 // Преобразуем данные для отображения
                 const userWishlists = wishlistsData
@@ -260,15 +265,16 @@
                         isExternal: isExternalProfile,
                         ownerId: profileId
                     }));
-                
+
+                console.log('Processed wishlists:', userWishlists);
+            
                 // Сохраняем загруженные вишлисты
                 wishlistsForExternalUser = userWishlists;
-                currentExternalProfileId = profileId;
                 externalProfileId = profileId;
                 isExternalUser = true;
-                
+            
                 // Переходим на экран вишлистов с флагом внешнего пользователя
-                navigate('wishlists');
+                pushNavigate('wishlists');
                 
             } else {
                 console.error('Не удалось загрузить вишлисты пользователя');
@@ -667,7 +673,7 @@
                                 // Рекурсивное открытие другого профиля
                                 openOtherProfileById(e.detail.profileId);
                             }}
-                            on:show-all-wishlists={() => pushNavigate('wishlists')}
+                            on:show-all-wishlists={(e) => handleShowAllWishlists(e)}
                             on:show-all-subscriptions={() => pushNavigate('subscriptions')}
                             on:share-profile={(e) => {
                                 const profileId = e.detail.profileId;
