@@ -100,6 +100,10 @@
                 console.log(currentWishlist);
                 console.log('currentWishlist.privacy:', currentWishlist.privacy);
                 console.log('privacy type:', typeof currentWishlist.privacy);
+                if (currentWishlist.privacy !== 'private')
+                {
+                    console.log('not privacy');
+                }
                 
                 // Проверяем, является ли текущий пользователь владельцем
                 // Для этого нужно получить ID текущего пользователя
@@ -742,14 +746,7 @@
             </div>
             <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
             <!-- {#if currentWishlist.privacy !== 'private' && currentWishlist} -->
-            <script>
-                $: {
-                    console.log('currentWishlist:', currentWishlist);
-                    console.log('currentWishlist.privacy:', currentWishlist.privacy);
-                    console.log('privacy type:', typeof currentWishlist.privacy);
-                }
-            </script>
-             {#if currentWishlist}
+            {#if currentWishlist}
                 <button 
                     class="share-button"
                     on:click={handleShareWishlist}
