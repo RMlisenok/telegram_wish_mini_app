@@ -37,6 +37,14 @@
             externalProfileId,
             externalUserWishlistsLength: externalUserWishlists?.length
         });
+        console.log('All displayed wishlists:', displayedWishlists);
+        console.log('Check for undefined items:', displayedWishlists.map((w, i) => ({
+            index: i,
+            id: w?.id,
+            typeprivacy: w?.typeprivacy,
+            isUndefined: w === undefined,
+            isNull: w === null
+        })));
         if (token && !isExternalUser) {
             try {
                 await fetchWishlists();
@@ -157,8 +165,17 @@
     // };
 
     // Получить текст и иконку для статуса приватности
-    const getPrivacyInfo = (privacy) => {
-        switch (privacy) {
+    const getPrivacyInfo = (wishlist) => {
+        const privacyValue = wishlist?.typeprivacy || wishlist?.privacy || 'private';
+    
+        console.log('getPrivacyInfo called with:', {
+            wishlist,
+            typeprivacy: wishlist?.typeprivacy,
+            privacy: wishlist?.privacy,
+            result: privacyValue
+        });
+
+        switch (privacyValue) {
             case 'public':
                 return {
                     icon: ICON_PUBLIC_FRIENDS,
@@ -297,11 +314,11 @@
                         <!-- Статус приватности -->
                         <div class="wishlist-privacy">
                             <img 
-                                src={getPrivacyInfo(item.typeprivacy || item.privacy).icon} 
+                                src={getPrivacyInfo(item).icon} 
                                 alt="" 
                                 class="privacy-icon"
                             />
-                            <span>{getPrivacyInfo(item.typeprivacy || item.privacy).text}</span>
+                            <span>{getPrivacyInfo(item).text}</span>
                         </div>
 
                         <!-- Количество желаний -->
