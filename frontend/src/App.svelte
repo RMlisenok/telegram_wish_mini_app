@@ -260,11 +260,32 @@
                         photo: wl.photo,
                         description: wl.description,
                         typeprivacy: wl.typeprivacy,
+                        privacy: mapPrivacy(wl.typeprivacy),
                         count: wl.wishes_count || 0,
                         wishesCount: wl.wishes_count || 0,
                         isExternal: isExternalProfile,
-                        ownerId: profileId
+                        ownerId: profileId,
+                        ownerName: ''
                     }));
+
+                // Загружаем информацию о владельце
+                try {
+                    const ownerResponse = await fetch(`/api/v1/users/${profileId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (ownerResponse.ok) {
+                        const ownerData = await ownerResponse.json();
+                        // Обновляем имя владельца во всех вишлистах
+                        userWishlists.forEach(wl => {
+                            wl.ownerName = ownerData.name || 'Пользователь';
+                        });
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки информации о владельце:', error);
+                }
 
                 console.log('Processed wishlists:', userWishlists);
             
@@ -283,6 +304,19 @@
         } catch (error) {
             console.error('Ошибка загрузки вишлистов пользователя:', error);
             showNotification('Произошла ошибка при загрузке вишлистов');
+        }
+    }
+
+    function mapPrivacy(typeprivacy: string): 'public' | 'restricted' | 'private' {
+        switch (typeprivacy) {
+            case 'public':
+                return 'public';
+            case 'protected':
+                return 'restricted';
+            case 'private':
+                return 'private';
+            default:
+                return 'private';
         }
     }
 

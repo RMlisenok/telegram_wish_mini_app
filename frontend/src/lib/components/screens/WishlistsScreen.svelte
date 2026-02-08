@@ -149,6 +149,7 @@
                     icon: ICON_PUBLIC_FRIENDS,
                     text: 'Виден всем'
                 };
+            case 'protected':
             case 'restricted':
                 return {
                     icon: ICON_PUBLIC_FRIENDS,
@@ -165,11 +166,17 @@
 
     // Получить владельца вишлиста
     const getWishlistOwner = (wishlist) => {
-        // TODO: Получить данные владельца
-        return {
-            id: wishlist.ownerId || 'user_1',
-            name: wishlist.ownerName || 'Вы'
-        };
+        if (isExternalUser) {
+            return {
+                id: wishlist.ownerId || externalProfileId,
+                name: wishlist.ownerName || 'Другой пользователь'
+            };
+        } else {
+            return {
+                id: 'current_user',
+                name: 'Вы'
+            };
+        }
     };
 
     //2008_4_Dass_25.12.2025 -->
@@ -250,9 +257,9 @@
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
-                        {#if wishlist.rUrl}
+                        {#if wishlist.photo}
                             <img 
-                                src={wishlist.rUrl} 
+                                src={wishlist.photo} 
                                 alt={wishlist.title}
                                 class="cover-image"
                             />
@@ -275,11 +282,11 @@
                         <!-- Статус приватности -->
                         <div class="wishlist-privacy">
                             <img 
-                                src={getPrivacyInfo(wishlist.privacy).icon} 
+                                src={getPrivacyInfo(wishlist.typeprivacy || wishlist.privacy).icon} 
                                 alt="" 
                                 class="privacy-icon"
                             />
-                            <span>{getPrivacyInfo(wishlist.privacy).text}</span>
+                            <span>{getPrivacyInfo(wishlist.typeprivacy || wishlist.privacy).text}</span>
                         </div>
 
                         <!-- Количество желаний -->
@@ -301,24 +308,26 @@
 
                     <!-- Кнопки действий -->
                     <div class="wishlist-actions">
-                        <!-- Кнопка редактирования -->
-                        <button
-                            class="action-button edit-button"
-                            on:click|stopPropagation={() => handleEditWishlist(wishlist.id)}
-                            aria-label="Редактировать вишлист"
-                        >
-                            <img src={ICON_EDIT} alt="Редактировать" />
-                        </button>
+                        {#if !isExternalUser}
+                            <!-- Кнопка редактирования -->
+                            <button
+                                class="action-button edit-button"
+                                on:click|stopPropagation={() => handleEditWishlist(wishlist.id)}
+                                aria-label="Редактировать вишлист"
+                            >
+                                <img src={ICON_EDIT} alt="Редактировать" />
+                            </button>
 
-                        <!-- Кнопка удаления -->
-                        <button
-                            class="action-button delete-button"
-                            on:click|stopPropagation={() => handleDeleteWishlist(wishlist.id)}
-                            aria-label="Удалить вишлист"
-                        >
-                            <img src={ICON_TRASH} alt="Удалить" />
-                        </button>
-
+                            <!-- Кнопка удаления -->
+                            <button
+                                class="action-button delete-button"
+                                on:click|stopPropagation={() => handleDeleteWishlist(wishlist.id)}
+                                aria-label="Удалить вишлист"
+                            >
+                                <img src={ICON_TRASH} alt="Удалить" />
+                            </button>
+                        {/if}
+                        
                         <!-- Интерактивная стрелка для перехода -->
                         <button
                             class="action-button arrow-button"
