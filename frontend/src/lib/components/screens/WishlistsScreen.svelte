@@ -287,7 +287,7 @@
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each displayedWishlists.filter(i => i && i.id != null) as item (item.id) as item (item.id)}
+            {#each displayedWishlists.filter(i => i && i.id != null) as item (item.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
