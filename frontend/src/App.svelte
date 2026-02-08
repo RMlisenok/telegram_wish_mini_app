@@ -645,6 +645,7 @@
                             on:openCreateWishlists={() => navigate('wishlistsCreate')}
                             on:openMainScreen={() => navigate('main')}
                             on:openWishlistDetail={(e) => {
+                                console.log(e.detail.wishlistId);
                                 const isExternal = e.detail.isExternal || isExternalUser || false;
                                 navigate('wishes', { 
                                     wishlistId: e.detail.wishlistId,
