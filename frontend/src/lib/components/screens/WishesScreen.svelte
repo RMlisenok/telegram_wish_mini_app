@@ -91,7 +91,7 @@
                     title: data.name,
                     photo: data.photo,
                     description: data.description,
-                    typeprivacy: data.typeprivacy,
+                    privacy: data.typeprivacy,
                     count: data.wishes_count || 0
                 };
                 
