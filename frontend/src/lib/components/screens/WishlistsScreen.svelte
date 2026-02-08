@@ -77,14 +77,32 @@
     // <--
 
     let displayedWishlists = [];
+    let processedWishlists = [];
     $: {
-        if (isExternalUser) {
-            displayedWishlists = (externalUserWishlists || []).filter(wl => wl && wl.id != null);
-            console.log('Using external wishlists:', displayedWishlists);
-        } else {
-            displayedWishlists = (userWishlists || []).filter(wl => wl && wl.id != null);
-            console.log('Using own wishlists:', displayedWishlists);
-        }
+        // Гарантируем, что работаем с массивом
+        const source = isExternalUser 
+            ? (Array.isArray(externalUserWishlists) ? externalUserWishlists : []) 
+            : (Array.isArray(userWishlists) ? userWishlists : []);
+        
+        displayedWishlists = source.filter(wl => wl && wl.id != null);
+        
+        // Предварительно обрабатываем приватность для ВСЕХ элементов
+        processedWishlists = displayedWishlists.map(item => {
+            try {
+                return {
+                    ...item,
+                    _privacyInfo: getPrivacyInfo(item) // Кэшируем результат
+                };
+            } catch (err) {
+                console.error('Ошибка обработки приватности для вишлиста:', item, err);
+                return {
+                    ...item,
+                    _privacyInfo: { icon: ICON_PRIVATE, text: 'Виден только вам' }
+                };
+            }
+        });
+        
+        console.log(isExternalUser ? 'Using external wishlists:' : 'Using own wishlists:', processedWishlists);
     }
 
     const openCreateWishlists = () => {
@@ -161,7 +179,7 @@
     // Получить текст и иконку для статуса приватности
     const getPrivacyInfo = (wishlist) => {
         if (!wishlist || typeof wishlist !== 'object') {
-            console.warn('getPrivacyInfo received invalid wishlist:', wishlist);
+            console.warn('[WishlistsScreen] Некорректный объект вишлиста:', wishlist);
             return {
                 icon: ICON_PRIVATE,
                 text: 'Виден только вам'
@@ -287,7 +305,7 @@
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each displayedWishlists.filter(i => i && i.id != null) as item (item.id)}
+            {#each processedWishlists as item (item.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
@@ -316,11 +334,11 @@
                         <!-- Статус приватности -->
                         <div class="wishlist-privacy">
                             <img 
-                                src={getPrivacyInfo(item).icon} 
-                                alt="" 
+                                src={item._privacyInfo.icon} 
+                                alt={item._privacyInfo.text}
                                 class="privacy-icon"
                             />
-                            <span>{getPrivacyInfo(item).text}</span>
+                            <span>{item._privacyInfo.text}</span>
                         </div>
 
                         <!-- Количество желаний -->
@@ -366,7 +384,7 @@
                         <button
                             class="action-button arrow-button"
                             on:click|stopPropagation={() => {
-                                if (!item || !item.id) {
+                                if (!item?.id) {
                                     console.error('Invalid item in arrow click handler:', item);
                                     return;
                                 }
