@@ -684,7 +684,7 @@
         if (!wishlistId || !currentWishlist) return;
         
         // Проверяем, можно ли делиться этим вишлистом
-        if (currentWishlist.typeprivacy === 'private') {
+        if (currentWishlist.privacy === 'private') {
             // Для приватных вишлистов проверяем, владелец ли это
             if (isExternalWishlist && !isCurrentUserOwner) {
                 showNotification('Это приватный вишлист, нельзя поделиться');
@@ -698,7 +698,7 @@
             title: currentWishlist.title || currentWishlist.name || 'Вишлист',
             photo: currentWishlist.photo || '',
             description: currentWishlist.description || '',
-            typeprivacy: currentWishlist.typeprivacy || 'private',
+            typeprivacy: currentWishlist.privacy || 'private',
             count: currentWishlist.count || filteredWishes.length,
             wishesCount: filteredWishes.length,
             isExternalWishlist: isExternalWishlist || false,
@@ -735,7 +735,7 @@
                 <div class="h1">Все ваши желания</div>
             </div>
             <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
-            {#if currentWishlist.typeprivacy !== 'private'}
+            {#if currentWishlist.privacy !== 'private'}
                 <button 
                     class="share-button"
                     on:click={handleShareWishlist}
