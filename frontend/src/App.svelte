@@ -585,6 +585,7 @@
                         <WishesScreen 
                             token={token}
                             wishlistId={currentWishlistId}
+                            onMount={() => console.log(currentWishlistId)}
                             isExternalWishlist={currentWishlistIsExternal}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                             on:openEditWishes={(e) => {
