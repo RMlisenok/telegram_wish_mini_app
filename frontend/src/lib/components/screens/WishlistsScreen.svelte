@@ -105,8 +105,8 @@
         showDeleteWishlistModal = true;
     };
 
-    const handleOpenWishlist = (wishlistId) => {
-        console.log('Открытие вишлиста:', wishlistId);
+    const handleOpenWishlist = (wishlist) => {
+        console.log('Открытие вишлиста:', wishlist.id);
         console.log('Wishlist properties:', {
             id: wishlist.id,
             typeprivacy: wishlist.typeprivacy,
@@ -119,7 +119,10 @@
             return;
         }
         // TODO: Реализовать переход в вишлист
-        dispatch('openWishlistDetail', { wishlistId, isExternal: isExternalUser }); //2009/0_Dass_25.12.2025
+        dispatch('openWishlistDetail', { 
+            wishlistId: wishlist.id, 
+            isExternal: isExternalUser 
+        }); //2009/0_Dass_25.12.2025
     };
 
     const handleOpenOwnerProfile = (ownerId) => {
