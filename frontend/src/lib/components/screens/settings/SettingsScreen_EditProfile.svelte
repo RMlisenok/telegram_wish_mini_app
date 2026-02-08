@@ -4,6 +4,7 @@
     import Button from '../../ui/Button.svelte';
     import TextField from '../../ui/TextField.svelte';
     import { formatDateToDDMMYYYY } from '../../../../types/mainScreenData.ts'
+    import { uploadFile, replaceFile, deleteFile } from '../../../../types/storage.ts';
 
     // import { userStore } from '../../../stores/data';
 
@@ -31,6 +32,8 @@
         return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
     }
 
+    let selectedFile = null; //для хранения выбранного файла
+
     function uploadPhoto() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -42,6 +45,7 @@
                     alert('Файл слишком большой. Максимальный размер: 10MB');
                     return;
                 }
+                selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     tempAvatarUrl = event.target.result;
@@ -53,6 +57,7 @@
     }
 
     function removePhoto() {
+        selectedFile = null;
         tempAvatarUrl = '';
     }
 
@@ -64,11 +69,30 @@
         try {
             const [day, month, year] = birthDate.split('.');
             const formattedDate = `${year}-${month}-${day}`;
+
+            let photoUrl = userStore?.avatarUrl || '';
+            
+            //S3
+            if (selectedFile) {
+                if (photoUrl) {
+                    //замена существующего файла
+                    const result = await replaceFile(photoUrl, selectedFile, token);
+                    photoUrl = result.file_url;
+                } else {
+                    //загрузка нового файла
+                    const result = await uploadFile(selectedFile, token);
+                    photoUrl = result.file_url;
+                }
+            } else if (!tempAvatarUrl && photoUrl) {
+                //удаление фото
+                await deleteFile(photoUrl, token);
+                photoUrl = '';
+            }
             
             const userData = {
                 name: fullName.trim(),
                 birth_date: formattedDate,
-                photo: tempAvatarUrl || '',
+                photo: photoUrl,
                 theme: userStore.ui?.theme || 'light',
                 text_size: userStore.ui?.textSize || 'medium',
                 show_sub: userStore.showSubscriptions || true
