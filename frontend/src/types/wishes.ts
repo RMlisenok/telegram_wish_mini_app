@@ -53,6 +53,43 @@ export async function loadWishes(token: string) {
     }
 }
 
+export async function loadFinishedWishes(token: string) {
+    try {
+        const response = await fetch('/api/v1/wishes/finish?is_finish=true', {
+            method: 'GET',
+            headers: {
+                "Authorization": 'Bearer ' + token,
+                "Content-Type": "application/json"
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки желаний');
+        }
+        
+        const data = await response.json();
+        console.log(data)
+        
+        const transformedWishlists = data.map((wish: any) => ({
+            id: wish.id.toString(),
+            name: wish.name,
+            photo: wish.photo,
+            url_gift: wish.url_gift,
+            price: wish.price,
+            currency: wish.currency || null,
+            is_booked: wish.is_booked
+        }));
+        
+        wishesStore.set(transformedWishlists);
+        console.log(wishesStore);
+        return data;
+    } catch (error) {
+        console.error('Ошибка загрузки желаний:', error);
+        wishesStore.set([]);
+        throw error;
+    }
+}
+
 export async function createWish(token: string, wishData: {
     name: string;
     photo: string;
