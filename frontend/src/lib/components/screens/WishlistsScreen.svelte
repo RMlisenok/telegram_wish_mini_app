@@ -6,6 +6,12 @@
 
     const dispatch = createEventDispatcher();
 
+    // Для отладки
+    console.log('WishlistsStore type:', typeof wishlistsStore);
+    console.log('WishlistsStore has subscribe?', wishlistsStore && typeof wishlistsStore.subscribe === 'function');
+    console.log('WishlistsStore:', wishlistsStore);
+    
+
     // Иконки
     const ICON_EDIT = '../../../../static/icons/edit.png';
     const ICON_TRASH = '../../../../static/icons/trash.png';
@@ -230,7 +236,7 @@
 </header>
 
 <section class="section-card">
-    {#if $displayedWishlists.length === 0}
+    {#if displayedWishlists.length === 0}
         <p class="empty-note">
             {#if isExternalUser}
                 У этого пользователя пока нет публичных вишлистов.
@@ -240,7 +246,7 @@
         </p>
     {:else}
         <div class="wishlists-list">
-            {#each $displayedWishlists as wishlist (wishlist.id)}
+            {#each displayedWishlists as wishlist (wishlist.id)}
                 <div class="wishlist-card">
                     <!-- Обложка вишлиста -->
                     <div class="wishlist-cover">
