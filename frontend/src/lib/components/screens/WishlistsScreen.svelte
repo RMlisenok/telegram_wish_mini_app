@@ -369,8 +369,8 @@
                         <button
                             class="action-button arrow-button"
                             on:click|stopPropagation={() => {
-                                console.log('Button clicked, current item:', wishlist);
-                                console.log('Item has typeprivacy?', wishlist?.typeprivacy !== undefined);
+                                console.log('Button clicked, current item:', item);
+                                console.log('Item has typeprivacy?', item?.typeprivacy !== undefined);
                                 handleOpenWishlist(item)
                                 }}
                             aria-label="Открыть вишлист"
