@@ -137,7 +137,7 @@
             return;
         }
         console.log('Открытие вишлиста:', wishlist?.id);
-        
+        console.log(wishlist);
         
         dispatch('openWishlistDetail', { 
             wishlistId: wishlist.id, 
