@@ -157,6 +157,7 @@
                 
                 if (userResponse.ok) {
                     const userData = await userResponse.json();
+                    console.log('checkWishOwnership - userData:', userData);
                     const currentUserId = userData.id.toString();
                     const wishOwnerId = wishData.user_id.toString();
                     
@@ -702,6 +703,7 @@
             
             if (response.ok) {
                 const data = await response.json();
+                console.log('loadWishDetails - полученные данные:', data);
 
                 let connectionInfo = null;
                 if (wishlistId) {
@@ -726,8 +728,11 @@
                     updatedAt: data.updated_at,
                     connection_id: connectionInfo?.connection_id || null,
                     is_pinned: connectionInfo?.is_pinned || false,
-                    order_position: connectionInfo?.order_position || 0
+                    order_position: connectionInfo?.order_position || 0,
+                    user_id: data.user_id
                 };
+
+                console.log('selectedWish после обработки:', selectedWish);
 
                 // Проверяем владельца желания
                 const wishOwnerCheck = await checkWishOwnership(wishId);
@@ -738,6 +743,7 @@
                     isCurrentWishOwner, // Владелец желания
                     selectedWishId: selectedWish.id,
                     selectedWishIsFinished: selectedWish.isFinished,
+                    selectedWishUserId: selectedWish.user_id,
                     // Показывать ли кнопку "Исполнено"? 
                     shouldShowFinishedButton: !isExternalWishlist && wishOwnerCheck
                 });
