@@ -890,49 +890,51 @@
                         {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
                         filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
                     </div>                    
-                    {#if currentWishlist.privacy !== 'private'}
-                        <button 
-                            class="share-button"
-                            on:click={handleShareWishlist}
-                            aria-label="Поделиться вишлистом"
-                            title="Поделиться вишлистом"
-                        >
-                            <img 
-                                src="../../../../static/icons/share.png" 
-                                alt="Поделиться" 
-                                width="24" 
-                                height="24"
-                            />
-                        </button>
-                    {:else if !isExternalWishlist || isCurrentUserOwner}
-                        <!-- Для приватных вишлистов показываем кнопку только владельцу -->
-                        <button 
-                            class="share-button"
-                            on:click={handleShareWishlist}
-                            aria-label="Поделиться вишлистом"
-                            title="Поделиться вишлистом"
-                        >
-                            <img 
-                                src="../../../../static/icons/share.png" 
-                                alt="Поделиться" 
-                                width="24" 
-                                height="24"
-                            />
-                        </button>
-                    {/if}
                 </div>
-            </div>         
-            {#if !isExternalWishlist}
-                <div style="margin-left: 12px; display: flex; align-items: center;">
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px; margin-left: auto;"></div>
+                {#if currentWishlist.privacy !== 'private'}
                     <button 
-                        class="finished-button"
-                        on:click={openFinishedWishes}
-                        aria-label="Показать исполненные желания"
+                        class="share-button"
+                        on:click={handleShareWishlist}
+                        aria-label="Поделиться вишлистом"
+                        title="Поделиться вишлистом"
                     >
-                        Исполненные
+                        <img 
+                            src="../../../../static/icons/share.png" 
+                            alt="Поделиться" 
+                            width="24" 
+                            height="24"
+                        />
                     </button>
-                </div>
-            {/if}
+                {:else if !isExternalWishlist || isCurrentUserOwner}
+                    <!-- Для приватных вишлистов показываем кнопку только владельцу -->
+                    <button 
+                        class="share-button"
+                        on:click={handleShareWishlist}
+                        aria-label="Поделиться вишлистом"
+                        title="Поделиться вишлистом"
+                    >
+                        <img 
+                            src="../../../../static/icons/share.png" 
+                            alt="Поделиться" 
+                            width="24" 
+                            height="24"
+                        />
+                    </button>
+                {/if}         
+                {#if !isExternalWishlist}
+                    <div style="margin-left: 12px; display: flex; align-items: center;">
+                        <button 
+                            class="finished-button"
+                            on:click={openFinishedWishes}
+                            aria-label="Показать исполненные желания"
+                        >
+                            Исполненные
+                        </button>
+                    </div>
+                {/if}
+            </div>
         </div>
     </header>
 {:else}
