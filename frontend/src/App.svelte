@@ -396,7 +396,7 @@
             user_id: user.id.toString(),
             fullName: user.name  || 'Гость',
             birthDate: formatDateToDDMMYYYY(user.birth_date),
-            avatarUrl: user.photo || '/default-avatar.png',
+            avatarUrl: user.photo || '',
             showSubscriptions: user.show_sub ?? true,
             ui: {
                 textSize: (user.text_size as 'small' | 'medium' | 'large') || 'medium',
