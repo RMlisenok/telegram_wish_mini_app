@@ -25,13 +25,10 @@
     color: #111827;
     overflow: hidden;
     flex-shrink: 0;
-    position: relative;
   }
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    position: relative;
-    z-index: 1;
   }
 </style>
