@@ -245,9 +245,9 @@
         const wishlist = userWishlists.find(wl => wl.id === wishlistToDelete);
         try {
             // удаление фото из S3 если оно есть
-            if (wishlist?.rUrl && wishlist.rUrl.includes('selstorage.ru')) {
+            if (wishlist?.photo && wishlist.photo.includes('selstorage.ru')) {
                 try {
-                    await deleteFile(wishlist.rUrl, token);
+                    await deleteFile(wishlist.photo, token);
                     console.log('Фото вишлиста удалено из S3');
                 } catch (s3Error) {
                     console.warn('Не удалось удалить фото из S3:', s3Error);

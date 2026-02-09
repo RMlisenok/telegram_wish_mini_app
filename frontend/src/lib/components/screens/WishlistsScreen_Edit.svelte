@@ -33,7 +33,7 @@
                 // Инициализируем значения формы
                 title = wishlist.title || '';
                 description = wishlist.description || '';
-                photoPreview = wishlist.rUrl || null;
+                photoPreview = wishlist.photo || null;
                 privacy = wishlist.privacy || 'public';
             } else {
                 console.error('Вишлист не найден:', wishlistId);
@@ -85,7 +85,7 @@
         
         try {
             const apiPrivacy = mapPrivacyToApi(privacy);
-            let photoUrl = wishlist?.rUrl || '';
+            let photoUrl = wishlist?.photo || '';
             if (photoFile) {
                 if (photoUrl && photoUrl.includes('selstorage.ru')) {
                     // Замена существующего файла
