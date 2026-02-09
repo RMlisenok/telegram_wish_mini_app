@@ -919,13 +919,15 @@
                     </button>
                 {/if}
             </div>
-            <button 
-                class="finished-button"
-                on:click={openFinishedWishes}
-                aria-label="Показать исполненные желания"
-            >
-                Исполненные
-            </button>
+            {#if !isExternalWishlist}
+                <button 
+                    class="finished-button"
+                    on:click={openFinishedWishes}
+                    aria-label="Показать исполненные желания"
+                >
+                    Исполненные
+                </button>
+            {/if}
         </div>
         <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
             
