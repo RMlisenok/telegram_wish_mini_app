@@ -20,7 +20,7 @@ export const questionnaireStore = writable<QuestionnaireData>([]);
 
 // Загружает анкету текущего пользователя
 export const loadQuestionnaire = async (token: string): Promise<QuestionnaireData> => {
-  const response = await fetch('/api/v1/questionnaire', {
+  const response = await fetch('/api/v1/questionnaire/', {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -51,7 +51,7 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
 export const saveQuestionnaire = async (token: string, questionnaireData: QuestionnaireData): Promise<void> => {
   console.log(questionnaireData);
 
-  const response = await fetch('/api/v1/questionnaire', {
+  const response = await fetch('/api/v1/questionnaire/', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
