@@ -72,7 +72,7 @@ export const saveQuestionnaire = async (token: string, questionnaireData: Questi
 // Загружает доступные теги с бэкенда
 export const loadAvailableTags = async (token: string, isInterest: boolean): Promise<string[]> => {
   const params = new URLSearchParams({ is_interest: String(isInterest) });
-  const response = await fetch(`/api/v1/questionnaire/tags/available?${params}`, {
+  const response = await fetch(`/v1/questionnaire/tags/available?${params}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
