@@ -678,6 +678,7 @@
                     {:else if currentScreen === 'wishlistsEdit'}
                         <WishlistsScreenEdit
                             wishlistId={selectedWishlistId}
+                            token={token}
                             onGoBack={() => {
                                 selectedWishlistId = null;
                                 navigate('wishlists');
