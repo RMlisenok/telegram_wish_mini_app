@@ -70,11 +70,10 @@
             const wishlistData = {
                 name: title.trim(),
                 description: description.trim(),
-                typeprivacy: mapPrivacyToApi(privacy)
+                typeprivacy: mapPrivacyToApi(privacy),
+                photo: photoUrl
             };
-            if (photoUrl) {
-                wishlistData.photo = photoUrl;
-            }
+            
             
             await createWishlist(token, wishlistData);
             
