@@ -246,9 +246,8 @@
                     <TextField
                         label="Детали"
                         placeholder="Уточните..."
-                        value={item.details || ''}
+                        bind:value={item.details}
                         maxlength={100}
-                        on:change={(e) => updateInterestDetails(item.tag, e.detail || '')}
                     />
                 </div>
             {/each}
