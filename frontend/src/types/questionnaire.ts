@@ -39,7 +39,7 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
   }
 
   const data: QuestionnaireData = await response.json();
-  // Убедимся, что возвращаемые массивы всегда существуют
+
   return {
     interests: data.interests || [],
     avoid_gifts: data.avoid_gifts || []
@@ -81,6 +81,7 @@ export const loadAvailableTags = async (token: string, isInterest: boolean): Pro
   }
 
   const data = await response.json();
+  console.log(data);
   return data.tags || [];
 };
 
