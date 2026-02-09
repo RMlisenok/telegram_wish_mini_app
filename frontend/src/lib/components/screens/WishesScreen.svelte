@@ -1022,7 +1022,7 @@
         <Button full on:click={openForm}>+ Новое желание</Button>
     </div>
 <!--2009_1_Dass_25.12.2025-->
-{:else if wishlistId && !isExternalWishlist && isCurrentUserOwner}  
+{:else if wishlistId && !isExternalWishlist}  
     <div style="padding:0 16px 12px;">
         <Button full on:click={openAddExistingModal}>
             + Добавить существующее желание
