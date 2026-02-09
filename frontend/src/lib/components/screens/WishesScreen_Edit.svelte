@@ -35,6 +35,7 @@
     let selectedWishlists = [];
 
     let removePhotoFlag = false;
+    let currentPhotoUrl = '';
 
     function clearError() {
         error = ''; 
@@ -127,7 +128,7 @@
         error = '';
         
         try {
-            let photoUrl = selectedWish?.photo || '';
+            let photoUrl = photoPreview;
 
             if (photoFile) {
                 // Если есть новое фото
