@@ -85,7 +85,7 @@
         
         try {
             const apiPrivacy = mapPrivacyToApi(privacy);
-            let photoUrl = wishlist?.photo || '';
+            let photoUrl = photoPreview;
             if (photoFile) {
                 if (photoUrl && photoUrl.includes('selstorage.ru')) {
                     // Замена существующего файла
