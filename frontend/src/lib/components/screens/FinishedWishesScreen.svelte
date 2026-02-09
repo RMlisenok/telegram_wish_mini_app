@@ -2,7 +2,7 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, loadWishes } from '../../../types/wishes.ts';
+    import { wishesStore, loadFinishedWishes } from '../../../types/wishes.ts';
     
     export let token;
     const dispatch = createEventDispatcher();
@@ -35,7 +35,7 @@
             return;
         }
         try {
-            await loadWishes(token);
+            await loadFinishedWishes(token);
         } catch (err) {
             console.error('Ошибка загрузки желаний:', err);
         }
