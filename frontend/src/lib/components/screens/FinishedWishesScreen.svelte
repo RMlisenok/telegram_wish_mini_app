@@ -2,7 +2,7 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, loadWishes } from '../../../types/wishes.ts';
+    import { wishesStore, loadFinishedWishes } from '../../../types/wishes.ts';
     
     export let token;
     const dispatch = createEventDispatcher();
@@ -24,8 +24,11 @@
     };
     
     onMount(async () => {
+        console.log('Загрузка исполненных желаний...');
         if (token) {
             await fetchWishes();
+        } else {
+            console.error('Токен не найден');
         }
     });
     
@@ -35,17 +38,26 @@
             return;
         }
         try {
-            await loadWishes(token);
+            await loadFinishedWishes(token);
         } catch (err) {
             console.error('Ошибка загрузки желаний:', err);
         }
     }
     
-    $: finishedWishes = $wishesStore.filter(wish => wish.status_is_finished === true);
+    $: finishedWishes = $wishesStore;
     
     const goBack = () => {
         dispatch('back');
     };
+
+    $: {
+        console.log('Текущие желания в store:', $wishesStore);
+        console.log('Типы id в store:', $wishesStore.map(w => ({ 
+            id: w.id, 
+            type: typeof w.id,
+            value: w.id
+        })));
+    }
 </script>
 
 <header class="app-header">
