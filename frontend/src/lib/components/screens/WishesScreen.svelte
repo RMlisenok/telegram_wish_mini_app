@@ -925,7 +925,7 @@
                         />
                     </button>
                 {/if}         
-                {#if !isExternalWishlist}
+                <!-- {#if !isExternalWishlist}
                     <button 
                         class="finished-button"
                         on:click={openFinishedWishes}
@@ -934,7 +934,7 @@
                     >
                         Исполненные
                     </button>
-                {/if}
+                {/if} -->
             </div>
     </header>
 {:else}
