@@ -88,6 +88,7 @@
                 wishlistOwnerId = data.owner_id;
                 wishlistOwnerName = data.owner_name || '';
                 wishlistOwnerAvatar = data.owner_photo || '';
+                console.log('loadWishlistOwnerInfo - wishlistOwnerId:', wishlistOwnerId);
 
                 currentWishlist = {
                     ...data,
@@ -117,7 +118,13 @@
                 
                 if (userResponse.ok) {
                     const userData = await userResponse.json();
+                    const currentUserId = userData.id.toString();
                     isCurrentUserOwner = userData.id.toString() === wishlistOwnerId?.toString();
+                    console.log('loadWishlistOwnerInfo - isCurrentUserOwner check:', {
+                        currentUserId,
+                        wishlistOwnerId,
+                        result: isCurrentUserOwner
+                    });
                 }
             }
         } catch (error) {
@@ -191,6 +198,12 @@
 
     // Открыть модальное окно с детальной информацией
     const openDetailModal = async (wish) => {
+        console.log('openDetailModal - входные данные:', {
+            wish,
+            wishlistId,
+            isExternalWishlist,
+            isCurrentUserOwner
+        });
         await loadWishDetails(wish.id);
     };
 
@@ -627,6 +640,12 @@
     //2006_7_Dass_25.12.2025 <--
 
     const loadWishDetails = async (wishId) => {
+        console.log('loadWishDetails - начал загрузку для wishId:', wishId);
+        console.log('Текущие параметры:', {
+            wishlistId,
+            isExternalWishlist,
+            isCurrentUserOwner
+        });
         try {
             const response = await fetch(`/api/v1/wishes/${wishId}`, {
                 method: 'GET',
@@ -665,6 +684,13 @@
                     order_position: connectionInfo?.order_position || 0
                 };
                 console.log('selectedWish после обработки:', selectedWish);
+                console.log('loadWishDetails - selectedWish после обработки:', selectedWish);
+                console.log('loadWishDetails - ключевые параметры:', {
+                    isExternalWishlist,
+                    isCurrentUserOwner,
+                    selectedWishId: selectedWish.id,
+                    selectedWishIsFinished: selectedWish.isFinished
+                });
                 showDetailModal = true;
             }
         } catch (error) {
