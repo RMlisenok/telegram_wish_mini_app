@@ -134,6 +134,7 @@
 
     const updateInterestDetails = (tag: string, details: string) => {
         interests = updateTagDetails(interests, tag, details);
+        console.log("update:", interests);
     };
 
     const updateNoGiftDetails = (tag: string, details: string) => {
@@ -160,6 +161,7 @@
             tag: item.tag,
             details: item.details || ''
         }));
+        console.log(validatedInterests);
         
         const validatedNoGifts = noGifts.map(item => ({
             tag: item.tag,
