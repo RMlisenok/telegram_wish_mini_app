@@ -82,7 +82,7 @@ export const loadAvailableTags = async (token: string, isInterest: boolean): Pro
 
   const data = await response.json();
   console.log(data);
-  return data.tags || [];
+  return data.tags ? data.tags.map((item: {tag_value: string}) => item.tag_value) : [];
 };
 
 // Загружает анкету конкретного пользователя
