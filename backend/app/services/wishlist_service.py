@@ -72,6 +72,12 @@ class WishlistService:
         wishlist_id: int,
         wishlist_data: WishlistUpdate
     ) -> Optional[WishlistResponse]:
+        if wishlist_data.photo is None:
+            default_photo = (
+                "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
+                "selstorage.ru/9bcb1b11-c7cd-4787-ad2d-60c6b49ce9ca.svg"
+            )
+            wishlist_data.photo = default_photo
         update_data = wishlist_data.model_dump(exclude_unset=True)
         wishlist = await self.rep_wishlist.update(wishlist_id, update_data)
         if wishlist:
