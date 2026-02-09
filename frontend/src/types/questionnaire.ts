@@ -60,7 +60,7 @@ export const saveQuestionnaire = async (token: string, questionnaireData: Questi
     body: JSON.stringify(questionnaireData),
   });
 
-  console.log("Тело ответа:", response.text());
+  //console.log("Тело ответа:", response.text());
 
   if (!response.ok) {
     const errorText = await response.text();

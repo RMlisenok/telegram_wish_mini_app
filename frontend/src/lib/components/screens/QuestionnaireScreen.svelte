@@ -52,7 +52,7 @@
             availableInterests = await loadAvailableTags(token, true);
             availableNoGifts = await loadAvailableTags(token, false);
 
-            //const data = await loadQuestionnaire(token);
+            const data = await loadQuestionnaire(token);
             interests = data.interests;
             noGifts = data.avoid_gifts;
 
