@@ -147,7 +147,13 @@
     };
 
     const handleOpenOwnerProfile = (ownerId) => {
-        dispatch('openMainScreen');
+        const isCurrentUser = !isExternalUser && ownerId === 'current_user';
+        
+        if (isCurrentUser) {
+            dispatch('openMainScreen');
+        } else {
+            dispatch('openOwnerProfile', { profileId: ownerId });
+        }
     };
 
     // Получить слово "желание" в корректной форме в зависимости от числа

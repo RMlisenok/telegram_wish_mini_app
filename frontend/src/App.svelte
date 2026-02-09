@@ -682,6 +682,12 @@
                                 selectedWishlistId = e.detail.id;
                                 navigate('wishlistsEdit'); 
                             }}
+                            on:openOwnerProfile={(e) => {
+                                const { profileId } = e.detail;
+                                if (profileId && profileId !== 'current_user') {
+                                    openOtherProfileById(profileId);
+                                }
+                            }}
                             isExternalUser={isExternalUser}
                             externalProfileId={externalProfileId}
                             externalUserWishlists={wishlistsForExternalUser}
