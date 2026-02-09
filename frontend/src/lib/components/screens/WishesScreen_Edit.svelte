@@ -156,7 +156,7 @@
                 description: description.trim(),
                 photo: photoUrl,
                 url_gift: link.trim(),
-                price: price ? parseFloat(price) : 0,
+                price: price,
                 currency: currency || null,
                 is_booked: false,
                 status_is_finished: false
