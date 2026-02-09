@@ -23,6 +23,7 @@
     
     import QuestionnaireScreen from './lib/components/screens/QuestionnaireScreen.svelte';
     import WishesScreen from './lib/components/screens/WishesScreen.svelte';
+    import FinishedWishesScreen from './lib/components/screens/FinishedWishesScreen.svelte';
     import WishlistsScreen from './lib/components/screens/WishlistsScreen.svelte';
     import SubscriptionsScreen from './lib/components/screens/SubscriptionsScreen.svelte';
     import SubscribersScreen from './lib/components/screens/SubscribersScreen.svelte';
@@ -587,6 +588,7 @@
                     {:else if currentScreen === 'questionnaire'}
                         <QuestionnaireScreen 
                             user={$userStore} 
+                            token={token}
                             on:back={() => navigate('main')} 
                         />
                     
@@ -604,8 +606,13 @@
                             on:shareWishlist={(e) => {
                                 openShareWishlist(e.detail);
                             }}
+                            on:openFinishedWishes={() => pushNavigate('finishedWishes')}
                         />
-                    
+                    {:else if currentScreen === 'finishedWishes'}
+                        <FinishedWishesScreen 
+                            token={token}
+                            on:back={() => navigate('wishes')}
+                        />
                     {:else if currentScreen === 'shareProfile'}
                         <ShareProfileScreen 
                             user={$userStore} 

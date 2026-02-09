@@ -1,10 +1,11 @@
-<script>
+<script lang="ts">
     import {onMount} from 'svelte';
     import Tag from '../ui/Tag.svelte';
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
-    import {questionnaireStore} from '../../stores/data.js';
+    //import {questionnaireStore} from '../../stores/data.js';
     import { createEventDispatcher } from 'svelte';
+    import { loadAvailableTags, loadQuestionnaire, questionnaireStore, TagItem } from '../../../types/questionnaire.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -28,32 +29,54 @@
         'мягкие игрушки', 'домашний декор', 'книги', 'подарочные сертификаты', '-'
     ];
 
-    let interests = [];
-    let noGifts = [];
+    let interests: TagItem[] = [];
+    let noGifts: TagItem[] = [];
     let customInterest = '';
     let customNoGift = '';
+    let availableInterests: string[] = [];
+    let availableNoGifts: string[] = [];
 
     let errors = {
         interests: '',
         noGifts: ''
     };
 
+    export let token;
+
     // Charger depuis le store à l’ouverture de la page
-    onMount(() => {
-        const current = $questionnaireStore;
-        interests = current.interests || [];
-        noGifts = current.noGifts || [];
+    onMount(async () => {
+        if (!token) {
+            console.error("Токен не найден для загрузки анкеты.");
+        }
+        try {
+            availableInterests = await loadAvailableTags(token, true);
+            availableNoGifts = await loadAvailableTags(token, false);
+
+            const data = await loadQuestionnaire(token);
+            interests = data.interests;
+            noGifts = data.avoid_gifts;
+
+            questionnaireStore.set({ interests, noGifts });
+        } catch (err) {
+            console.error('Ошибка загрузки анкеты или тегов:', err);
+        }
     });
 
-    const addInterest = (tag) => {
-        if (interests.length >= 20) {
-            errors.interests = 'Можно добавить не более 20 интересов.';
-            return;
+    const addInterest = (tag: string) => {
+        interests = addTag(interests, tag, 20, 'interests');
+        errors = { ...errors, interests: '' };
+    };
+    
+    const addTag = (arr: TagItem[], tagValue: string, maxCount: number, errorKey: keyof typeof errors): TagItem[] => {
+        if (arr.length >= maxCount) {
+            errors = { ...errors, [errorKey]: `Можно добавить не более ${maxCount} тегов.` };
+            return arr;
         }
-        if (!interests.includes(tag)) {
-            interests = [...interests, tag];
-            errors.interests = '';
+        if (!arr.some(item => item.tag === tagValue)) {
+            const newTag: TagItem = { tag: tagValue, details: '' }; // Новый тег без деталей по умолчанию
+            return [...arr, newTag];
         }
+        return arr;
     };
 
     const addCustomInterest = () => {
@@ -67,15 +90,9 @@
         customInterest = '';
     };
 
-    const addNoGift = (tag) => {
-        if (noGifts.length >= 10) {
-            errors.noGifts = 'Можно указать не более 10 вариантов.';
-            return;
-        }
-        if (!noGifts.includes(tag)) {
-            noGifts = [...noGifts, tag];
-            errors.noGifts = '';
-        }
+    const addNoGift = (tag: string) => {
+        noGifts = addTag(noGifts, tag, 10, 'noGifts'); // Переименовано
+        errors = { ...errors, noGifts: '' };
     };
 
     const addCustomNoGift = () => {
@@ -89,12 +106,16 @@
         customNoGift = '';
     };
 
-    const removeInterest = (tag) => {
-        interests = interests.filter((t) => t !== tag);
+    const removeTag = (arr: TagItem[], tagValue: string): TagItem[] => {
+        return arr.filter(t => t.tag !== tagValue);
     };
 
-    const removeNoGift = (tag) => {
-        noGifts = noGifts.filter((t) => t !== tag);
+    const removeInterest = (tag: string) => {
+        interests = removeTag(interests, tag);
+    };
+
+    const removeNoGift = (tag: string) => {
+        noGifts = removeTag(noGifts, tag);
     };
 
 

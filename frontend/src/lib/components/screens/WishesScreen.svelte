@@ -721,6 +721,11 @@
         dispatch('shareWishlist', shareData);
     };
 
+    const openFinishedWishes = () => {
+        console.log('Открытие экрана исполненных желаний');
+        dispatch('openFinishedWishes');
+    };
+
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -765,6 +770,13 @@
                     </button>
                 {/if}
             </div>
+            <button 
+                class="finished-button"
+                on:click={openFinishedWishes}
+                aria-label="Показать исполненные желания"
+            >
+                Исполненные
+            </button>
         </div>
         <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
             
@@ -776,7 +788,13 @@
             <div style="flex: 1;">
                 <div class="h1">Все ваши желания</div>
             </div>
-            
+            <button 
+                class="finished-button"
+                on:click={openFinishedWishes}
+                aria-label="Показать исполненные желания"
+            >
+                Исполненные
+            </button>
         </div>
     </header>
 {/if}
@@ -1971,6 +1989,28 @@
     }
 
     .share-button:active {
+        background-color: #e5e7eb;
+    }
+
+    /* Исполненные */
+    .finished-button {
+        background: none;
+        border: none;
+        color: var(--tg-theme-link-color, #2563eb);
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 12px;
+        margin-left: 12px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .finished-button:hover {
+        background-color: #f3f4f6;
+    }
+
+    .finished-button:active {
         background-color: #e5e7eb;
     }
 
