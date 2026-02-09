@@ -122,25 +122,6 @@
         noGifts = removeTag(noGifts, tag);
     };
 
-    // Функция для обновления деталей тега
-    const updateTagDetails = (arr: TagItem[], tagValue: string, newDetails: string): TagItem[] => {
-        return arr.map(item => {
-            if (item.tag === tagValue) {
-                return { ...item, details: newDetails.substring(0, 100) };
-            }
-            return item;
-        });
-    };
-
-    const updateInterestDetails = (tag: string, details: string) => {
-        interests = updateTagDetails(interests, tag, details);
-        console.log("update:", interests);
-    };
-
-    const updateNoGiftDetails = (tag: string, details: string) => {
-        noGifts = updateTagDetails(noGifts, tag, details);
-    };
-
     $: isValidInterests = interests.some(item => item.tag === '-') || interests.length >= 3; // FS-5.3
     $: isValidNoGifts = noGifts.some(item => item.tag === '-') || noGifts.length >= 1; // FS-5.3
     $: isValid = isValidInterests && isValidNoGifts;
@@ -159,13 +140,13 @@
 
         const validatedInterests = interests.map(item => ({
             tag: item.tag,
-            details: item.details || ''
+            details: (item.details || '').substring(0, 100)
         }));
         console.log(validatedInterests);
         
         const validatedNoGifts = noGifts.map(item => ({
             tag: item.tag,
-            details: item.details || ''
+            details: (item.details || '').substring(0, 100)
         }));
 
         questionnaireStore.set({
@@ -202,17 +183,6 @@
         Выберите интересы, которые вам нравятся. Можно добавить до 20 тегов.
     </p>
 
-    <!-- <div class="chips">
-        {#each predefinedInterests as tag}
-            <button
-                    class="chip-btn"
-                    type="button"
-                    on:click={() => addInterest(tag)}
-            >
-                {tag}
-            </button>
-        {/each}
-    </div> -->
     <div class="chips">
         {#each availableInterests as tag}
             {#if !interests.some(i => i.tag === tag)} <!-- Показываем только не выбранные -->
@@ -224,19 +194,6 @@
     </div>
 
 
-    <!-- <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
-        {#if interests.length === 0}
-            <span class="placeholder">Пока ничего не выбрано.</span>
-        {/if}
-
-        {#each interests as tag}
-            <Tag
-                    text={tag}
-                    removable
-                    on:remove={(e) => removeInterest(e.detail.text)}
-            />
-        {/each}
-    </div> -->
     <!-- Выбранные интересы с полями для деталей -->
     <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
         {#if interests.length > 0}
@@ -309,9 +266,8 @@
                     <TextField
                         label="Детали"
                         placeholder="Уточните..."
-                        value={item.details || ''}
+                        bind:value={item.details}
                         maxlength={100}
-                        on:change={(e) => updateNoGiftDetails(item.tag, e.detail || '')}
                     />
                 </div>
             {/each}
