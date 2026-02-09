@@ -208,25 +208,56 @@ export async function updateWishStatus(
     }
 ): Promise<Wish> {
     try {
+        // 1. Сначала получаем текущие данные желания
+        const currentResponse = await fetch(`/api/v1/wishes/${wishId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!currentResponse.ok) {
+            const errorText = await currentResponse.text();
+            console.error('Ошибка получения текущих данных:', errorText);
+            throw new Error('Не удалось получить данные желания');
+        }
+        
+        const currentWish = await currentResponse.json();
+        console.log('Текущие данные желания:', currentWish);
+        
+        // 2. Подготавливаем полные данные для обновления
+        const updateData = {
+            name: currentWish.name || '',
+            description: currentWish.description || '',
+            photo: currentWish.photo || '',
+            url_gift: currentWish.url_gift || '',
+            price: currentWish.price,
+            currency: currentWish.currency,
+            status_is_finished: statusData.status_is_finished,
+            is_booked: statusData.is_booked !== undefined ? statusData.is_booked : false
+        };
+        
+        console.log('Данные для отправки:', updateData);
+        
+        // 3. Отправляем обновление
         const response = await fetch(`/api/v1/wishes/${wishId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                status_is_finished: statusData.status_is_finished,
-                is_booked: false // При установке статуса "Исполнено" снимаем бронирование
-            })
+            body: JSON.stringify(updateData)
         });
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Ошибка сервера:', errorText);
+            console.error('Ошибка сервера при обновлении:', errorText);
             throw new Error('Ошибка обновления статуса желания');
         }
         
         const updatedWish = await response.json();
+        console.log('Обновленное желание:', updatedWish);
         
         return updatedWish;
     } catch (error) {
