@@ -200,7 +200,7 @@
     </section>
 
     <!-- Подписки -->
-    {#if user.showSubscriptions}
+    <!-- {#if user.showSubscriptions} -->
         <section class="section-card">
             <div class="section-header">
                 <div class="h2">Подписки ({n_sub})</div>
@@ -264,7 +264,7 @@
                 </div>
             {/if}
         </section>
-    {/if}
+    <!-- {/if} -->
 
 
     <!-- Подписчики -->
