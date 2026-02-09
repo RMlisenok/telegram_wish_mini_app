@@ -55,7 +55,7 @@ class WishlistService:
         if not wishlist_data.photo or wishlist_data.photo.strip() == "":
             default_photo = (
                 "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
-                "selstorage.ru/9bcb1b11-c7cd-4787-ad2d-60c6b49ce9ca.svg"
+                "selstorage.ru/maingift.svg"
             )
             wishlist_data.photo = default_photo
         wishlist_with_user = WishlistCreateDb(
@@ -75,7 +75,7 @@ class WishlistService:
         if wishlist_data.photo is None:
             default_photo = (
                 "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
-                "selstorage.ru/9bcb1b11-c7cd-4787-ad2d-60c6b49ce9ca.svg"
+                "selstorage.ru/maingift.svg"
             )
             wishlist_data.photo = default_photo
         update_data = wishlist_data.model_dump(exclude_unset=True)
