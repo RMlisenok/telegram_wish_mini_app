@@ -4,7 +4,9 @@ import io
 from fastapi import UploadFile
 from typing import Optional
 from app.core.s3_client import S3Client
+import logging
 
+logger = logging.getLogger(__name__)
 
 class PhotoUpdateService:
     def __init__(
@@ -13,44 +15,122 @@ class PhotoUpdateService:
         ):
         self.s3_client = s3_client
     
-    async def migrate_photo(
-        self,
-        tg_photo_url: str
-    ) -> Optional[str]:
+    # async def migrate_photo(
+    #     self,
+    #     tg_photo_url: str
+    # ) -> Optional[str]:
 
-        if not tg_photo_url:
+    #     if not tg_photo_url:
+    #         return None
+        
+    #     if self.check_s3_storage(tg_photo_url):
+    #         return tg_photo_url
+    #     try:
+    #         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
+    #             async with session.get(tg_photo_url) as response:
+    #                 if response.status != 200:
+    #                     return None
+    #             content = await response.read()
+    #             if not content:
+    #                 return None
+    #             content_type = response.headers.get('Content-Type', 'image/jpeg')
+
+    #             file_extension = self._get_extension_from_content_type(content_type)
+    #             filename = f"{uuid.uuid4()}.{file_extension}"
+
+    #             upload_file = UploadFile(
+    #                 filename=filename,
+    #                 file=io.BytesIO(content),
+    #                 content_type=content_type,
+    #                 size=len(content)
+    #             )
+    #             new_url = self.s3_client.upload_fastapi_file(upload_file)
+    #             return new_url
+    #     except aiohttp.ClientError as e:
+    #         print(f"Error download file = {e}")
+    #         return None
+    #     except Exception as e:
+    #         print(f"Error e = {e}")
+    #         return None
+
+    async def migrate_telegram_photo(
+        self, 
+        telegram_photo_url: str
+    ) -> Optional[str]:
+        """
+        Скачивает фото из Telegram и загружает в S3.
+        Без сложных заголовков.
+        """
+        if not telegram_photo_url:
             return None
         
-        if self.check_s3_storage(tg_photo_url):
-            return tg_photo_url
+        # Проверяем, не в нашем ли хранилище уже фото
+        if 'selstorage.ru' in telegram_photo_url:
+            return telegram_photo_url
+        
         try:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
-                async with session.get(tg_photo_url) as response:
+            logger.info(f"Начинаем миграцию фото: {telegram_photo_url}")
+            
+            # Простой запрос без заголовков
+            async with aiohttp.ClientSession() as session:
+                async with session.get(telegram_photo_url) as response:
                     if response.status != 200:
+                        logger.warning(f"Статус ответа: {response.status}")
                         return None
-                content = await response.read()
-                if not content:
-                    return None
-                content_type = response.headers.get('Content-Type', 'image/jpeg')
+                    
+                    # Читаем содержимое
+                    content = await response.read()
+                    
+                    if not content:
+                        logger.warning("Пустой ответ")
+                        return None
+                    
+                    # Определяем тип файла
+                    content_type = response.headers.get('Content-Type', '')
+                    
+                    # Создаем имя файла
 
-                file_extension = self._get_extension_from_content_type(content_type)
-                filename = f"{uuid.uuid4()}.{file_extension}"
-
-                upload_file = UploadFile(
-                    filename=filename,
-                    file=io.BytesIO(content),
-                    content_type=content_type,
-                    size=len(content)
-                )
-                new_url = self.s3_client.upload_fastapi_file(upload_file)
-                return new_url
+                    
+                    # Определяем расширение
+                    if 'svg' in content_type.lower() or telegram_photo_url.endswith('.svg'):
+                        file_extension = 'svg'
+                    elif 'png' in content_type.lower():
+                        file_extension = 'png'
+                    elif 'webp' in content_type.lower():
+                        file_extension = 'webp'
+                    elif 'jpeg' in content_type.lower() or 'jpg' in content_type.lower():
+                        file_extension = 'jpg'
+                    elif 'gif' in content_type.lower():
+                        file_extension = 'gif'
+                    else:
+                        # Пытаемся определить по первым байтам
+                        if content.startswith(b'<?xml') or b'<svg' in content[:100]:
+                            file_extension = 'svg'
+                        else:
+                            file_extension = 'jpg'  # по умолчанию
+                    
+                    filename = f"{uuid.uuid4()}.{file_extension}"
+                    
+                    # Создаем UploadFile
+                    upload_file = UploadFile(
+                        filename=filename,
+                        file=io.BytesIO(content),
+                        content_type=content_type or f'image/{file_extension}',
+                        size=len(content)
+                    )
+                    
+                    # Загружаем в S3
+                    new_url = await self.s3_client.upload_fastapi_file(upload_file)
+                    
+                    logger.info(f"Фото успешно загружено в S3: {new_url}")
+                    return new_url
+                    
         except aiohttp.ClientError as e:
-            print(f"Error download file = {e}")
-            return None
+            logger.error(f"Ошибка сети: {e}")
         except Exception as e:
-            print(f"Error e = {e}")
-            return None
-
+            logger.error(f"Общая ошибка: {e}")
+        
+        return None
     def check_s3_storage(
         self,
         url: str
