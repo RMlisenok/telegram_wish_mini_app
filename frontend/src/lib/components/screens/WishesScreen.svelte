@@ -1208,15 +1208,19 @@
                 <div class="panel-actions">
                     {#if wishlistId && !isExternalWishlist}
                         <!-- Если мы в режиме вишлиста -->
-                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
-                            Копировать в...
-                        </Button>
-                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
-                            Переместить в...
-                        </Button>
-                        <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
-                            Удалить из вишлиста
-                        </Button>
+                        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                            <div style="display: flex; gap: 12px;">
+                                <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
+                                    Копировать в
+                                </Button>
+                                <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
+                                    Переместить в
+                                </Button>
+                            </div>
+                            <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)} full>
+                                Удалить из вишлиста
+                            </Button>
+                        </div>
                     {:else if !isExternalWishlist}
                         <!-- В обычном режиме показываем стандартные кнопки -->
                         <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
