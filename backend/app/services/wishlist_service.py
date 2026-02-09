@@ -52,7 +52,7 @@ class WishlistService:
         user_id: int,
         wishlist_data: WishlistCreate
     ) -> WishlistResponse:
-        if not wishlist_data.photo:
+        if not wishlist_data.photo or wishlist_data.photo.strip() == "":
             default_photo = (
                 "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
                 "selstorage.ru/9bcb1b11-c7cd-4787-ad2d-60c6b49ce9ca.svg"
