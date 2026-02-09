@@ -100,7 +100,7 @@ async def delete_wish(
 
 @router.delete("/wishlists/{wish_id}",
                status_code=status.HTTP_204_NO_CONTENT)
-async def delete_wish(
+async def delete_wish_from_wishlists(
     wish_id: int,
     db: AsyncSession = Depends(get_db),
     user_id: AsyncSession = Depends(get_current_user_id)
@@ -114,28 +114,3 @@ async def delete_wish(
                 detail="Wish not found"
             )
 
-@router.delete("/wishlists/{wish_id}",
-               status_code=status.HTTP_204_NO_CONTENT)
-async def delete_wish_from_all_wishlists(
-    wish_id: int,
-    user_id: int = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
-):
-    """Удаление желания из всех вишлистов"""
-    async with db.begin():
-        service = WishService(db)
-        
-        # Проверяем, что пользователь является владельцем желания
-        wish = await service.get_wish(wish_id)
-        if not wish or wish.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Недостаточно прав"
-            )
-        
-        delete_status = await service.delete_wish_in_wishlists(wish_id)
-        if not delete_status:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Wish not found in any wishlists"
-            )

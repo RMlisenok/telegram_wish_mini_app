@@ -144,15 +144,3 @@ class WishService:
             limit
         )
         return [WishResponse.model_validate(wish) for wish in wishes]
-
-    async def delete_wish_in_wishlists(
-        self,
-        wish_id: int
-    ) -> bool:
-        """Удаление желания из всех вишлистов"""
-        try:
-            deleted_count = await self.rep_wish_wishlist.delete_wish_in_wishlists(wish_id)
-            return deleted_count > 0
-        except Exception as e:
-            print(f"Error deleting wish from wishlists: {e}")
-            return False
