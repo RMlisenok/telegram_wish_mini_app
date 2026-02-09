@@ -1206,7 +1206,7 @@
 
                 <!-- Кнопки действий -->
                 <div class="panel-actions">
-                    {#if wishlistId}
+                    {#if wishlistId && !isExternalWishlist}
                         <!-- Если мы в режиме вишлиста -->
                         <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
                             Копировать в...
@@ -1217,7 +1217,7 @@
                         <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
                             Удалить из вишлиста
                         </Button>
-                    {:else}
+                    {:else if !isExternalWishlist}
                         <!-- В обычном режиме показываем стандартные кнопки -->
                         <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
                         <Button kind="danger" on:click={handleDelete}>Удалить</Button>
