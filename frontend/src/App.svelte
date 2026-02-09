@@ -123,7 +123,7 @@
                 id: userData.id,
                 fullName: userData.name,
                 birthDate: formatDateToDDMMYYYY(userData.birth_date),
-                avatarUrl: userData.photo || '/default-avatar.png',
+                avatarUrl: userData.photo || '',
                 isSubscribed: false, // Нужно будет проверить через API
                 publicWishlists: [], // Нужно загрузить отдельно
                 subscriptions: [], // Нужно загрузить отдельно
