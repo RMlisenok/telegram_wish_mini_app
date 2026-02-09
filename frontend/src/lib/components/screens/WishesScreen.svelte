@@ -846,6 +846,19 @@
         }
     };
 
+    $: {
+        if (showDetailModal && selectedWish) {
+            console.log('=== MODAL AUTO-DEBUG ===');
+            console.log('isExternalWishlist:', isExternalWishlist);
+            console.log('isCurrentUserOwner:', isCurrentUserOwner);
+            console.log('isCurrentWishOwner:', isCurrentWishOwner);
+            console.log('selectedWish.id:', selectedWish?.id);
+            console.log('selectedWish.isFinished:', selectedWish?.isFinished);
+            console.log('Показывать чекбокс "Исполнено"?', !isExternalWishlist && isCurrentWishOwner);
+            console.log('======================');
+        }
+    }
+
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -1015,13 +1028,6 @@
 
 <!-- Модальное окно детального просмотра -->
 {#if showDetailModal && selectedWish}
-    <script>
-        console.log('=== MODAL CONDITIONS DEBUG ===');
-        console.log('1. isExternalWishlist:', isExternalWishlist);
-        console.log('2. isCurrentUserOwner (вишлист):', isCurrentUserOwner);
-        console.log('3. isCurrentWishOwner (желание):', isCurrentWishOwner);
-        console.log('4. Показывать статус владельцу?', !isExternalWishlist && isCurrentWishOwner);
-    </script>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="detail-backdrop" on:click={closeDetailModal}>
