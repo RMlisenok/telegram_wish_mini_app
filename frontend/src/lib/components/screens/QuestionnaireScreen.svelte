@@ -5,7 +5,7 @@
     import Button from '../ui/Button.svelte';
     //import {questionnaireStore} from '../../stores/data.js';
     import { createEventDispatcher } from 'svelte';
-    import { loadAvailableTags, loadQuestionnaire, questionnaireStore, TagItem } from '../../../types/questionnaire.ts';
+    import { loadAvailableTags, loadQuestionnaire, questionnaireStore, TagItem, QuestionnaireData, saveQuestionnaire } from '../../../types/questionnaire.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -56,7 +56,7 @@
             interests = data.interests;
             noGifts = data.avoid_gifts;
 
-            questionnaireStore.set({ interests, noGifts });
+            questionnaireStore.set({ interests, avoid_gifts: noGifts });
         } catch (err) {
             console.error('Ошибка загрузки анкеты или тегов:', err);
         }
@@ -118,12 +118,30 @@
         noGifts = removeTag(noGifts, tag);
     };
 
+    // Функция для обновления деталей тега
+    const updateTagDetails = (arr: TagItem[], tagValue: string, newDetails: string): TagItem[] => {
+        return arr.map(item => {
+            if (item.tag === tagValue) {
+                return { ...item, details: newDetails.substring(0, 100) };
+            }
+            return item;
+        });
+    };
 
-    $: isValidInterests = interests.includes('-') || interests.length >= 3;
-    $: isValidNoGifts = noGifts.includes('-') || noGifts.length >= 1;
+    const updateInterestDetails = (tag: string, details: string) => {
+        interests = updateTagDetails(interests, tag, details);
+    };
+
+    const updateNoGiftDetails = (tag: string, details: string) => {
+        noGifts = updateTagDetails(noGifts, tag, details);
+    };
+
+    $: isValidInterests = interests.some(item => item.tag === '-') || interests.length >= 3; // FS-5.3
+    $: isValidNoGifts = noGifts.some(item => item.tag === '-') || noGifts.length >= 1; // FS-5.3
+    $: isValid = isValidInterests && isValidNoGifts;
 
 
-    const save = () => {
+    const save = async () => {
         errors = {interests: '', noGifts: ''};
 
         if (!isValidInterests) {
@@ -134,9 +152,22 @@
         }
         if (errors.interests || errors.noGifts) return;
 
-        questionnaireStore.set({interests, noGifts});
+        questionnaireStore.set({interests, avoid_gifts: noGifts});
 
-        alert('Анкета успешно сохранена!');
+        try {
+            if (!token) throw new Error('Токен авторизации отсутствует.');
+
+            const questionnaireData: QuestionnaireData = {
+                interests,
+                avoid_gifts: noGifts
+            };
+
+            await saveQuestionnaire(token, questionnaireData);
+            questionnaireStore.set({ interests, avoid_gifts: noGifts });
+            alert('Анкета успешно сохранена! Теперь друзья смогут видеть ваши интересы.'); // FS-5.6
+        } catch (err) {
+            console.error('Ошибка сохранения анкеты:', err);
+        }
     };
 
 
@@ -152,7 +183,7 @@
         Выберите интересы, которые вам нравятся. Можно добавить до 20 тегов.
     </p>
 
-    <div class="chips">
+    <!-- <div class="chips">
         {#each predefinedInterests as tag}
             <button
                     class="chip-btn"
@@ -162,10 +193,19 @@
                 {tag}
             </button>
         {/each}
+    </div> -->
+    <div class="chips">
+        {#each availableInterests as tag}
+            {#if !interests.some(i => i.tag === tag)} <!-- Показываем только не выбранные -->
+                <button type="button" class="chip-btn" on:click={() => addInterest(tag)}>
+                    {tag}
+                </button>
+            {/if}
+        {/each}
     </div>
 
 
-    <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
+    <!-- <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
         {#if interests.length === 0}
             <span class="placeholder">Пока ничего не выбрано.</span>
         {/if}
@@ -177,6 +217,25 @@
                     on:remove={(e) => removeInterest(e.detail.text)}
             />
         {/each}
+    </div> -->
+    <!-- Выбранные интересы с полями для деталей -->
+    <div class={`chips-selected ${errors.interests ? 'error' : ''}`}>
+        {#if interests.length > 0}
+            {#each interests as item}
+                <div class="selected-chip-with-details">
+                    <Tag text={item.tag} removable={true} on:remove={() => removeInterest(item.tag)} />
+                    <TextField
+                        label="Детали"
+                        placeholder="Уточните..."
+                        value={item.details || ''}
+                        maxlength={100}
+                        on:input={(e) => updateInterestDetails(item.tag, e.detail?.value || '')}
+                    />
+                </div>
+            {/each}
+        {:else}
+            <span class="placeholder">Пока ничего не выбрано.</span>
+        {/if}
     </div>
 
     {#if errors.interests}
@@ -203,7 +262,7 @@
         Выберите или добавьте пометки о подарках, которые не подойдут.
     </p>
 
-    <div class="chips">
+    <!-- <div class="chips">
         {#each predefinedNoGifts as tag}
             <button
                     class="chip-btn"
@@ -213,20 +272,34 @@
                 {tag}
             </button>
         {/each}
+    </div> -->
+    <div class="chips">
+        {#each availableNoGifts as tag}
+            {#if !noGifts.some(n => n.tag === tag)}
+                <button type="button" class="chip-btn" on:click={() => addNoGift(tag)}>
+                    {tag}
+                </button>
+            {/if}
+        {/each}
     </div>
 
-    <div class={`chips-selected ${errors.noGifts ? 'error' : ''}`}>
-        {#if noGifts.length === 0}
+    <div class={`chips-selected ${errors.noGifts ? 'error' : ''}`}> 
+        {#if noGifts.length > 0} 
+            {#each noGifts as item} 
+                <div class="selected-chip-with-details">
+                    <Tag text={item.tag} removable={true} on:remove={() => removeNoGift(item.tag)} />
+                    <TextField
+                        label="Детали"
+                        placeholder="Уточните..."
+                        value={item.details || ''}
+                        maxlength={100}
+                        on:input={(e) => updateNoGiftDetails(item.tag, e.detail?.value || '')}
+                    />
+                </div>
+            {/each}
+        {:else}
             <span class="placeholder">Пока ничего не выбрано.</span>
         {/if}
-
-        {#each noGifts as tag}
-            <Tag
-                    text={tag}
-                    removable
-                    on:remove={(e) => removeNoGift(e.detail.text)}
-            />
-        {/each}
     </div>
 
     {#if errors.noGifts}
@@ -251,7 +324,7 @@
     <Button
             full
             kind="ghost"
-            inactive={!isValidInterests || !isValidNoGifts}
+            inactive={!isValid}
             on:click={save}
     >
         Сохранить анкету
