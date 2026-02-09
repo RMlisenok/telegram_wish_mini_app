@@ -937,13 +937,15 @@
             <div style="flex: 1;">
                 <div class="h1">Все ваши желания</div>
             </div>
-            <button 
-                class="finished-button"
-                on:click={openFinishedWishes}
-                aria-label="Показать исполненные желания"
-            >
-                Исполненные
-            </button>
+            {#if !isExternalWishlist}
+                <button 
+                    class="finished-button"
+                    on:click={openFinishedWishes}
+                    aria-label="Показать исполненные желания"
+                >
+                    Исполненные
+                </button>
+            {/if}
         </div>
     </header>
 {/if}
@@ -1113,7 +1115,7 @@
                     <div class="detail-section">
                         <h3>Статус</h3>
                         
-                        {#if !selectedWish.isFinished}
+                        {#if !selectedWish.isFinished && !isExternalWishlist}
                             <!-- Кнопка для пометки как исполненного -->
                             <Button 
                                 kind="primary" 
