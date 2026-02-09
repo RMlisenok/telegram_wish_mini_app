@@ -153,7 +153,7 @@
     <div class="profile-row">
         <Avatar
                 size={152}
-                src={profile?.avatarUrl}
+                src={profile?.avatarUrl || ''}
                 initials={(profile?.fullName ?? '')
         .split(' ')
         .filter(Boolean)
