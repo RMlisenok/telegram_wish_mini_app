@@ -99,7 +99,7 @@ async def auth_telegram(
         final_photo_url = photo_url
         if final_photo_url:
             try:
-                migrated_url = await photo_service.migrate_photo(photo_url)
+                migrated_url = await photo_service.migrate_telegram_photo(photo_url)
                 if migrated_url:
                     final_photo_url = migrated_url
                 else:
@@ -124,7 +124,7 @@ async def auth_telegram(
             if photo_url:
                 try:
                     logger.error(f"START FUNCTION MIGRATE: {photo_url}")
-                    migrated_url = await photo_service.migrate_photo(photo_url)
+                    migrated_url = await photo_service.migrate_telegram_photo(photo_url)
                     logger.error(f"END FUNCTION MIGRATE: {migrated_url}")
                     if migrated_url:
                         logger.error(f"NEW PHOTO")
