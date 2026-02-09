@@ -1047,8 +1047,7 @@
             <h2>Детальное описание желания</h2>
             <div class="detail-content">
                 <!-- Добавляем кнопку закрепления в детальном просмотре -->
-                <!-- {#if wishlistId && selectedWish.connection_id} -->
-                {#if !isExternalWishlist && isCurrentWishOwner}
+                {#if wishlistId && selectedWish.connection_id}
                     <div class="detail-section">
                         <h3>Действия</h3>
                         <div class="detail-actions">
@@ -1099,7 +1098,7 @@
                     </div>
                 {/if}
 
-                {#if !isExternalWishlist && isCurrentWishOwner}
+                <!-- {#if !isExternalWishlist && isCurrentWishOwner} -->
                     <!-- Секция статуса -->
                     <div class="detail-section">
                         <h3>Статус</h3>
@@ -1124,7 +1123,7 @@
                             </Button>
                         {/if}
                     </div>
-                {/if}
+                <!-- {/if} -->
                 
                 <!-- Изображение -->
                 <div class="detail-image">
