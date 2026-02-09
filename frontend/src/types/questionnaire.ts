@@ -20,7 +20,7 @@ export const questionnaireStore = writable<QuestionnaireData>([]);
 
 // Загружает анкету текущего пользователя
 export const loadQuestionnaire = async (token: string): Promise<QuestionnaireData> => {
-  const response = await fetch('/api/v1/questionnaire', {
+  const response = await fetch('/v1/questionnaire', {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -59,6 +59,8 @@ export const saveQuestionnaire = async (token: string, questionnaireData: Questi
     },
     body: JSON.stringify(questionnaireData),
   });
+
+  console.log("Тело ответа:", response.text());
 
   if (!response.ok) {
     const errorText = await response.text();
