@@ -427,7 +427,7 @@
     .q-block { margin-bottom: 8px; }
     .q-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
     .q-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-    .q-pill { font-size: 13px; padding: 6px 12px; font-weight: 500; white-space: nowrap; }
+    .q-pill { font-size: 13px; padding: 6px 12px; font-weight: 500; white-space: normal; }
     .q-pill--ok { background: #0ea5e9; color: white; }
     .q-pill--no { background: #ef4444; color: white; }
 
@@ -449,10 +449,11 @@
         padding: 6px 12px;
         color: #4b5563;
         background: #f3f4f6;
-        white-space: nowrap;
+        white-space: normal;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 200px;
+        word-break: break-word;
     }
 
 </style>
