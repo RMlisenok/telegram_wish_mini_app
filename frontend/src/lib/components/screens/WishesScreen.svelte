@@ -892,13 +892,14 @@
                     </div>                    
                 </div>
             </div>
-            <div style="display: flex; align-items: flex-start; gap: 12px; margin-left: auto;"></div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 12px;">
                 {#if currentWishlist.privacy !== 'private'}
                     <button 
                         class="share-button"
                         on:click={handleShareWishlist}
                         aria-label="Поделиться вишлистом"
                         title="Поделиться вишлистом"
+                        style="margin-bottom: 8px; padding: 6px;"
                     >
                         <img 
                             src="../../../../static/icons/share.png" 
@@ -914,6 +915,7 @@
                         on:click={handleShareWishlist}
                         aria-label="Поделиться вишлистом"
                         title="Поделиться вишлистом"
+                        style="margin-bottom: 8px; padding: 6px;"
                     >
                         <img 
                             src="../../../../static/icons/share.png" 
@@ -924,15 +926,14 @@
                     </button>
                 {/if}         
                 {#if !isExternalWishlist}
-                    <div style="margin-left: 12px; display: flex; align-items: center;">
-                        <button 
-                            class="finished-button"
-                            on:click={openFinishedWishes}
-                            aria-label="Показать исполненные желания"
-                        >
-                            Исполненные
-                        </button>
-                    </div>
+                    <button 
+                        class="finished-button"
+                        on:click={openFinishedWishes}
+                        aria-label="Показать исполненные желания"
+                        style="padding: 6px 12px; font-size: 13px;"
+                    >
+                        Исполненные
+                    </button>
                 {/if}
             </div>
     </header>
