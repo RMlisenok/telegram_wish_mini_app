@@ -44,7 +44,19 @@
         }
     }
     
-    $: finishedWishes = $wishesStore;
+    $: finishedWishes = $wishesStore
+        .slice() // создаем копию массива, чтобы не мутировать оригинал
+        .sort((a, b) => {
+            // Если даты есть, сортируем по ним
+            if (a.updated_At && b.updated_At) {
+                return b.updated_At.getTime() - a.updated_At.getTime();
+            }
+            // Если у одного из объектов нет даты, ставим его в конец
+            if (!a.updated_At && b.updated_At) return 1;
+            if (a.updated_At && !b.updated_At) return -1;
+            // Если дат нет у обоих, сохраняем исходный порядок
+            return 0;
+        });
     
     const goBack = () => {
         dispatch('back');
