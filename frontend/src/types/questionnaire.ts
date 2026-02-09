@@ -49,6 +49,7 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
 
 // Сохраняет анкету текущего пользователя
 export const saveQuestionnaire = async (token: string, questionnaireData: QuestionnaireData): Promise<void> => {
+  console.log(questionnaireData);
   const formattedData = {
     interests: questionnaireData.interests.map(item => ({
       tag: item.tag,
@@ -59,6 +60,7 @@ export const saveQuestionnaire = async (token: string, questionnaireData: Questi
       details: item.details || ""
     }))
   };
+  console.log(formattedData);
 
   const response = await fetch('/api/v1/questionnaire', {
     method: 'POST',
