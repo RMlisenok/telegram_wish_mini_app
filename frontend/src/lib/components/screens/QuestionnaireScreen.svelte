@@ -152,18 +152,31 @@
         }
         if (errors.interests || errors.noGifts) return;
 
-        questionnaireStore.set({interests, avoid_gifts: noGifts});
+        const validatedInterests = interests.map(item => ({
+            tag: item.tag,
+            details: item.details || ''
+        }));
+        
+        const validatedNoGifts = noGifts.map(item => ({
+            tag: item.tag,
+            details: item.details || ''
+        }));
+
+        questionnaireStore.set({
+            interests: validatedInterests, 
+            avoid_gifts: validatedNoGifts 
+        });
 
         try {
             if (!token) throw new Error('Токен авторизации отсутствует.');
 
             const questionnaireData: QuestionnaireData = {
-                interests,
-                avoid_gifts: noGifts
+                interests: validatedInterests,
+                avoid_gifts: validatedNoGifts
             };
             console.log('Sending data:', questionnaireData);
             await saveQuestionnaire(token, questionnaireData);
-            questionnaireStore.set({ interests, avoid_gifts: noGifts });
+            
             alert('Анкета успешно сохранена! Теперь друзья смогут видеть ваши интересы.'); // FS-5.6
         } catch (err) {
             console.error('Ошибка сохранения анкеты:', err);

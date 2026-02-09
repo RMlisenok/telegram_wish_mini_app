@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 export interface TagItem {
   tag: string;
-  details?: string;
+  details: string;
 }
 
 export interface QuestionnaireData {
@@ -16,7 +16,10 @@ export interface AvailableTag {
   type_tags: boolean;
 }
 
-export const questionnaireStore = writable<QuestionnaireData>([]);
+export const questionnaireStore = writable<QuestionnaireData>({
+  interests: [],
+  avoid_gifts: []
+});
 
 // Загружает анкету текущего пользователя
 export const loadQuestionnaire = async (token: string): Promise<QuestionnaireData> => {
@@ -42,8 +45,14 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
   console.log(data);
 
   return {
-    interests: data.interests || [],
-    avoid_gifts: data.avoid_gifts || []
+    interests: (data.interests || []).map((item: any) => ({
+      tag: item.tag,
+      details: item.details || '' 
+    })),
+    avoid_gifts: (data.avoid_gifts || []).map((item: any) => ({
+      tag: item.tag,
+      details: item.details || ''
+    }))
   };
 };
 
@@ -111,7 +120,13 @@ export const loadUserQuestionnaire = async (token: string, userId: number): Prom
 
   const data: QuestionnaireData = await response.json();
   return {
-    interests: data.interests || [],
-    avoid_gifts: data.avoid_gifts || []
+    interests: (data.interests || []).map((item: any) => ({
+      tag: item.tag,
+      details: item.details || ''
+    })),
+    avoid_gifts: (data.avoid_gifts || []).map((item: any) => ({
+      tag: item.tag,
+      details: item.details || ''
+    }))
   };
 };
