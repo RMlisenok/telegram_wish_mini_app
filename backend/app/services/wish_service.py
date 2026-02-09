@@ -87,6 +87,11 @@ class WishService:
         wish_id,
         wish_data: WishUpdate
     ) -> Optional[WishResponse]:
+        if wish_data.photo is None:
+            wish_data.photo = (
+                "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
+                "selstorage.ru/d118dd34-8236-4e18-b22e-d7f03c1992c6.png"
+            )
         update_data = wish_data.model_dump(exclude_unset=True)
         wish = await self.rep_wish.update(wish_id, update_data)
         if wish:
