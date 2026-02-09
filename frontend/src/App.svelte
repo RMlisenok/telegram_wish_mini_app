@@ -304,7 +304,7 @@
                 isExternalUser = true;
             
                 // Переходим на экран вишлистов с флагом внешнего пользователя
-                pushNavigate('wishlists');
+                navigate('wishlists', { keepExternalState: true });
                 
             } else {
                 console.error('Не удалось загрузить вишлисты пользователя');
