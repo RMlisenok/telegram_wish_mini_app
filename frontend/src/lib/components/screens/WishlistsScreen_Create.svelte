@@ -4,6 +4,7 @@
     import Button from '../ui/Button.svelte';
     //import { wishlistsStore } from '../../stores/data.js';
     import { wishlistsStore, createWishlist } from '../../../types/wishlists.ts';
+    import { uploadFile } from '../../../types/storage3.ts';
     export let token;
     export let onGoBack;
     function goBack() {
@@ -20,6 +21,10 @@
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) { 
+                alert('Файл слишком большой. Максимальный размер: 5MB');
+                return;
+            }
             photoFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -54,12 +59,21 @@
         error = '';
         
         try {
+            let photoUrl = '';
+            
+            if (photoFile) {
+                // Загрузка нового файла в S3
+                const result = await uploadFile(photoFile, token);
+                photoUrl = result.file_url;
+            }
+
             const wishlistData = {
                 name: title.trim(),
                 description: description.trim(),
-                photo: photoPreview || '',
-                typeprivacy: mapPrivacyToApi(privacy)
+                typeprivacy: mapPrivacyToApi(privacy),
+                photo: photoUrl
             };
+            
             
             await createWishlist(token, wishlistData);
             

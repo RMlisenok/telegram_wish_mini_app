@@ -21,6 +21,7 @@
         makeWishlistTgUrl, 
         makeWishlistShareUrl 
     } from '../../stores/data.js';
+    import { deleteFile } from '../../../types/storage3.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -629,6 +630,15 @@
         if (!selectedWish || !token) return;
     
         try {
+            if (selectedWish.photo && selectedWish.photo.includes('selstorage.ru')) {
+                try {
+                    await deleteFile(selectedWish.photo, token);
+                    console.log('Фото желания удалено из S3');
+                } catch (s3Error) {
+                    console.warn('Не удалось удалить фото из S3:', s3Error);
+                }
+            }
+            
             await deleteWish(token, selectedWish.id);
 
             await loadWishes(token);
@@ -871,19 +881,25 @@
 {#if wishlistId && currentWishlist}
     <!-- Шапка для режима просмотра вишлиста -->
     <header class="app-header">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <div style="flex: 1;">
-                <div class="h1">{currentWishlist.title}</div>
-                <div class="wishlist-subtitle">
-                    {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
-                    filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div class="h1" style="margin-bottom: 4px;">{currentWishlist.title}</div>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                    <div class="wishlist-subtitle">
+                        {filteredWishes.length} {filteredWishes.length === 1 ? 'желание' : 
+                        filteredWishes.length >= 2 && filteredWishes.length <= 4 ? 'желания' : 'желаний'}
+                    </div>                    
                 </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 12px;">
                 {#if currentWishlist.privacy !== 'private'}
                     <button 
                         class="share-button"
                         on:click={handleShareWishlist}
                         aria-label="Поделиться вишлистом"
                         title="Поделиться вишлистом"
+                        style="margin-bottom: 8px; padding: 6px;"
                     >
                         <img 
                             src="../../../../static/icons/share.png" 
@@ -899,6 +915,7 @@
                         on:click={handleShareWishlist}
                         aria-label="Поделиться вишлистом"
                         title="Поделиться вишлистом"
+                        style="margin-bottom: 8px; padding: 6px;"
                     >
                         <img 
                             src="../../../../static/icons/share.png" 
@@ -907,33 +924,37 @@
                             height="24"
                         />
                     </button>
-                {/if}
+                {/if}         
+                <!-- {#if !isExternalWishlist}
+                    <button 
+                        class="finished-button"
+                        on:click={openFinishedWishes}
+                        aria-label="Показать исполненные желания"
+                        style="padding: 6px 12px; font-size: 13px;"
+                    >
+                        Исполненные
+                    </button>
+                {/if} -->
             </div>
-            <button 
-                class="finished-button"
-                on:click={openFinishedWishes}
-                aria-label="Показать исполненные желания"
-            >
-                Исполненные
-            </button>
-        </div>
-        <!-- Кнопка "Поделиться" - показываем для всех вишлистов, кроме приватных -->
-            
     </header>
 {:else}
     <!-- Стандартная шапка -->
-     <header class="app-header">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+    <header class="app-header">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
             <div style="flex: 1;">
                 <div class="h1">Все ваши желания</div>
             </div>
-            <button 
-                class="finished-button"
-                on:click={openFinishedWishes}
-                aria-label="Показать исполненные желания"
-            >
-                Исполненные
-            </button>
+            {#if !isExternalWishlist}
+                <div style="margin-left: 12px; display: flex; align-items: center;">
+                    <button 
+                        class="finished-button"
+                        on:click={openFinishedWishes}
+                        aria-label="Показать исполненные желания"
+                    >
+                        Исполненные
+                    </button>
+                </div>
+            {/if}
         </div>
     </header>
 {/if}
@@ -967,7 +988,7 @@
                         {/if}
 
                         <!-- Иконка закрепления (только в режиме вишлиста) -->
-                        {#if wishlistId && wish.connection_id}
+                        {#if wishlistId && wish.connection_id && !isExternalWishlist}
                             <button 
                                 class="pin-button {wish.is_pinned ? 'pinned' : ''}"
                                 on:click|stopPropagation={() => togglePinWish(wish.id, wish.connection_id, wish.is_pinned, wish.order_position)}
@@ -1001,7 +1022,7 @@
         <Button full on:click={openForm}>+ Новое желание</Button>
     </div>
 <!--2009_1_Dass_25.12.2025-->
-{:else if wishlistId && !isExternalWishlist && isCurrentUserOwner}  
+{:else if wishlistId && !isExternalWishlist}  
     <div style="padding:0 16px 12px;">
         <Button full on:click={openAddExistingModal}>
             + Добавить существующее желание
@@ -1047,7 +1068,7 @@
             <h2>Детальное описание желания</h2>
             <div class="detail-content">
                 <!-- Добавляем кнопку закрепления в детальном просмотре -->
-                {#if wishlistId && selectedWish.connection_id}
+                {#if wishlistId && selectedWish.connection_id && !isExternalWishlist}
                     <div class="detail-section">
                         <h3>Действия</h3>
                         <div class="detail-actions">
@@ -1103,7 +1124,7 @@
                     <div class="detail-section">
                         <h3>Статус</h3>
                         
-                        {#if !selectedWish.isFinished}
+                        {#if !selectedWish.isFinished && !isExternalWishlist}
                             <!-- Кнопка для пометки как исполненного -->
                             <Button 
                                 kind="primary" 
@@ -1185,18 +1206,22 @@
 
                 <!-- Кнопки действий -->
                 <div class="panel-actions">
-                    {#if wishlistId}
+                    {#if wishlistId && !isExternalWishlist}
                         <!-- Если мы в режиме вишлиста -->
-                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
-                            Копировать в...
-                        </Button>
-                        <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
-                            Переместить в...
-                        </Button>
-                        <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)}>
-                            Удалить из вишлиста
-                        </Button>
-                    {:else}
+                        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                            <div style="display: flex; gap: 12px;">
+                                <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'copy')}>
+                                    Копировать в
+                                </Button>
+                                <Button kind="ghost" on:click={() => openCopyMoveModal(selectedWish.id, 'move')}>
+                                    Переместить в
+                                </Button>
+                            </div>
+                            <Button kind="danger" on:click={() => handleRemoveFromWishlist(selectedWish.id)} full>
+                                Удалить из вишлиста
+                            </Button>
+                        </div>
+                    {:else if !isExternalWishlist}
                         <!-- В обычном режиме показываем стандартные кнопки -->
                         <Button kind="ghost" on:click={handleEdit}>Редактировать</Button>
                         <Button kind="danger" on:click={handleDelete}>Удалить</Button>

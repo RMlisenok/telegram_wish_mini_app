@@ -153,7 +153,7 @@
     <div class="profile-row">
         <Avatar
                 size={152}
-                src={profile?.avatarUrl}
+                src={profile?.avatarUrl || ''}
                 initials={(profile?.fullName ?? '')
         .split(' ')
         .filter(Boolean)
@@ -426,30 +426,34 @@
 
     .q-block { margin-bottom: 8px; }
     .q-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .q-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-    .q-pill { font-size: 13px; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; }
-    .q-pill--ok { background: #e0f2fe; color: #0369a1; }
-    .q-pill--no { background: #fee2e2; color: #b91c1c; }
+    .q-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .q-pill { font-size: 13px; padding: 6px 12px; font-weight: 500; white-space: normal; }
+    .q-pill--ok { background: #0ea5e9; color: white; }
+    .q-pill--no { background: #ef4444; color: white; }
 
     .empty-note { color: #6b7280; font-size: 14px; margin: 8px 0; }
 
     .footer-actions { padding: 0 16px 12px; }
 
     .q-tag-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        max-width: 200px;
+        display: inline-flex;
+        align-items: center;
+        background: #f9fafb;
+        border-radius: 999px;
+        overflow: hidden;
+        max-width: 100%;
     }
 
     .q-tag-details {
-        font-size: 11px;
+        font-size: 12px;
+        padding: 6px 12px;
         color: #4b5563;
-        margin-top: 2px;
-        padding-left: 4px;
-        line-height: 1.2;
+        background: #f3f4f6;
+        white-space: normal;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
         word-break: break-word;
-        max-width: 100%;
     }
 
 </style>

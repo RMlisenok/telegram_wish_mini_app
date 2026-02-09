@@ -9,6 +9,8 @@
         addMultipleWishesToWishlist 
     } from '../../../types/wish_wishlist.ts';
 
+    import { uploadFile, replaceFile, deleteFile } from '../../../types/storage3.ts';
+
     import { onMount } from 'svelte';
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
@@ -31,6 +33,9 @@
     let currency = '';
     let description = '';
     let selectedWishlists = [];
+
+    let removePhotoFlag = false;
+    let currentPhotoUrl = '';
 
     function clearError() {
         error = ''; 
@@ -76,6 +81,7 @@
                     
                     if (wishData.photo) {
                         photoPreview = wishData.photo;
+                        removePhotoFlag = false;
                     }
                     
                     // Получаем список вишлистов, в которые добавлено желание
@@ -108,6 +114,7 @@
     function removePhoto() {
         photoFile = null;
         photoPreview = null;
+        removePhotoFlag = true;
     }
 
     // Сохранение желания
@@ -121,13 +128,35 @@
         error = '';
         
         try {
+            let photoUrl = photoPreview;
+
+            if (photoFile) {
+                // Если есть новое фото
+                if (photoUrl && photoUrl.includes('selstorage.ru')) {
+                    // Замена существующего файла в S3
+                    const result = await replaceFile(photoUrl, photoFile, token);
+                    photoUrl = result.file_url;
+                } else {
+                    // Загрузка нового файла
+                    const result = await uploadFile(photoFile, token);
+                    photoUrl = result.file_url;
+                }
+            } else if (removePhotoFlag && photoUrl && photoUrl.includes('selstorage.ru')) {
+                // Удаление фото из S3
+                await deleteFile(photoUrl, token);
+                photoUrl = '';
+            } else if (removePhotoFlag && photoUrl && !photoUrl.includes('selstorage.ru')) {
+                // Если фото не из S3 и удалено - просто очищаем URL
+                photoUrl = '';
+            }
+
             // Подготовка данных для отправки
             const wishData = {
                 name: title.trim(),
                 description: description.trim(),
-                photo: photoPreview || '',
+                photo: photoUrl,
                 url_gift: link.trim(),
-                price: price ? parseFloat(price) : 0,
+                price: price || null,
                 currency: currency || null,
                 is_booked: false,
                 status_is_finished: false

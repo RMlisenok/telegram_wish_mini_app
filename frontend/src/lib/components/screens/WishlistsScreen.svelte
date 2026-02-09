@@ -28,6 +28,7 @@
     export let isExternalUser = false; // режим внешнего пользователя
     export let externalProfileId = null; // ID внешнего пользователя
     export let externalUserWishlists = []; // Вишлисты внешнего пользователя
+    import { deleteFile } from '../../../types/storage3.ts';
 
     let userWishlists = [];
 
@@ -146,7 +147,13 @@
     };
 
     const handleOpenOwnerProfile = (ownerId) => {
-        dispatch('openMainScreen');
+        const isCurrentUser = !isExternalUser && ownerId === 'current_user';
+        
+        if (isCurrentUser) {
+            dispatch('openMainScreen');
+        } else {
+            dispatch('openOwnerProfile', { profileId: ownerId });
+        }
     };
 
     // Получить слово "желание" в корректной форме в зависимости от числа
@@ -241,7 +248,17 @@
     const confirmDeleteWishlist = async () => {
         if (!wishlistToDelete) return;
         // Удаляем этот wishlistId из всех желаний
+        const wishlist = userWishlists.find(wl => wl.id === wishlistToDelete);
         try {
+            // удаление фото из S3 если оно есть
+            if (wishlist?.photo && wishlist.photo.includes('selstorage.ru')) {
+                try {
+                    await deleteFile(wishlist.photo, token);
+                    console.log('Фото вишлиста удалено из S3');
+                } catch (s3Error) {
+                    console.warn('Не удалось удалить фото из S3:', s3Error);
+                }
+            }
             // Вызываем API для удаления
             await deleteWishlist(token, wishlistToDelete);
             
@@ -447,7 +464,9 @@
 {/if}
 
 <div style="padding:0 16px 12px;">
-    <Button full on:click={openCreateWishlists}>+ Создать вишлист</Button>
+    {#if !isExternalUser}
+        <Button full on:click={openCreateWishlists}>+ Создать вишлист</Button>
+    {/if}
 </div>
 
 <style>

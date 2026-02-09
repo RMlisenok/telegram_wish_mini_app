@@ -13,6 +13,10 @@
     export let wishlistId;
     //import { wishlistsStore } from '../../stores/data.js';
     import { updateWishlist, wishlistsStore } from '../../../types/wishlists.ts';
+    import { uploadFile, replaceFile, deleteFile } from '../../../types/storage3.ts';
+
+    let removePhotoFlag = false;
+
     let wishlist = null;
     let title = '';
     let description = '';
@@ -29,7 +33,7 @@
                 // Инициализируем значения формы
                 title = wishlist.title || '';
                 description = wishlist.description || '';
-                photoPreview = wishlist.rUrl || null;
+                photoPreview = wishlist.photo || null;
                 privacy = wishlist.privacy || 'public';
             } else {
                 console.error('Вишлист не найден:', wishlistId);
@@ -40,7 +44,12 @@
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) { 
+                alert('Файл слишком большой. Максимальный размер: 5MB');
+                return;
+            }
             photoFile = file;
+            removePhotoFlag = false; // Сбрасываем флаг удаления
             const reader = new FileReader();
             reader.onload = (e) => {
                 photoPreview = e.target.result;
@@ -59,6 +68,7 @@
     function removePhoto() {
         photoFile = null;
         photoPreview = null;
+        removePhotoFlag = true; // Устанавливаем флаг удаления
     }
 
     function clearError() {
@@ -75,11 +85,30 @@
         
         try {
             const apiPrivacy = mapPrivacyToApi(privacy);
+            let photoUrl = photoPreview;
+            if (photoFile) {
+                if (photoUrl && photoUrl.includes('selstorage.ru')) {
+                    // Замена существующего файла
+                    const result = await replaceFile(photoUrl, photoFile, token);
+                    photoUrl = result.file_url;
+                } else {
+                    // Загрузка нового файла
+                    const result = await uploadFile(photoFile, token);
+                    photoUrl = result.file_url;
+                }
+            } else if (removePhotoFlag && photoUrl && photoUrl.includes('selstorage.ru')) {
+                // Удаление фото из S3
+                await deleteFile(photoUrl, token);
+                photoUrl = '';
+            } else if (removePhotoFlag && photoUrl && !photoUrl.includes('selstorage.ru')) {
+                // Если фото не из S3 и удалено - просто очищаем URL
+                photoUrl = '';
+            }
             
             const wishlistData = {
                 name: title.trim(),
                 description: description.trim(),
-                photo: photoPreview || '',
+                photo: photoUrl || '',
                 typeprivacy: apiPrivacy
             };
             

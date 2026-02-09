@@ -183,7 +183,7 @@
         <div class="share-main">
             <div class="share-name">{wishlist.title}</div>
             
-            <div class="share-owner">
+            <!-- <div class="share-owner">
                 <Avatar
                     size={20}
                     src={getOwnerAvatarUrl()}
@@ -193,7 +193,7 @@
                 <span style="vertical-align: middle; font-size: 14px; color: #6b7280;">
                     {getWishlistOwnerText()}
                 </span>
-            </div>
+            </div> -->
             
             <div class="share-info">
                 {#if wishlist.wishesCount !== undefined || wishlist.count !== undefined}

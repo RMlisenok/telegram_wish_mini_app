@@ -123,11 +123,12 @@
                 id: userData.id,
                 fullName: userData.name,
                 birthDate: formatDateToDDMMYYYY(userData.birth_date),
-                avatarUrl: userData.photo || '/default-avatar.png',
+                avatarUrl: userData.photo || '',
                 isSubscribed: false, // Нужно будет проверить через API
                 publicWishlists: [], // Нужно загрузить отдельно
                 subscriptions: [], // Нужно загрузить отдельно
-                questionnaire: { interests: [], noGifts: [] } // Нужно загрузить отдельно
+                questionnaire: { interests: [], noGifts: [] }, // Нужно загрузить отдельно
+                subscriptionsArePrivate: !userData.show_sub
             };
             
         } catch (error) {
@@ -155,7 +156,8 @@
             isSubscribed: false,
             publicWishlists: [],
             subscriptions: [],
-            questionnaire: { interests: [], noGifts: [] }
+            questionnaire: { interests: [], noGifts: [] },
+            subscriptionsArePrivate: false
         };
         
         pushNavigate('otherProfile');
@@ -304,7 +306,7 @@
                 isExternalUser = true;
             
                 // Переходим на экран вишлистов с флагом внешнего пользователя
-                pushNavigate('wishlists');
+                navigate('wishlists', { keepExternalState: true });
                 
             } else {
                 console.error('Не удалось загрузить вишлисты пользователя');
@@ -338,6 +340,13 @@
     }
     
     function navigate(screen, params = {}) {
+        // Сброс состояния внешнего пользователя при переходе на вишлисты через таб-бар или главный экран
+        if (screen === 'wishlists' && !params.isExternal && !params.keepExternalState) {
+            isExternalUser = false;
+            externalProfileId = null;
+            wishlistsForExternalUser = [];
+        }
+
         currentScreen = screen;
         if (params.wishlistId) {
             currentWishlistId = params.wishlistId;
@@ -396,7 +405,7 @@
             user_id: user.id.toString(),
             fullName: user.name  || 'Гость',
             birthDate: formatDateToDDMMYYYY(user.birth_date),
-            avatarUrl: user.photo || '/default-avatar.png',
+            avatarUrl: user.photo || '',
             showSubscriptions: user.show_sub ?? true,
             ui: {
                 textSize: (user.text_size as 'small' | 'medium' | 'large') || 'medium',
@@ -527,7 +536,12 @@
                             on:openSettings={() => navigate('settings')}
                             on:openQuestionnaire={() => navigate('questionnaire')}
                             on:openWishes={() => navigate('wishes')}
-                            on:openWishlists={() => navigate('wishlists')}
+                            on:openWishlists={() => {
+                                isExternalUser = false;
+                                externalProfileId = null;
+                                wishlistsForExternalUser = [];
+                                navigate('wishlists');
+                            }}
                             on:openSubscriptions={() => navigate('subscriptions')}
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
@@ -670,6 +684,12 @@
                                 selectedWishlistId = e.detail.id;
                                 navigate('wishlistsEdit'); 
                             }}
+                            on:openOwnerProfile={(e) => {
+                                const { profileId } = e.detail;
+                                if (profileId && profileId !== 'current_user') {
+                                    openOtherProfileById(profileId);
+                                }
+                            }}
                             isExternalUser={isExternalUser}
                             externalProfileId={externalProfileId}
                             externalUserWishlists={wishlistsForExternalUser}
@@ -678,6 +698,7 @@
                     {:else if currentScreen === 'wishlistsEdit'}
                         <WishlistsScreenEdit
                             wishlistId={selectedWishlistId}
+                            token={token}
                             onGoBack={() => {
                                 selectedWishlistId = null;
                                 navigate('wishlists');
@@ -769,7 +790,12 @@
                     <button
                         type="button"
                         class={`tab-item ${currentScreen === 'wishlists' ? 'active' : ''}`}
-                        on:click={() => navigate('wishlists')}
+                        on:click={() => {
+                            isExternalUser = false;
+                            externalProfileId = null;
+                            wishlistsForExternalUser = [];
+                            navigate('wishlists');
+                        }}                        
                     >
                         <img class="tab-icon" src="../../../../static/icons/tab-list.png" alt="" />
                         <span>Вишлисты</span>
