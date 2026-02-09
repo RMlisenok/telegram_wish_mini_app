@@ -115,10 +115,11 @@ class PhotoUpdateService:
                     upload_file = UploadFile(
                         filename=filename,
                         file=io.BytesIO(content),
-                        content_type=content_type or f'image/{file_extension}',
-                        size=len(content)
+                        # content_type=
+                        # size=len(content)
                     )
-                    
+                    upload_file.content_type = content_type or f'image/{file_extension}'
+                    logger.info("Uploading to S3...")
                     # Загружаем в S3
                     new_url = await self.s3_client.upload_fastapi_file(upload_file)
                     
