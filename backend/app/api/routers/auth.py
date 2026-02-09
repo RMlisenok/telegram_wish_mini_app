@@ -119,7 +119,7 @@ async def auth_telegram(
         user = UserResponse.model_validate(user)
         final_photo_url = user.photo
 
-        if photo_url and photo_url != user.photo:
+        if photo_url and photo_url == user.photo:
             logger.error(f"START REPLACE PHOTO: {telegram_id}")
             if photo_url:
                 try:
