@@ -73,7 +73,11 @@
             return arr;
         }
         if (!arr.some(item => item.tag === tagValue)) {
-            const newTag: TagItem = { tag: tagValue, details: '' }; // Новый тег без деталей по умолчанию
+            const existingTag = [...interests, ...noGifts].find(item => item.tag === tagValue);
+            const newTag: TagItem = { 
+                tag: tagValue, 
+                details: existingTag?.details || ''
+            };
             return [...arr, newTag];
         }
         return arr;
@@ -176,7 +180,7 @@
             };
             console.log('Sending data:', questionnaireData);
             await saveQuestionnaire(token, questionnaireData);
-            
+
             alert('Анкета успешно сохранена! Теперь друзья смогут видеть ваши интересы.'); // FS-5.6
         } catch (err) {
             console.error('Ошибка сохранения анкеты:', err);
@@ -242,7 +246,7 @@
                         placeholder="Уточните..."
                         value={item.details || ''}
                         maxlength={100}
-                        on:input={(e) => updateInterestDetails(item.tag, e.detail?.value || '')}
+                        on:change={(e) => updateInterestDetails(item.tag, e.detail || '')}
                     />
                 </div>
             {/each}
@@ -306,7 +310,7 @@
                         placeholder="Уточните..."
                         value={item.details || ''}
                         maxlength={100}
-                        on:input={(e) => updateNoGiftDetails(item.tag, e.detail?.value || '')}
+                        on:change={(e) => updateNoGiftDetails(item.tag, e.detail || '')}
                     />
                 </div>
             {/each}
