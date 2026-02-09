@@ -458,7 +458,9 @@
 {/if}
 
 <div style="padding:0 16px 12px;">
-    <Button full on:click={openCreateWishlists}>+ Создать вишлист</Button>
+    {#if !isExternalUser}
+        <Button full on:click={openCreateWishlists}>+ Создать вишлист</Button>
+    {/if}
 </div>
 
 <style>

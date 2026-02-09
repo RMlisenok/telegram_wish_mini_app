@@ -338,6 +338,13 @@
     }
     
     function navigate(screen, params = {}) {
+        // Сброс состояния внешнего пользователя при переходе на вишлисты через таб-бар или главный экран
+        if (screen === 'wishlists' && !params.isExternal && !params.keepExternalState) {
+            isExternalUser = false;
+            externalProfileId = null;
+            wishlistsForExternalUser = [];
+        }
+
         currentScreen = screen;
         if (params.wishlistId) {
             currentWishlistId = params.wishlistId;
@@ -527,7 +534,12 @@
                             on:openSettings={() => navigate('settings')}
                             on:openQuestionnaire={() => navigate('questionnaire')}
                             on:openWishes={() => navigate('wishes')}
-                            on:openWishlists={() => navigate('wishlists')}
+                            on:openWishlists={() => {
+                                isExternalUser = false;
+                                externalProfileId = null;
+                                wishlistsForExternalUser = [];
+                                navigate('wishlists');
+                            }}
                             on:openSubscriptions={() => navigate('subscriptions')}
                             on:openSubscribers={() => navigate('subscribers')}
                             on:openShareProfile={() => navigate('shareProfile')}
@@ -770,7 +782,12 @@
                     <button
                         type="button"
                         class={`tab-item ${currentScreen === 'wishlists' ? 'active' : ''}`}
-                        on:click={() => navigate('wishlists')}
+                        on:click={() => {
+                            isExternalUser = false;
+                            externalProfileId = null;
+                            wishlistsForExternalUser = [];
+                            navigate('wishlists');
+                        }}                        
                     >
                         <img class="tab-icon" src="../../../../static/icons/tab-list.png" alt="" />
                         <span>Вишлисты</span>
