@@ -77,7 +77,11 @@ export async function loadFinishedWishes(token: string) {
             url_gift: wish.url_gift,
             price: wish.price,
             currency: wish.currency || null,
-            is_booked: wish.is_booked
+            is_booked: wish.is_booked,
+            status_is_finished: wish.status_is_finished,
+            description: wish.description || "",
+            created_At: new Date(wish.created_at),
+            updated_At: new Date(wish.updated_at)
         }));
         
         wishesStore.set(transformedWishlists);

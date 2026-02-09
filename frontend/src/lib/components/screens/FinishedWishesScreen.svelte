@@ -24,8 +24,11 @@
     };
     
     onMount(async () => {
+        console.log('Загрузка исполненных желаний...');
         if (token) {
             await fetchWishes();
+        } else {
+            console.error('Токен не найден');
         }
     });
     
@@ -41,11 +44,20 @@
         }
     }
     
-    $: finishedWishes = $wishesStore.filter(wish => wish.status_is_finished === true);
+    $: finishedWishes = $wishesStore;
     
     const goBack = () => {
         dispatch('back');
     };
+
+    $: {
+        console.log('Текущие желания в store:', $wishesStore);
+        console.log('Типы id в store:', $wishesStore.map(w => ({ 
+            id: w.id, 
+            type: typeof w.id,
+            value: w.id
+        })));
+    }
 </script>
 
 <header class="app-header">
