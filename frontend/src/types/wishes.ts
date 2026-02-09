@@ -197,3 +197,68 @@ export async function deleteWish(token: string, wishId: string): Promise<boolean
         throw error;
     }
 }
+
+// Функция для обновления статуса "Исполнено"
+export async function updateWishStatus(
+    token: string,
+    wishId: string,
+    statusData: {
+        status_is_finished: boolean;
+        is_booked?: boolean;
+    }
+): Promise<Wish> {
+    try {
+        const response = await fetch(`/api/v1/wishes/${wishId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status_is_finished: statusData.status_is_finished,
+                is_booked: false // При установке статуса "Исполнено" снимаем бронирование
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Ошибка сервера:', errorText);
+            throw new Error('Ошибка обновления статуса желания');
+        }
+        
+        const updatedWish = await response.json();
+        
+        return updatedWish;
+    } catch (error) {
+        console.error('Ошибка обновления статуса желания:', error);
+        throw error;
+    }
+}
+
+// Функция для удаления желания из всех вишлистов
+export async function removeWishFromAllWishlists(
+    token: string,
+    wishId: string
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/v1/wishes/wishlists/${wishId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Желание не найдено');
+            }
+            throw new Error('Ошибка удаления желания из вишлистов');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Ошибка удаления желания из вишлистов:', error);
+        throw error;
+    }
+}

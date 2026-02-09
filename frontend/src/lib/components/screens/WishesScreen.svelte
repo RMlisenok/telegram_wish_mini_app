@@ -726,6 +726,47 @@
         dispatch('openFinishedWishes');
     };
 
+    // Функция для пометки желания как исполненного
+    const markWishAsFinished = async (wishId) => {
+        if (!token || !wishId) return;
+        
+        try {
+            // Обновляем статус желания на Исполнено
+            await updateWishStatus(token, wishId, {
+                status_is_finished: true
+            });
+            
+            // Удаляем желание из всех вишлистов
+            await removeWishFromAllWishlists(token, wishId);
+            
+            // Обновляем локальные stores
+            wishesStore.update(wishes => 
+                wishes.map(w => 
+                    w.id === wishId 
+                        ? { ...w, status_is_finished: true, is_booked: false }
+                        : w
+                )
+            );
+            
+            // // Если в режиме вишлиста, удаляем из текущего вишлиста
+            // if (wishlistId) {
+            //     wishWishlistsStore.update(items => 
+            //         items.filter(item => item.id !== wishId.toString())
+            //     );
+            // }
+            
+            showNotification('Желание отмечено как исполненное');
+            
+            if (showDetailModal && selectedWish?.id === wishId) {
+                closeDetailModal();
+            }
+            
+        } catch (error) {
+            console.error('Ошибка при пометке желания как исполненного:', error);
+            showNotification('Не удалось отметить желание как исполненное');
+        }
+    };
+
 </script>
 
 <!--2009/0_Dass_25.12.2025-->
@@ -956,6 +997,33 @@
                                 {/if}
                             </Button>
                         </div>
+                    </div>
+                {/if}
+
+                {#if selectedWish && !isExternalWishlist && isCurrentUserOwner}
+                    <!-- Секция статуса -->
+                    <div class="detail-section">
+                        <h3>Статус</h3>
+                        
+                        {#if !selectedWish.isFinished}
+                            <!-- Кнопка для пометки как исполненного -->
+                            <Button 
+                                kind="primary" 
+                                full
+                                on:click={async () => {
+                                    if (confirm('Отметить желание как исполненное?\n\nОно будет перемещено в список "Исполненные" и удалено из всех вишлистов.')) {
+                                        await markWishAsFinished(selectedWish.id);
+                                    }
+                                }}
+                            >
+                                <img 
+                                    src="../../../../static/icons/check-circle-filled.png" 
+                                    alt="Исполнено" 
+                                    class="action-icon"
+                                />
+                                Отметить как исполненное
+                            </Button>
+                        {/if}
                     </div>
                 {/if}
                 
