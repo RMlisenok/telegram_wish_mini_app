@@ -39,6 +39,7 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
   }
 
   const data: QuestionnaireData = await response.json();
+  console.log(data);
 
   return {
     interests: data.interests || [],
@@ -48,13 +49,24 @@ export const loadQuestionnaire = async (token: string): Promise<QuestionnaireDat
 
 // Сохраняет анкету текущего пользователя
 export const saveQuestionnaire = async (token: string, questionnaireData: QuestionnaireData): Promise<void> => {
+  const formattedData = {
+    interests: questionnaireData.interests.map(item => ({
+      tag: item.tag,
+      details: item.details || "" 
+    })),
+    avoid_gifts: questionnaireData.avoid_gifts.map(item => ({
+      tag: item.tag,
+      details: item.details || ""
+    }))
+  };
+
   const response = await fetch('/api/v1/questionnaire', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(questionnaireData),
+    body: JSON.stringify(formattedData),
   });
 
   if (!response.ok) {
