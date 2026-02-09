@@ -1068,7 +1068,7 @@
             <h2>Детальное описание желания</h2>
             <div class="detail-content">
                 <!-- Добавляем кнопку закрепления в детальном просмотре -->
-                {#if wishlistId && selectedWish.connection_id}
+                {#if wishlistId && selectedWish.connection_id && !isExternalWishlist}
                     <div class="detail-section">
                         <h3>Действия</h3>
                         <div class="detail-actions">
