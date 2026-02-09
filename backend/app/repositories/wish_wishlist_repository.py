@@ -189,7 +189,6 @@ class WishWishlistRepository:
         count = result.scalar_one_or_none()
         return count if count is not None else 0
 
-
     async def delete_wish_in_wishlists(self, wish_id: int) -> int:
         query = (
             select(WishWishlist)

@@ -110,11 +110,11 @@ class WishService:
     async def delete_wish_in_wishlists(
         self,
         wish_id: int,
-        user_id: int
+        # user_id: int
     ) -> bool:
         try:
             wish = await self.get_wish(wish_id)
-            if not wish or wish.user_id != user_id:
+            if not wish:
                 return False
             deleted_count = await self.rep_wish_wishlist.delete_wish_in_wishlists(wish_id)
             print(f"Deleted: {deleted_count}")
