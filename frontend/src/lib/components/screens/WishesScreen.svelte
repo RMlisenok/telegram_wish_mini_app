@@ -2,12 +2,12 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     //import { wishlistsStore } from '../../stores/data.js';
-    import { wishesStore, loadWishes, deleteWish } from '../../../types/wishes.ts';
+    import { wishesStore, loadWishes, deleteWish, updateWishStatus, removeWishFromAllWishlists } from '../../../types/wishes.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
         checkWishlistSubscription,
         subscribeToWishlist,
-        unsubscribeFromWishlist 
+        unsubscribeFromWishlist
     } from '../../../types/subscription.ts';
     import { 
         addMultipleWishesToWishlist, 
