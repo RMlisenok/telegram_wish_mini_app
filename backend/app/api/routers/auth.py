@@ -120,10 +120,14 @@ async def auth_telegram(
         final_photo_url = user.photo
 
         if photo_url and photo_url != user.photo:
+            logger.error(f"START REPLACE PHOTO: {telegram_id}")
             if photo_url:
                 try:
+                    logger.error(f"START FUNCTION MIGRATE: {photo_url}")
                     migrated_url = await photo_service.migrate_photo(photo_url)
+                    logger.error(f"END FUNCTION MIGRATE: {migrated_url}")
                     if migrated_url:
+                        logger.error(f"NEW PHOTO")
                         final_photo_url = migrated_url
                     else:
                         logger.error(f"Error, use old photo: {final_photo_url}")
