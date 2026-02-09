@@ -269,10 +269,10 @@ export async function updateWishStatus(
 // Функция для удаления желания из всех вишлистов
 export async function removeWishFromAllWishlists(
     token: string,
-    wishId: string
+    wish_id: string
 ): Promise<boolean> {
     try {
-        const response = await fetch(`/api/v1/wishes/wishlists/${wishId}`, {
+        const response = await fetch(`/api/v1/wishes/wishlists/${wish_id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
