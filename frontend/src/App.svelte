@@ -127,7 +127,8 @@
                 isSubscribed: false, // Нужно будет проверить через API
                 publicWishlists: [], // Нужно загрузить отдельно
                 subscriptions: [], // Нужно загрузить отдельно
-                questionnaire: { interests: [], noGifts: [] } // Нужно загрузить отдельно
+                questionnaire: { interests: [], noGifts: [] }, // Нужно загрузить отдельно
+                subscriptionsArePrivate: !userData.show_sub
             };
             
         } catch (error) {
@@ -155,7 +156,8 @@
             isSubscribed: false,
             publicWishlists: [],
             subscriptions: [],
-            questionnaire: { interests: [], noGifts: [] }
+            questionnaire: { interests: [], noGifts: [] },
+            subscriptionsArePrivate: false
         };
         
         pushNavigate('otherProfile');
