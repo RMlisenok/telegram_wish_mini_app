@@ -317,7 +317,12 @@
                 <div class="q-label">Что дарить?</div>
                 <div class="q-pills">
                     {#each profile.questionnaire.interests as item (item.tag)}
-                        <span class="q-pill q-pill--ok">{item.tag}</span>
+                        <div class="q-tag-container">
+                            <span class="q-pill q-pill--ok">{item.tag}</span>
+                            {#if item.details && item.details.trim()}
+                                <div class="q-tag-details">{item.details}</div>
+                            {/if}
+                        </div>
                     {/each}
                 </div>
             </div>
@@ -328,7 +333,12 @@
                 <div class="q-label">Что вам не дарить?</div>
                 <div class="q-pills">
                     {#each profile.questionnaire.noGifts as item (item.tag)}
-                        <span class="q-pill q-pill--no">{item.tag}</span>
+                        <div class="q-tag-container">
+                            <span class="q-pill q-pill--no">{item.tag}</span>
+                            {#if item.details && item.details.trim()}
+                                <div class="q-tag-details">{item.details}</div>
+                            {/if}
+                        </div>
                     {/each}
                 </div>
             </div>
@@ -424,4 +434,22 @@
     .empty-note { color: #6b7280; font-size: 14px; margin: 8px 0; }
 
     .footer-actions { padding: 0 16px 12px; }
+
+    .q-tag-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: 200px;
+    }
+
+    .q-tag-details {
+        font-size: 11px;
+        color: #4b5563;
+        margin-top: 2px;
+        padding-left: 4px;
+        line-height: 1.2;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
 </style>
