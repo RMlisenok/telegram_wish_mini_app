@@ -28,6 +28,7 @@
     export let isExternalUser = false; // режим внешнего пользователя
     export let externalProfileId = null; // ID внешнего пользователя
     export let externalUserWishlists = []; // Вишлисты внешнего пользователя
+    import { deleteFile } from '../../../types/storage3.ts';
 
     let userWishlists = [];
 
@@ -241,7 +242,17 @@
     const confirmDeleteWishlist = async () => {
         if (!wishlistToDelete) return;
         // Удаляем этот wishlistId из всех желаний
+        const wishlist = userWishlists.find(wl => wl.id === wishlistToDelete);
         try {
+            // удаление фото из S3 если оно есть
+            if (wishlist?.rUrl && wishlist.rUrl.includes('selstorage.ru')) {
+                try {
+                    await deleteFile(wishlist.rUrl, token);
+                    console.log('Фото вишлиста удалено из S3');
+                } catch (s3Error) {
+                    console.warn('Не удалось удалить фото из S3:', s3Error);
+                }
+            }
             // Вызываем API для удаления
             await deleteWishlist(token, wishlistToDelete);
             
