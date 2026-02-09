@@ -21,6 +21,7 @@
         makeWishlistTgUrl, 
         makeWishlistShareUrl 
     } from '../../stores/data.js';
+    import { deleteFile } from '../../../types/storage3.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -629,6 +630,15 @@
         if (!selectedWish || !token) return;
     
         try {
+            if (selectedWish.photo && selectedWish.photo.includes('selstorage.ru')) {
+                try {
+                    await deleteFile(selectedWish.photo, token);
+                    console.log('Фото желания удалено из S3');
+                } catch (s3Error) {
+                    console.warn('Не удалось удалить фото из S3:', s3Error);
+                }
+            }
+            
             await deleteWish(token, selectedWish.id);
 
             await loadWishes(token);
