@@ -3,12 +3,14 @@
     import TextField from '../ui/TextField.svelte';
     import Button from '../ui/Button.svelte';
     import { onMount } from 'svelte';
+    import { uploadFile } from '../../../types/storage3.ts';
     //import { wishesStore, wishlistsStore } from '../../stores/data.js';
 
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { createWish } from '../../../types/wishes.ts';
     export let onGoBack;
     export let token;
+    let removePhotoFlag = false;
 
     onMount(async () => {
         if (!token) {
@@ -66,6 +68,7 @@
     function removePhoto() {
         photoFile = null;
         photoPreview = null;
+        removePhotoFlag = true;
     }
 
     // Сохранение желания
@@ -76,23 +79,31 @@
             return;
         }
         
-        error = '';
-        
-        // Создание объекта желания
-        const wishData = {
-            name: title.trim(),
-            description: description.trim(),
-            price: price ? parseFloat(price) : null,
-            currency: currency || null,
-            url_gift: link.trim(),
-            photo: photoPreview
-        };
+        error = '';   
 
-        if (currency && currency.trim() !== '') {
-            wishData.currency = currency;
-        }
+        
 
         try {
+            let photoUrl = '';
+            
+            if (photoFile) {
+                // Загрузка нового файла в S3
+                const result = await uploadFile(photoFile, token);
+                photoUrl = result.file_url;
+            }
+            // Создание объекта желания
+            const wishData = {
+                name: title.trim(),
+                description: description.trim(),
+                price: price ? parseFloat(price) : null,
+                currency: currency || null,
+                url_gift: link.trim(),
+                photo: photoUrl
+            };
+            if (currency && currency.trim() !== '') {
+                wishData.currency = currency;
+            }
+
             const newWish = await createWish(token, wishData);
             console.log('Создано новое желание:', newWish);
 

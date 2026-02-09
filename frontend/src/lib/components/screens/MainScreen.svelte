@@ -117,7 +117,7 @@
 
     <section class="section-card">
         <div class="profile-row">
-            <Avatar size={152} src={user.avatarUrl} initials={getInitials(user.fullName)} />
+            <Avatar size={152} src={user?.avatarUrl || ''} initials={getInitials(user?.fullName)} />
             <div class="profile-main">
                 <div class="profile-name">{user.fullName}</div>
                 <div class="profile-birth">{user.birthDate}</div>

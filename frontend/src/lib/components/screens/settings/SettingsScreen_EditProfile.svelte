@@ -74,7 +74,7 @@
             
             //S3
             if (selectedFile) {
-                if (photoUrl) {
+                if (photoUrl && photoUrl.includes('selstorage.ru')) {
                     //замена существующего файла
                     const result = await replaceFile(photoUrl, selectedFile, token);
                     photoUrl = result.file_url;
@@ -83,9 +83,12 @@
                     const result = await uploadFile(selectedFile, token);
                     photoUrl = result.file_url;
                 }
-            } else if (!tempAvatarUrl && photoUrl) {
+            } else if (!tempAvatarUrl && photoUrl && photoUrl.includes('selstorage.ru')) {
                 //удаление фото
                 await deleteFile(photoUrl, token);
+                photoUrl = ''; 
+            } else if (!tempAvatarUrl && photoUrl && !photoUrl.includes('selstorage.ru')) {
+                // Если фото не из S3 и удалено - просто очищаем URL
                 photoUrl = '';
             }
             

@@ -123,7 +123,7 @@
                 id: userData.id,
                 fullName: userData.name,
                 birthDate: formatDateToDDMMYYYY(userData.birth_date),
-                avatarUrl: userData.photo || '/default-avatar.png',
+                avatarUrl: userData.photo || '',
                 isSubscribed: false, // Нужно будет проверить через API
                 publicWishlists: [], // Нужно загрузить отдельно
                 subscriptions: [], // Нужно загрузить отдельно
@@ -396,7 +396,7 @@
             user_id: user.id.toString(),
             fullName: user.name  || 'Гость',
             birthDate: formatDateToDDMMYYYY(user.birth_date),
-            avatarUrl: user.photo || '/default-avatar.png',
+            avatarUrl: user.photo || '',
             showSubscriptions: user.show_sub ?? true,
             ui: {
                 textSize: (user.text_size as 'small' | 'medium' | 'large') || 'medium',
@@ -678,6 +678,7 @@
                     {:else if currentScreen === 'wishlistsEdit'}
                         <WishlistsScreenEdit
                             wishlistId={selectedWishlistId}
+                            token={token}
                             onGoBack={() => {
                                 selectedWishlistId = null;
                                 navigate('wishlists');

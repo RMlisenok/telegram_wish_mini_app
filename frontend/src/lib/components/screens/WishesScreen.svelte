@@ -2,12 +2,12 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     //import { wishlistsStore } from '../../stores/data.js';
-    import { wishesStore, loadWishes, deleteWish } from '../../../types/wishes.ts';
+    import { wishesStore, loadWishes, deleteWish, updateWishStatus, removeWishFromAllWishlists } from '../../../types/wishes.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
         checkWishlistSubscription,
         subscribeToWishlist,
-        unsubscribeFromWishlist 
+        unsubscribeFromWishlist
     } from '../../../types/subscription.ts';
     import { 
         addMultipleWishesToWishlist, 
@@ -21,6 +21,7 @@
         makeWishlistTgUrl, 
         makeWishlistShareUrl 
     } from '../../stores/data.js';
+    import { deleteFile } from '../../../types/storage3.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -131,6 +132,52 @@
             console.error('Ошибка загрузки информации о владельце вишлиста:', error);
         }
     }
+
+    let isCurrentWishOwner = false;
+
+    const checkWishOwnership = async (wishId) => {
+        if (!token || !wishId) return false;
+        
+        try {
+            // Загружаем информацию о желании
+            const wishResponse = await fetch(`/api/v1/wishes/${wishId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (wishResponse.ok) {
+                const wishData = await wishResponse.json();
+                
+                // Получаем ID текущего пользователя
+                const userResponse = await fetch('/api/v1/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    console.log('checkWishOwnership - userData:', userData);
+                    const currentUserId = userData.id.toString();
+                    const wishOwnerId = wishData.user_id.toString();
+                    
+                    isCurrentWishOwner = currentUserId === wishOwnerId;
+                    console.log('checkWishOwnership:', {
+                        currentUserId,
+                        wishOwnerId,
+                        isCurrentWishOwner
+                    });
+                    
+                    return isCurrentWishOwner;
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка проверки владельца желания:', error);
+        }
+        
+        return false;
+    };
 
     // Функция проверки подписки на вишлист
     async function checkWishlistSubscriptionStatus() {
@@ -583,6 +630,15 @@
         if (!selectedWish || !token) return;
     
         try {
+            if (selectedWish.photo && selectedWish.photo.includes('selstorage.ru')) {
+                try {
+                    await deleteFile(selectedWish.photo, token);
+                    console.log('Фото желания удалено из S3');
+                } catch (s3Error) {
+                    console.warn('Не удалось удалить фото из S3:', s3Error);
+                }
+            }
+            
             await deleteWish(token, selectedWish.id);
 
             await loadWishes(token);
@@ -657,6 +713,7 @@
             
             if (response.ok) {
                 const data = await response.json();
+                console.log('loadWishDetails - полученные данные:', data);
 
                 let connectionInfo = null;
                 if (wishlistId) {
@@ -681,16 +738,28 @@
                     updatedAt: data.updated_at,
                     connection_id: connectionInfo?.connection_id || null,
                     is_pinned: connectionInfo?.is_pinned || false,
-                    order_position: connectionInfo?.order_position || 0
+                    order_position: connectionInfo?.order_position || 0,
+                    user_id: data.user_id
                 };
+
                 console.log('selectedWish после обработки:', selectedWish);
-                console.log('loadWishDetails - selectedWish после обработки:', selectedWish);
+
+                // Проверяем владельца желания
+                const wishOwnerCheck = await checkWishOwnership(wishId);
+                
                 console.log('loadWishDetails - ключевые параметры:', {
                     isExternalWishlist,
-                    isCurrentUserOwner,
+                    isCurrentUserOwner, // Владелец вишлиста
+                    isCurrentWishOwner, // Владелец желания
                     selectedWishId: selectedWish.id,
-                    selectedWishIsFinished: selectedWish.isFinished
+                    selectedWishIsFinished: selectedWish.isFinished,
+                    selectedWishUserId: selectedWish.user_id,
+                    // Показывать ли кнопку "Исполнено"? 
+                    shouldShowFinishedButton: !isExternalWishlist && wishOwnerCheck
                 });
+                console.log('selectedWish после обработки:', selectedWish);
+                console.log('loadWishDetails - selectedWish после обработки:', selectedWish);
+                
                 showDetailModal = true;
             }
         } catch (error) {
@@ -792,6 +861,19 @@
             showNotification('Не удалось отметить желание как исполненное');
         }
     };
+
+    $: {
+        if (showDetailModal && selectedWish) {
+            console.log('=== MODAL AUTO-DEBUG ===');
+            console.log('isExternalWishlist:', isExternalWishlist);
+            console.log('isCurrentUserOwner:', isCurrentUserOwner);
+            console.log('isCurrentWishOwner:', isCurrentWishOwner);
+            console.log('selectedWish.id:', selectedWish?.id);
+            console.log('selectedWish.isFinished:', selectedWish?.isFinished);
+            console.log('Показывать чекбокс "Исполнено"?', !isExternalWishlist && isCurrentWishOwner);
+            console.log('======================');
+        }
+    }
 
 </script>
 
@@ -1026,7 +1108,7 @@
                     </div>
                 {/if}
 
-                {#if selectedWish && !isExternalWishlist && isCurrentUserOwner}
+                <!-- {#if !isExternalWishlist && isCurrentWishOwner} -->
                     <!-- Секция статуса -->
                     <div class="detail-section">
                         <h3>Статус</h3>
@@ -1051,7 +1133,7 @@
                             </Button>
                         {/if}
                     </div>
-                {/if}
+                <!-- {/if} -->
                 
                 <!-- Изображение -->
                 <div class="detail-image">
