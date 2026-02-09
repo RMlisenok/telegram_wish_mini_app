@@ -103,14 +103,16 @@ async def delete_wish(
 async def delete_wish_from_wishlists(
     wish_id: int,
     db: AsyncSession = Depends(get_db),
-    user_id: AsyncSession = Depends(get_current_user_id)
+    user_id: int = Depends(get_current_user_id)
 ):
     async with db.begin():
         service = WishService(db)
-        delete_status = await service.delete_wish_in_wishlists(wish_id)
+        delete_status = await service.delete_wish_in_wishlists(
+            wish_id,
+            user_id
+        )
         if not delete_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Wish not found"
             )
-
