@@ -191,31 +191,19 @@ class WishWishlistRepository:
 
 
     async def delete_wish_in_wishlists(self, wish_id: int) -> int:
-        # query = (
-        #     select(WishWishlist)
-        #     .where(WishWishlist.wish_id == wish_id)
-        # )
-        # result = await self.session.execute(query)
-        # connections = result.scalars().all()
+        query = (
+            select(WishWishlist)
+            .where(WishWishlist.wish_id == wish_id)
+        )
+        result = await self.session.execute(query)
+        connections = result.scalars().all()
 
-        # count = 0
-        # for connection in connections:
-        #     await self.session.delete(connection)
-        #     count += 1
+        count = 0
+        for connection in connections:
+            await self.session.delete(connection)
+            count += 1
 
-        # if count > 0:
-        #     await self.session.commit()
+        if count > 0:
+            await self.session.commit()
 
-        # return count
-        try:
-            stmt = delete(WishWishlist).where(WishWishlist.wish_id == wish_id)
-            result = await self.session.execute(stmt)
-            # rowcount возвращает количество удаленных строк
-            deleted_count = result.rowcount
-            
-            print(f"Deleted {deleted_count} wish-wishlist connections for wish_id: {wish_id}")
-            
-            return deleted_count
-        except Exception as e:
-            print(f"Error deleting wish-wishlist connections: {e}")
-            return 0
+        return count
