@@ -161,7 +161,7 @@
                 interests,
                 avoid_gifts: noGifts
             };
-
+            console.log('Sending data:', questionnaireData);
             await saveQuestionnaire(token, questionnaireData);
             questionnaireStore.set({ interests, avoid_gifts: noGifts });
             alert('Анкета успешно сохранена! Теперь друзья смогут видеть ваши интересы.'); // FS-5.6

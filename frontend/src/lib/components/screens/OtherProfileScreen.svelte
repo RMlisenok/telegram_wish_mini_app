@@ -316,8 +316,8 @@
             <div class="q-block">
                 <div class="q-label">Что дарить?</div>
                 <div class="q-pills">
-                    {#each profile.questionnaire.interests as item (item)}
-                        <span class="q-pill q-pill--ok">{item}</span>
+                    {#each profile.questionnaire.interests as item (item.tag)}
+                        <span class="q-pill q-pill--ok">{item.tag}</span>
                     {/each}
                 </div>
             </div>
@@ -327,8 +327,8 @@
             <div class="q-block">
                 <div class="q-label">Что вам не дарить?</div>
                 <div class="q-pills">
-                    {#each profile.questionnaire.noGifts as item (item)}
-                        <span class="q-pill q-pill--no">{item}</span>
+                    {#each profile.questionnaire.noGifts as item (item.tag)}
+                        <span class="q-pill q-pill--no">{item.tag}</span>
                     {/each}
                 </div>
             </div>
