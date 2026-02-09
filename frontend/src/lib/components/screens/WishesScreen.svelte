@@ -988,7 +988,7 @@
                         {/if}
 
                         <!-- Иконка закрепления (только в режиме вишлиста) -->
-                        {#if wishlistId && wish.connection_id}
+                        {#if wishlistId && wish.connection_id && !isExternalWishlist}
                             <button 
                                 class="pin-button {wish.is_pinned ? 'pinned' : ''}"
                                 on:click|stopPropagation={() => togglePinWish(wish.id, wish.connection_id, wish.is_pinned, wish.order_position)}
