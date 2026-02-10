@@ -43,6 +43,20 @@
             console.error('Ошибка загрузки желаний:', err);
         }
     }
+
+    const returnToActive = async (wishId) => {
+        console.log('Возврат желания в активные:', wishId);
+        // TODO: реализовать API вызов для возврата желания в активные
+        alert(`Желание с ID ${wishId} будет возвращено в активные`);
+    };
+
+    const deletePermanently = async (wishId) => {
+        console.log('Удаление желания:', wishId);
+        if (confirm('Вы уверены, что хотите полностью удалить это желание? Это действие нельзя будет отменить.')) {
+            // TODO: реализовать API вызов для полного удаления желания
+            alert(`Желание с ID ${wishId} будет полностью удалено`);
+        }
+    };
     
     $: finishedWishes = $wishesStore
         .slice() // создаем копию массива, чтобы не мутировать оригинал
@@ -101,6 +115,24 @@
                         {#if wish.price != null}
                             <div class="wish-price">{formatPrice(wish)}</div>
                         {/if}
+                        
+                        <!-- Добавляем кнопки действий -->
+                        <div class="wish-actions">
+                            <div class="wish-actions">
+                                <Button 
+                                    kind="primary" 
+                                    on:click={() => returnToActive(wish.id)}
+                                >
+                                    Вернуть в активные
+                                </Button>
+                                <Button 
+                                    kind="ghost" 
+                                    on:click={() => deletePermanently(wish.id)}
+                                >
+                                    Удалить
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </article>
             {/each}
