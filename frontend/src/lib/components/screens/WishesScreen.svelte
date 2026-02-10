@@ -2,19 +2,7 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
     //import { wishlistsStore } from '../../stores/data.js';
-    import { 
-        wishesStore, 
-        loadWishes, 
-        deleteWish, 
-        updateWishStatus, 
-        removeWishFromAllWishlists
-    } from '../../../types/wishes.ts';
-    import { 
-        checkWishReservation, 
-        toggleReservation,
-        getReservationForWishWishlist,
-        reservationsStore
-    } from '../../../types/wish_reservation.ts';
+    import { wishesStore, loadWishes, deleteWish, updateWishStatus, removeWishFromAllWishlists } from '../../../types/wishes.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
         checkWishlistSubscription,
@@ -51,16 +39,10 @@
     let wishlistOwnerId = null; // ID владельца вишлиста
     let isCurrentUserOwner = false; // Является ли текущий пользователь владельцем
 
-    // Переменные для бронирования
-    let currentUserId = null;
-    let wishReservations = new Map(); // Map: wish_wishlist_id -> {isReserved, reservedByCurrentUser}
-    let isLoadingReservation = new Map(); // Map: wish_wishlist_id -> boolean
-
     onMount(async () => {
         console.log(1);
         if (token) {
             await fetchWishes();
-            await loadCurrentUserId();
         }
 
         // Если мы в режиме вишлиста, загружаем его желания
@@ -74,8 +56,6 @@
                 // Проверяем подписку на вишлист (только для внешних вишлистов)
                 if (isExternalWishlist && token) {
                     await checkWishlistSubscriptionStatus();
-                    // Загружаем данные о бронировании
-                    await loadAllWishReservations();
                 }
                 
                 // Загружаем информацию о владельце вишлиста
@@ -85,141 +65,6 @@
             }
         }
     });
-
-    // Функция для получения статуса бронирования по connection_id
-    const getReservationStatus = (connectionId) => {
-        if (!connectionId) return { isReserved: false, reservedByCurrentUser: false };
-        return wishReservations.get(connectionId) || { isReserved: false, reservedByCurrentUser: false };
-    };
-    
-    // Функция для проверки, может ли пользователь снять бронь
-    const canUserUnreserve = (connectionId) => {
-        const status = getReservationStatus(connectionId);
-        return status.isReserved && status.reservedByCurrentUser;
-    };
-
-    // Функция загрузки ID текущего пользователя
-    async function loadCurrentUserId() {
-        if (!token) return null;
-        
-        try {
-            const response = await fetch('/api/v1/users/me', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                const userData = await response.json();
-                currentUserId = userData.id.toString();
-                console.log('Текущий пользователь ID:', currentUserId);
-                return currentUserId;
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки текущего пользователя:', error);
-        }
-        return null;
-    }
-
-    // Функция проверки бронирования для всех желаний в вишлисте
-    async function loadAllWishReservations() {
-        if (!token || !wishlistId || !isExternalWishlist || !currentUserId) return;
-        
-        try {
-            const newReservationsMap = new Map();
-            
-            // Для каждого желания в вишлисте проверяем бронь
-            for (const wish of $wishWishlistsStore) {
-                if (!wish.connection_id) continue;
-                
-                const reservationData = await checkWishReservation(token, wish.connection_id);
-                newReservationsMap.set(wish.connection_id, reservationData);
-                
-                console.log(`Бронь для wish ${wish.id}, connection ${wish.connection_id}:`, reservationData);
-            }
-            
-            wishReservations = newReservationsMap;
-        } catch (error) {
-            console.error('Ошибка загрузки бронирований:', error);
-        }
-    }
-
-    // Функция проверки брони для конкретного желания
-    async function checkSingleWishReservation(wishConnectionId) {
-        if (!token || !wishConnectionId) return;
-        
-        try {
-            const reservationData = await checkWishReservation(token, wishConnectionId);
-            wishReservations.set(wishConnectionId, reservationData);
-            return reservationData;
-        } catch (error) {
-            console.error('Ошибка проверки брони для желания:', error);
-            return { isReserved: false, reservedByCurrentUser: false };
-        }
-    }
-
-    // Функция бронирования/снятия брони
-    async function handleReservationToggle(wishId, wishConnectionId) {
-        if (!token || !wishConnectionId || !currentUserId) {
-            showNotification('Необходима авторизация');
-            return;
-        }
-        
-        // Проверяем текущий статус
-        const currentStatus = wishReservations.get(wishConnectionId);
-        const isCurrentlyReserved = currentStatus?.isReserved || false;
-        const reservedByCurrentUser = currentStatus?.reservedByCurrentUser || false;
-        
-        // Если забронировано другим пользователем, нельзя снять бронь
-        if (isCurrentlyReserved && !reservedByCurrentUser) {
-            showNotification('Это желание уже забронировано другим пользователем');
-            return;
-        }
-        
-        // Устанавливаем флаг загрузки
-        isLoadingReservation.set(wishConnectionId, true);
-        
-        try {
-            const newReservationStatus = !isCurrentlyReserved;
-            
-            // Отправляем запрос на сервер
-            await toggleReservation(token, wishConnectionId, newReservationStatus);
-            
-            // Обновляем локальное состояние
-            const updatedStatus = {
-                isReserved: newReservationStatus,
-                reservedByCurrentUser: newReservationStatus ? true : false
-            };
-            
-            wishReservations.set(wishConnectionId, updatedStatus);
-            
-            // Показываем уведомление
-            if (newReservationStatus) {
-                showNotification('Желание успешно забронировано!');
-            } else {
-                showNotification('Бронь успешно снята');
-            }
-            
-            // Обновляем is_booked статус в локальных данных
-            if (wishlistId) {
-                wishWishlistsStore.update(items => 
-                    items.map(item => 
-                        item.connection_id === wishConnectionId
-                            ? { ...item, is_booked: newReservationStatus }
-                            : item
-                    )
-                );
-            }
-            
-        } catch (error) {
-            console.error('Ошибка при бронировании:', error);
-            showNotification(error.message || 'Произошла ошибка');
-        } finally {
-            isLoadingReservation.delete(wishConnectionId);
-        }
-    }
 
     let wishlistOwnerData = null;
     let wishlistOwnerName = '';
@@ -927,9 +772,7 @@
         console.log('selectedWish.wishlistIds:', selectedWish.wishlistIds);
         return selectedWish.wishlistIds.map(id => id.toString());
     };
-
-    $: reservationStatus = getReservationStatus(wish.connection_id);
-
+    
     $: availableWishlistsForCopyMove = $wishlistsStore
     .filter(wl => {
         // получаем ID вишлистов, где уже есть желание
@@ -1160,45 +1003,12 @@
                                 />
                             </button>
                         {/if}
-
-                        <!-- Индикатор брони для внешних вишлистов -->
-                        {#if isExternalWishlist && wish.is_booked}
-                            <div class="reservation-badge">Забронировано</div>
-                        {/if}
                     </div>
 
                     <div class="wish-card-body">
                         <div class="wish-title" title={wish.name}>{wish.name}</div>
                         {#if wish.price != null}
                             <div class="wish-price">{formatPrice(wish)}</div>
-                        {/if}
-
-
-                        <!-- Кнопка бронирования для внешних вишлистов -->
-                        {#if isExternalWishlist && wish.connection_id && currentUserId !== wishlistOwnerId}
-                            <div class="wish-reservation-action">
-                                {#if reservationStatus.isReserved}
-                                    {#if reservationStatus.reservedByCurrentUser}
-                                        <button 
-                                            class="reservation-button reserved-by-me"
-                                            on:click|stopPropagation={() => handleReservationToggle(wish.id, wish.connection_id)}
-                                        >
-                                            Отменить бронь
-                                        </button>
-                                    {:else}
-                                        <button class="reservation-button reserved-by-other" disabled>
-                                            Забронировано
-                                        </button>
-                                    {/if}
-                                {:else}
-                                    <button 
-                                        class="reservation-button available"
-                                        on:click|stopPropagation={() => handleReservationToggle(wish.id, wish.connection_id)}
-                                    >
-                                        Забронировать
-                                    </button>
-                                {/if}
-                            </div>
                         {/if}
                     </div>
                 </article>
@@ -2396,70 +2206,6 @@
         background-color: #e5e7eb;
     }
 
-    /* Стили для бронирования */
-    .wish-card.booked {
-        opacity: 0.9;
-        border-color: #e5e7eb;
-    }
-    
-    .reservation-badge {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: #f59e0b;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        z-index: 2;
-    }
-    
-    .wish-reservation-action {
-        margin-top: 8px;
-        width: 100%;
-    }
-    
-    .reservation-button {
-        width: 100%;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .reservation-button.available {
-        background: #3b82f6;
-        color: white;
-    }
-    
-    .reservation-button.available:hover {
-        background: #2563eb;
-    }
-    
-    .reservation-button.reserved-by-me {
-        background: #ef4444;
-        color: white;
-    }
-    
-    .reservation-button.reserved-by-me:hover {
-        background: #dc2626;
-    }
-    
-    .reservation-button.reserved-by-other {
-        background: #9ca3af;
-        color: white;
-        cursor: not-allowed;
-    }
-    
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-    
+
 </style>
 
