@@ -835,13 +835,13 @@
             await removeWishFromAllWishlists(token, wishId);
             
             // Обновляем локальные stores
-            wishesStore.update(wishes => 
+            /*wishesStore.update(wishes => 
                 wishes.map(w => 
                     w.id === wishId 
                         ? { ...w, status_is_finished: true, is_booked: false }
                         : w
                 )
-            );
+            );*/
             
             // // Если в режиме вишлиста, удаляем из текущего вишлиста
             // if (wishlistId) {
@@ -851,6 +851,7 @@
             // }
             
             showNotification('Желание отмечено как исполненное');
+            await loadWishes(token);
             
             if (showDetailModal && selectedWish?.id === wishId) {
                 closeDetailModal();
