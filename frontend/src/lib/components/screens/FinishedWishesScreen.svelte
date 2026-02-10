@@ -2,7 +2,7 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, loadFinishedWishes, updateWishStatus } from '../../../types/wishes.ts';
+    import { wishesStore, loadFinishedWishes, updateWishStatus, deleteWish } from '../../../types/wishes.ts';
     
     export let token;
     const dispatch = createEventDispatcher();
@@ -58,7 +58,9 @@
         console.log('Удаление желания:', wishId);
         if (confirm('Вы уверены, что хотите полностью удалить это желание? Это действие нельзя будет отменить.')) {
             // TODO: реализовать API вызов для полного удаления желания
-            alert(`Желание с ID ${wishId} будет полностью удалено`);
+            await deleteWish(token, wishId);
+
+            await loadFinishedWishes(token);
         }
     };
     
