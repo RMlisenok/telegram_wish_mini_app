@@ -156,7 +156,7 @@
     
     .wish-card {
         width: 214px;
-        height: 277px;
+        height: 325px;
         border-radius: 16px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
@@ -212,7 +212,7 @@
         flex-direction: column;
         gap: 4px;
         flex: 1;
-        min-height: 63px;
+        min-height: 111px;
         box-sizing: border-box;
     }
     
@@ -226,6 +226,7 @@
         text-overflow: ellipsis;
         line-height: 1.3;
         flex-shrink: 0;
+        margin-bottom: 4px;
     }
     
     .wish-price {
@@ -241,5 +242,40 @@
         padding: 40px 16px;
         color: #6b7280;
         font-size: 16px;
+    }
+
+    .wish-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: auto;
+    }
+    
+    .wish-actions .ui-button {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+        min-height: 28px;
+        border-radius: 6px;
+        flex: 1;
+    }
+    
+    .wish-actions .ui-button.primary {
+        background: #2563eb !important;
+        box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    .wish-actions .ui-button.primary:active {
+        background: #2563eb !important;
+        box-shadow: 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    .wish-actions .ui-button.ghost {
+        background: #fef2f2 !important;
+        color: #dc2626 !important;
+        border: 1px solid #fecaca !important;
+        box-shadow: none !important;
+    }
+    
+    .wish-actions .ui-button.ghost:active {
+        background: #fee2e2 !important;
     }
 </style>
