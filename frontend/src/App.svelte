@@ -612,6 +612,7 @@
                             wishlistId={currentWishlistId}
                             onMount={() => console.log(currentWishlistId)}
                             isExternalWishlist={currentWishlistIsExternal}
+                            currentUserId={currentUserId}
                             onNavigateToCreateWishes={() => navigate('wishesCreate')} 
                             on:openEditWishes={(e) => {
                                 selectedWishId = e.detail.id;

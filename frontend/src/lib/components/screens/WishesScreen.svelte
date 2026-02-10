@@ -38,6 +38,9 @@
 
     export let token;
 
+    export let currentUserId = null;
+    console.log('Current user ID:', currentUserId);
+
     let isLoading = false;
     let isSubscribedToWishlist = false; // Состояние подписки на вишлист
     let wishlistOwnerId = null; // ID владельца вишлиста
@@ -74,42 +77,11 @@
         }
     });
 
-    // // Функция для загрузки ID текущего пользователя
-    // async function loadCurrentUserId() {
-    //     if (!token) return null;
-        
-    //     try {
-    //         const response = await fetch('/api/v1/users/me', {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-            
-    //         if (response.ok) {
-    //             const userData = await response.json();
-    //             currentUserId = userData.id.toString();
-    //             console.log('Текущий пользователь ID:', currentUserId);
-    //             return currentUserId;
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка загрузки текущего пользователя:', error);
-    //     }
-    //     return null;
-    // }
-
     async function handleReservation(wishId, connectionId) {
         if (!token || !connectionId) {
             showNotification('Необходима авторизация для бронирования');
             return;
         }
-        
-        // // Проверяем, что пользователь не владелец вишлиста
-        // if (currentUserId === wishlistOwnerId) {
-        //     showNotification('Вы не можете забронировать желание в своем собственном вишлисте');
-        //     return;
-        // }
         
         // Устанавливаем флаг загрузки
         loadingReservation.set(connectionId, true);
@@ -1596,7 +1568,7 @@
 
     .wish-card {
         width: 214px;
-        height: 277px;
+        height: auto;
         border-radius: 16px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
