@@ -720,6 +720,7 @@
                     
                     {:else if currentScreen === 'subscribers'}
                         <SubscribersScreen
+                        token={token}
                             on:open-profile={(e) => openOtherProfileById(e.detail.profileId)}
                         />
                     
