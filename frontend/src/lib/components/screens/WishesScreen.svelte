@@ -22,6 +22,10 @@
         makeWishlistShareUrl 
     } from '../../stores/data.js';
     import { deleteFile } from '../../../types/storage3.ts';
+    import { 
+        createReservation,
+        checkReservationStatus 
+    } from '../../../types/wish_reservation.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -39,10 +43,14 @@
     let wishlistOwnerId = null; // ID владельца вишлиста
     let isCurrentUserOwner = false; // Является ли текущий пользователь владельцем
 
+    // Состояние загрузки для каждой кнопки бронирования
+    let loadingReservation = new Map(); // Map<connection_id, boolean>
+
     onMount(async () => {
         console.log(1);
         if (token) {
             await fetchWishes();
+            await loadCurrentUserId();
         }
 
         // Если мы в режиме вишлиста, загружаем его желания
@@ -65,6 +73,78 @@
             }
         }
     });
+
+    // Функция для загрузки ID текущего пользователя
+    async function loadCurrentUserId() {
+        if (!token) return null;
+        
+        try {
+            const response = await fetch('/api/v1/users/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const userData = await response.json();
+                currentUserId = userData.id.toString();
+                console.log('Текущий пользователь ID:', currentUserId);
+                return currentUserId;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки текущего пользователя:', error);
+        }
+        return null;
+    }
+
+    async function handleReservation(wishId, connectionId) {
+        if (!token || !connectionId) {
+            showNotification('Необходима авторизация для бронирования');
+            return;
+        }
+        
+        // Проверяем, что пользователь не владелец вишлиста
+        if (currentUserId === wishlistOwnerId) {
+            showNotification('Вы не можете забронировать желание в своем собственном вишлисте');
+            return;
+        }
+        
+        // Устанавливаем флаг загрузки
+        loadingReservation.set(connectionId, true);
+        
+        try {
+            // Создаем резервацию
+            await createReservation(token, connectionId);
+            
+            // Обновляем локальное состояние - помечаем как забронированное
+            wishWishlistsStore.update(items => 
+                items.map(item => 
+                    item.connection_id === connectionId
+                        ? { ...item, is_booked: true }
+                        : item
+                )
+            );
+            
+            // Обновляем также в основном списке желаний
+            wishesStore.update(wishes =>
+                wishes.map(wish =>
+                    wish.id === wishId
+                        ? { ...wish, is_booked: true }
+                        : wish
+                )
+            );
+            
+            showNotification('Желание успешно забронировано!');
+            
+        } catch (error) {
+            console.error('Ошибка при бронировании:', error);
+            showNotification(error.message || 'Не удалось забронировать желание');
+        } finally {
+            loadingReservation.delete(connectionId);
+        }
+    }
 
     let wishlistOwnerData = null;
     let wishlistOwnerName = '';
@@ -1003,12 +1083,41 @@
                                 />
                             </button>
                         {/if}
+
+                        <!-- Индикатор "Забронировано" (если уже забронировано) -->
+                        {#if isExternalWishlist && wish.is_booked}
+                            <div class="reservation-badge">
+                                Забронировано
+                            </div>
+                        {/if}
                     </div>
 
                     <div class="wish-card-body">
                         <div class="wish-title" title={wish.name}>{wish.name}</div>
                         {#if wish.price != null}
                             <div class="wish-price">{formatPrice(wish)}</div>
+                        {/if}
+
+                        <!-- Кнопка бронирования (только для внешних вишлистов) -->
+                        {#if isExternalWishlist && wish.connection_id}
+                            <div class="reservation-section">
+                                {#if loadingReservation.get(wish.connection_id)}
+                                    <button class="reservation-button loading" disabled>
+                                        <span class="spinner"></span> Загрузка...
+                                    </button>
+                                {:else if wish.is_booked}
+                                    <button class="reservation-button reserved" disabled>
+                                        Забронировано
+                                    </button>
+                                {:else}
+                                    <button 
+                                        class="reservation-button" 
+                                        on:click|stopPropagation={() => handleReservation(wish.id, wish.connection_id)}
+                                    >
+                                        Забронировать
+                                    </button>
+                                {/if}
+                            </div>
                         {/if}
                     </div>
                 </article>
@@ -2205,6 +2314,77 @@
     .finished-button:active {
         background-color: #e5e7eb;
     }
+
+    /* Стили для кнопок бронирования */
+    .reservation-section {
+        margin-top: 8px;
+        width: 100%;
+    }
+    
+    .reservation-button {
+        width: 100%;
+        padding: 8px 12px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-align: center;
+    }
+    
+    .reservation-button:hover:not(:disabled) {
+        background-color: #2563eb;
+    }
+    
+    .reservation-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    .reservation-button.reserved {
+        background-color: #9ca3af;
+    }
+    
+    .reservation-button.loading {
+        background-color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ffffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    /* Индикатор "Забронировано" */
+    .reservation-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #f59e0b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    
 
 
 </style>
