@@ -2,7 +2,7 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, loadFinishedWishes } from '../../../types/wishes.ts';
+    import { wishesStore, loadFinishedWishes, updateWishStatus, deleteWish } from '../../../types/wishes.ts';
     
     export let token;
     const dispatch = createEventDispatcher();
@@ -43,8 +43,40 @@
             console.error('Ошибка загрузки желаний:', err);
         }
     }
+
+    const returnToActive = async (wishId) => {
+        console.log('Возврат желания в активные:', wishId);
+        // TODO: реализовать API вызов для возврата желания в активные
+        await updateWishStatus(token, wishId, {
+            status_is_finished: false
+        });
+
+        await loadFinishedWishes(token);
+    };
+
+    const deletePermanently = async (wishId) => {
+        console.log('Удаление желания:', wishId);
+        if (confirm('Вы уверены, что хотите полностью удалить это желание? Это действие нельзя будет отменить.')) {
+            // TODO: реализовать API вызов для полного удаления желания
+            await deleteWish(token, wishId);
+
+            await loadFinishedWishes(token);
+        }
+    };
     
-    $: finishedWishes = $wishesStore;
+    $: finishedWishes = $wishesStore
+        .slice() // создаем копию массива, чтобы не мутировать оригинал
+        .sort((a, b) => {
+            // Если даты есть, сортируем по ним
+            if (a.updated_At && b.updated_At) {
+                return b.updated_At.getTime() - a.updated_At.getTime();
+            }
+            // Если у одного из объектов нет даты, ставим его в конец
+            if (!a.updated_At && b.updated_At) return 1;
+            if (a.updated_At && !b.updated_At) return -1;
+            // Если дат нет у обоих, сохраняем исходный порядок
+            return 0;
+        });
     
     const goBack = () => {
         dispatch('back');
@@ -89,6 +121,26 @@
                         {#if wish.price != null}
                             <div class="wish-price">{formatPrice(wish)}</div>
                         {/if}
+                        
+                        <!-- Добавляем кнопки действий -->
+                        <div class="wish-actions-container">
+                            <div class="wish-actions">
+                                <Button 
+                                    kind="primary" 
+                                    on:click={() => returnToActive(wish.id)}
+                                    class="action-btn"
+                                >
+                                    Вернуть в активные
+                                </Button>
+                                <Button 
+                                    kind="ghost" 
+                                    on:click={() => deletePermanently(wish.id)}
+                                    class="action-btn"
+                                >
+                                    Удалить
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </article>
             {/each}
@@ -112,7 +164,7 @@
     
     .wish-card {
         width: 214px;
-        height: 277px;
+        height: auto;
         border-radius: 16px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
@@ -168,8 +220,9 @@
         flex-direction: column;
         gap: 4px;
         flex: 1;
-        min-height: 63px;
+        min-height: 111px;
         box-sizing: border-box;
+        flex-grow: 1;
     }
     
     .wish-title {
@@ -182,6 +235,7 @@
         text-overflow: ellipsis;
         line-height: 1.3;
         flex-shrink: 0;
+        margin-bottom: 4px;
     }
     
     .wish-price {
@@ -198,4 +252,25 @@
         color: #6b7280;
         font-size: 16px;
     }
+
+    .wish-actions-container {
+        margin-top: auto;
+        padding-top: 8px;
+        flex-shrink: 0;
+    }
+
+    .wish-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+    .action-btn {
+        height: 36px !important;
+        min-height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
 </style>
