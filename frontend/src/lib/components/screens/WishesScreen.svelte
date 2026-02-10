@@ -50,7 +50,7 @@
         console.log(1);
         if (token) {
             await fetchWishes();
-            await loadCurrentUserId();
+            // await loadCurrentUserId();
         }
 
         // Если мы в режиме вишлиста, загружаем его желания
@@ -74,30 +74,30 @@
         }
     });
 
-    // Функция для загрузки ID текущего пользователя
-    async function loadCurrentUserId() {
-        if (!token) return null;
+    // // Функция для загрузки ID текущего пользователя
+    // async function loadCurrentUserId() {
+    //     if (!token) return null;
         
-        try {
-            const response = await fetch('/api/v1/users/me', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+    //     try {
+    //         const response = await fetch('/api/v1/users/me', {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         });
             
-            if (response.ok) {
-                const userData = await response.json();
-                currentUserId = userData.id.toString();
-                console.log('Текущий пользователь ID:', currentUserId);
-                return currentUserId;
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки текущего пользователя:', error);
-        }
-        return null;
-    }
+    //         if (response.ok) {
+    //             const userData = await response.json();
+    //             currentUserId = userData.id.toString();
+    //             console.log('Текущий пользователь ID:', currentUserId);
+    //             return currentUserId;
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка загрузки текущего пользователя:', error);
+    //     }
+    //     return null;
+    // }
 
     async function handleReservation(wishId, connectionId) {
         if (!token || !connectionId) {
@@ -105,11 +105,11 @@
             return;
         }
         
-        // Проверяем, что пользователь не владелец вишлиста
-        if (currentUserId === wishlistOwnerId) {
-            showNotification('Вы не можете забронировать желание в своем собственном вишлисте');
-            return;
-        }
+        // // Проверяем, что пользователь не владелец вишлиста
+        // if (currentUserId === wishlistOwnerId) {
+        //     showNotification('Вы не можете забронировать желание в своем собственном вишлисте');
+        //     return;
+        // }
         
         // Устанавливаем флаг загрузки
         loadingReservation.set(connectionId, true);
