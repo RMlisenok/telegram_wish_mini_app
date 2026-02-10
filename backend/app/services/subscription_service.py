@@ -12,13 +12,15 @@ from app.schemas.subscription import (
     SubscribersVisitUpdate,
     SubscriptionsResponse,
     SubscribersResponse
-    )
+)
+from app.services.notification_service_bot import NotificationService
+from app.core.bot_setup import bot
 
 
 class SubscriptionService:
     def __init__(
-        self,
-        session: AsyncSession
+            self,
+            session: AsyncSession
     ):
         self.session = session
         self.rep_subs = SubscriptionRepository(session)
@@ -27,16 +29,17 @@ class SubscriptionService:
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def subscribe_to_user(
-        self,
-        user_id: int,
-        target_user_id: int
+            self,
+            user_id: int,
+            target_user_id: int
     ) -> bool:
         if user_id == target_user_id:
             return False
+
         target_user = await self.rep_user.get_user_by_id(target_user_id)
         if not target_user:
             return False
-        
+
         existing = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
             type_sub=True,
@@ -44,19 +47,57 @@ class SubscriptionService:
         )
         if existing:
             return False
-        
+
         subscription_data = {
             "subscriber_id": user_id,
             "type_sub": True,
             "target_user_id": target_user_id
         }
+
         subscription = await self.rep_subs.create(subscription_data)
+
+        if subscription:
+            try:
+                from app.services.notification_service_bot import NotificationService
+                from app.core.bot_setup import bot
+
+                notif_service = NotificationService(bot)
+                await notif_service.notify_new_follower(self.session, user_id, target_user_id)
+            except Exception as e:
+                print(f"Ошибка отправки уведомления о подписке: {e}")
         return subscription is not None
 
+    # async def subscribe_to_user(
+    #     self,
+    #     user_id: int,
+    #     target_user_id: int
+    # ) -> bool:
+    #     if user_id == target_user_id:
+    #         return False
+    #     target_user = await self.rep_user.get_user_by_id(target_user_id)
+    #     if not target_user:
+    #         return False
+    #
+    #     existing = await self.rep_subs.get_subscription(
+    #         subscriber_id=user_id,
+    #         type_sub=True,
+    #         target_user_id=target_user_id
+    #     )
+    #     if existing:
+    #         return False
+    #
+    #     subscription_data = {
+    #         "subscriber_id": user_id,
+    #         "type_sub": True,
+    #         "target_user_id": target_user_id
+    #     }
+    #     subscription = await self.rep_subs.create(subscription_data)
+    #     return subscription is not None
+
     async def subscribe_to_wishlist(
-        self,
-        user_id: int,
-        target_wishlist_id: int
+            self,
+            user_id: int,
+            target_wishlist_id: int
     ) -> bool:
         wishlist = await self.rep_wishlist.get(target_wishlist_id)
         if not wishlist:
@@ -64,7 +105,7 @@ class SubscriptionService:
 
         if wishlist.user_id == user_id:
             return False
-        
+
         existing = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
             type_sub=False,
@@ -72,7 +113,7 @@ class SubscriptionService:
         )
         if existing:
             return False
-        
+
         subscription_data = {
             "subscriber_id": user_id,
             "type_sub": False,
@@ -82,9 +123,9 @@ class SubscriptionService:
         return subscription is not None
 
     async def update_visit(
-        self,
-        user_id: int,
-        subscribe_id: int
+            self,
+            user_id: int,
+            subscribe_id: int
     ) -> SubscribersVisitUpdate:
         update = await self.rep_subs.update(subscribe_id)
         if update:
@@ -92,9 +133,9 @@ class SubscriptionService:
         return None
 
     async def unsubscribe_from_user(
-        self,
-        user_id: int,
-        target_user_id: int
+            self,
+            user_id: int,
+            target_user_id: int
     ) -> bool:
         return await self.rep_subs.delete_by_target(
             subscriber_id=user_id,
@@ -103,21 +144,21 @@ class SubscriptionService:
         )
 
     async def unsubscribe_from_wishlist(
-        self,
-        user_id: int,
-        target_wishlist_id: int
+            self,
+            user_id: int,
+            target_wishlist_id: int
     ) -> bool:
         return await self.rep_subs.delete_by_target(
             subscriber_id=user_id,
             type_sub=False,
-            target_wishlist_id=target_wishlist_id
+            target_user_id=target_wishlist_id
         )
 
     async def get_my_subscription(
-        self,
-        user_id: int,
-        is_desc: bool = False,
-        limit: int = 100
+            self,
+            user_id: int,
+            is_desc: bool = False,
+            limit: int = 100
     ) -> SubscriptionsResponse:
         subscriptions = await self.rep_subs.get_user_subscription(
             subscriber_id=user_id,
@@ -165,9 +206,9 @@ class SubscriptionService:
         )
 
     async def get_my_user_subscriptions(
-        self,
-        user_id: int,
-        limit: int = 100
+            self,
+            user_id: int,
+            limit: int = 100
     ) -> SubscriptionsResponse:
         subscriptions = await self.rep_subs.get_user_subscription(
             subscriber_id=user_id,
@@ -197,9 +238,9 @@ class SubscriptionService:
         )
 
     async def get_my_wishlist_subscriptions(
-        self,
-        user_id: int,
-        limit: int = 100
+            self,
+            user_id: int,
+            limit: int = 100
     ) -> SubscriptionsResponse:
         subscriptions = await self.rep_subs.get_user_subscription(
             subscriber_id=user_id,
@@ -236,10 +277,10 @@ class SubscriptionService:
         )
 
     async def get_user_subscriptions(
-        self,
-        user_id: int,
-        current_user_id: Optional[int] = None,
-        limit: int = 100
+            self,
+            user_id: int,
+            current_user_id: Optional[int] = None,
+            limit: int = 100
     ) -> SubscriptionsResponse:
         user = await self.rep_user.get_user_by_id(user_id=user_id)
         if not user:
@@ -291,9 +332,9 @@ class SubscriptionService:
         )
 
     async def check_user_subscription(
-        self,
-        user_id: int,
-        target_user_id: int
+            self,
+            user_id: int,
+            target_user_id: int
     ) -> bool:
         subscription = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
@@ -303,9 +344,9 @@ class SubscriptionService:
         return subscription is not None
 
     async def check_wishlist_subscription(
-        self,
-        user_id: int,
-        target_wishlist_id: int
+            self,
+            user_id: int,
+            target_wishlist_id: int
     ) -> bool:
         subscription = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
@@ -315,10 +356,10 @@ class SubscriptionService:
         return subscription is not None
 
     async def get_user_subscribers(
-        self,
-        user_id: int,
-        is_desc: bool = True,
-        limit: int = 100
+            self,
+            user_id: int,
+            is_desc: bool = True,
+            limit: int = 100
     ):
         subscribers = await self.rep_subs.get_user_subscribers(
             user_id,
