@@ -4,7 +4,7 @@
     import { 
         subscribersStore, 
         getMySubscribers
-    } from '../../../types/subscribers.js';
+    } from '../../../types/subscribers.ts';
 
     //  Lyse Modifications
 
@@ -12,7 +12,7 @@
     const dispatch = createEventDispatcher();
 
     export let token;
-    
+
     const ICON_ARROW = '../../../../static/icons/arrow-right.png';
     const ICON_CHECK = '../../../../static/icons/check.png';
 
