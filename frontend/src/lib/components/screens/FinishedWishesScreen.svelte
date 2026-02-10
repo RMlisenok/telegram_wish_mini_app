@@ -2,7 +2,7 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    import { wishesStore, loadFinishedWishes } from '../../../types/wishes.ts';
+    import { wishesStore, loadFinishedWishes, updateWishStatus } from '../../../types/wishes.ts';
     
     export let token;
     const dispatch = createEventDispatcher();
@@ -47,7 +47,11 @@
     const returnToActive = async (wishId) => {
         console.log('Возврат желания в активные:', wishId);
         // TODO: реализовать API вызов для возврата желания в активные
-        alert(`Желание с ID ${wishId} будет возвращено в активные`);
+        await updateWishStatus(token, wishId, {
+            status_is_finished: false
+        });
+
+        await loadFinishedWishes(token);
     };
 
     const deletePermanently = async (wishId) => {
