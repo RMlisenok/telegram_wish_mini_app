@@ -342,6 +342,7 @@
     async function handleShowAllSubscriptions(event) {
         const { profileId } = event.detail;
         await getUserSubscriptions(token, profileId);
+        navigate('subscriptions');
     }
     
     function navigate(screen, params = {}) {
