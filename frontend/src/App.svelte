@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { initializeTelegram, user, telegram } from './lib/telegram';
     import StartScreen from './lib/components/screens/StartScreen.svelte'; // Импортируем стартовый экран
-
+    import { getUserSubscriptions } from './types/subscription';
     // Импорты экранов
     import MainScreen from './lib/components/screens/MainScreen.svelte';
     import ShareProfileScreen from './lib/components/screens/ShareProfileScreen.svelte';
@@ -337,6 +337,11 @@
     function handleShowAllWishlists(event) {
         const { profileId, isExternalProfile } = event.detail;
         showAllWishlistsForUser(profileId, isExternalProfile);
+    }
+
+    async function handleShowAllSubscriptions(event) {
+        const { profileId } = event.detail;
+        await getUserSubscriptions(token, profileId);
     }
     
     function navigate(screen, params = {}) {
@@ -746,7 +751,7 @@
                                 openOtherProfileById(e.detail.profileId);
                             }}
                             on:show-all-wishlists={(e) => handleShowAllWishlists(e)}
-                            on:show-all-subscriptions={() => pushNavigate('subscriptions')}
+                            on:show-all-subscriptions={(e) => handleShowAllSubscriptions(e)}
                             on:share-profile={(e) => {
                                 const profileId = e.detail.profileId;
                                 navigate('shareProfile', { profileData: viewedProfile });

@@ -6,7 +6,7 @@
         unsubscribeFromUser, 
         unsubscribeFromWishlist,
         subscriptionsStore
-    } from '../../../types/subscription.js';
+    } from '../../../types/subscription.ts';
     
     import { createEventDispatcher, onMount } from 'svelte';
 
