@@ -49,120 +49,10 @@
     // Состояние загрузки для каждой кнопки бронирования
     let loadingReservation = new Map(); // Map<connection_id, boolean>
 
-    // Для хранения информации о том, кто забронировал каждое желание
-    // let reservationInfo = new Map(); // Map<connection_id, {isReserved: boolean, reservedByUserId: string}>
-
-    // // Функция для загрузки информации о бронировании всех желаний
-    // async function loadAllReservationsInfo() {
-    //     if (!token || !wishlistId || !isExternalWishlist) return;
-        
-    //     try {
-    //         const newReservationInfo = new Map();
-            
-    //         // Для каждого желания в вишлисте проверяем, кто его забронировал
-    //         for (const wish of $wishWishlistsStore) {
-    //             if (!wish.connection_id) continue;
-                
-    //             const reservationData = await getReservationByWishWishlistId(
-    //                 token, 
-    //                 wish.connection_id
-    //             );
-                
-    //             newReservationInfo.set(wish.connection_id, {
-    //                 isReserved: reservationData.isReserved,
-    //                 reservedByUserId: reservationData.reservedByUserId
-    //             });
-                
-    //             console.log(`Инфо о брони для wish ${wish.id}:`, reservationData);
-    //         }
-            
-    //         reservationInfo = newReservationInfo;
-    //     } catch (error) {
-    //         console.error('Ошибка загрузки информации о бронировании:', error);
-    //     }
-    // }
-
-    // // Функция для получения информации о бронировании для конкретного желания
-    // const getReservationInfo = (connectionId) => {
-    //     if (!connectionId) return { isReserved: false, reservedByUserId: null };
-    //     return reservationInfo.get(connectionId) || { isReserved: false, reservedByUserId: null };
-    // };
-
-    // // Функция для проверки, может ли текущий пользователь отменить бронь
-    // const canCancelReservation = (connectionId) => {
-    //     if (!connectionId || !currentUserId) return false;
-        
-    //     const info = getReservationInfo(connectionId);
-    //     return info.isReserved && info.reservedByUserId === currentUserId;
-    // };
-
-    // // Функция для проверки, может ли текущий пользователь забронировать
-    // const canReserve = (connectionId) => {
-    //     if (!connectionId || !currentUserId || currentUserId === wishlistOwnerId) return false;
-        
-    //     const info = getReservationInfo(connectionId);
-    //     return !info.isReserved; // Может забронировать только если еще не забронировано
-    // };
-
-    // // Функция для отмены брони
-    // async function handleCancelReservation(wishId, connectionId) {
-    //     if (!token || !connectionId) {
-    //         showNotification('Необходима авторизация для отмены брони');
-    //         return;
-    //     }
-        
-    //     // Проверяем, что пользователь может отменить бронь
-    //     if (!canCancelReservation(connectionId)) {
-    //         showNotification('Вы не можете отменить чужую бронь');
-    //         return;
-    //     }
-        
-    //     // Устанавливаем флаг загрузки
-    //     loadingReservation.set(connectionId, true);
-        
-    //     try {
-    //         // Удаляем резервацию
-    //         await deleteReservation(token, connectionId);
-            
-    //         // Обновляем локальное состояние
-    //         reservationInfo.set(connectionId, {
-    //             isReserved: false,
-    //             reservedByUserId: null
-    //         });
-            
-    //         // Обновляем состояние wish
-    //         wishWishlistsStore.update(items => 
-    //             items.map(item => 
-    //                 item.connection_id === connectionId
-    //                     ? { ...item, is_booked: false }
-    //                     : item
-    //             )
-    //         );
-            
-    //         // Обновляем также в основном списке желаний
-    //         wishesStore.update(wishes =>
-    //             wishes.map(wish =>
-    //                 wish.id === wishId
-    //                     ? { ...wish, is_booked: false }
-    //                     : wish
-    //             )
-    //         );
-            
-    //         showNotification('Бронь успешно отменена');
-            
-    //     } catch (error) {
-    //         console.error('Ошибка при отмене брони:', error);
-    //         showNotification(error.message || 'Не удалось отменить бронь');
-    //     } finally {
-    //         loadingReservation.delete(connectionId);
-    //     }
-    // }
-
     onMount(async () => {
         console.log(1);
         if (token) {
             await fetchWishes();
-            // await loadCurrentUserId();
         }
 
         // Если мы в режиме вишлиста, загружаем его желания
@@ -176,8 +66,6 @@
                 // Проверяем подписку на вишлист (только для внешних вишлистов)
                 if (isExternalWishlist && token) {
                     await checkWishlistSubscriptionStatus();
-                    // Загружаем информацию о бронировании
-                    // await loadAllReservationsInfo();
                 }
                 
                 // Загружаем информацию о владельце вишлиста
@@ -193,12 +81,6 @@
             showNotification('Необходима авторизация для бронирования');
             return;
         }
-
-        // Проверяем, что пользователь может забронировать
-        // if (!canReserve(connectionId)) {
-        //     showNotification('Невозможно забронировать это желание');
-        //     return;
-        // }
         
         // Устанавливаем флаг загрузки
         loadingReservation.set(connectionId, true);
@@ -207,12 +89,6 @@
             // Создаем резервацию и получаем результат
             await createReservation(token, connectionId);
 
-            // Обновляем информацию о бронировании
-            // reservationInfo.set(connectionId, {
-            //     isReserved: true,
-            //     reservedByUserId: reservationResult.reserved_by_id  // Используем результат
-            // });
-            
             // Обновляем локальное состояние - помечаем как забронированное
             wishWishlistsStore.update(items => 
                 items.map(item => 

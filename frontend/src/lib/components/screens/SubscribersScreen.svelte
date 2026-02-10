@@ -1,18 +1,54 @@
 <script>
     import Avatar from '../ui/Avatar.svelte';
     import TextField from '../ui/TextField.svelte';
-    import { subscribersStore } from '../../stores/data.js';
+    import { 
+        subscribersStore, 
+        getMySubscribers
+    } from '../../../types/subscribers.js';
 
     //  Lyse Modifications
 
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     const dispatch = createEventDispatcher();
 
-
+    export let token;
+    
     const ICON_ARROW = '../../../../static/icons/arrow-right.png';
     const ICON_CHECK = '../../../../static/icons/check.png';
 
     let searchQuery = '';
+    let isLoading = true;
+    let errorMessage = '';
+
+    onMount(async () => {
+        if (!token) {
+            console.warn('Token не передан в SubscribersScreen');
+            errorMessage = 'Требуется авторизация';
+            isLoading = false;
+            return;
+        }
+        await loadSubscribers();
+    });
+
+    async function loadSubscribers() {
+        try {
+            isLoading = true;
+            errorMessage = '';
+            
+            if (!token) {
+                errorMessage = 'Токен не найден';
+                console.error('Токен не найден для загрузки подписчиков');
+                return;
+            }
+            
+            await getMySubscribers(token, true, 100);
+        } catch (error) {
+            errorMessage = error.message || 'Не удалось загрузить подписчиков';
+            console.error('Ошибка загрузки подписчиков:', error);
+        } finally {
+            isLoading = false;
+        }
+    }
 
     // Фильтрация подписчиков по поисковому запросу
     $: filteredSubscribers = (() => {
@@ -106,19 +142,36 @@
     };
 
     // Обработчик подписки/отписки
-    const handleToggleSubscription = (subscriberId) => {
-        subscribersStore.update(list => {
-            return list.map(subscriber => {
-                if (subscriber.id === subscriberId) {
-                    const newSubscriptionStatus = !subscriber.am_i_subscribed_to_them;
-                    return {
-                        ...subscriber,
-                        am_i_subscribed_to_them: newSubscriptionStatus
-                    };
-                }
-                return subscriber;
-            });
-        });
+    const handleToggleSubscription = async (subscriber, event) => {
+        if (event) event.stopPropagation();
+        
+        try {
+            if (!token) {
+                alert('Ошибка авторизации');
+                return;
+            }
+            
+            // TODO: Реализовать API для подписки/отписки
+            // Временная заглушка
+            console.log('Переключение подписки на пользователя:', subscriber.user_id);
+            
+            // Обновляем локальное состояние
+            // subscribersStore.update(list => {
+            //     return list.map(sub => {
+            //         if (sub.user_id === subscriber.user_id) {
+            //             // Здесь будет логика обновления статуса подписки
+            //             // после реализации API
+            //         }
+            //         return sub;
+            //     });
+            // });
+            
+            alert('Функция подписки будет реализована в ближайшее время');
+            
+        } catch (error) {
+            console.error('Ошибка переключения подписки:', error);
+            alert('Произошла ошибка при изменении подписки');
+        }
     };
 
     // Получение инициалов для аватара
@@ -140,8 +193,19 @@
     };
 
     // Форматирование даты для отображения
-    const formatBirthDate = (dateStr) => {
+    const formatDateForDisplay = (dateStr) => {
         if (!dateStr) return 'не указана';
+        
+        // Если дата в формате YYYY-MM-DD
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const [year, month, day] = parts;
+                return `${day}.${month}.${year}`;
+            }
+        }
+        
+        // Если дата уже в правильном формате
         return dateStr;
     };
 
@@ -170,7 +234,7 @@
         </p>
     {:else}
         <div class="subscribers-list">
-            {#each filteredSubscribers as subscriber (subscriber.id)}
+            {#each filteredSubscribers as subscriber (subscriber.sub_id)}
                 <div 
                     class="subscriber-card"
                     on:click={() => handleOpenProfile(subscriber)}
@@ -180,11 +244,16 @@
                 >
                     <!-- Аватар и основная информация -->
                     <div class="subscriber-content">
-                        <Avatar 
+                        <!-- <Avatar 
                             size={60}
                             src={subscriber.photo}
                             initials={getInitials(subscriber.name)}
                             style={subscriber.is_blocked ? 'opacity: 0.5; filter: grayscale(100%);' : ''}
+                        /> -->
+                        <Avatar 
+                            size={60}
+                            src={subscriber.photo}
+                            initials={getInitials(subscriber.name)}
                         />
                         
                         <div class="subscriber-info">
@@ -193,7 +262,7 @@
                             </div>
                             
                             <div class="subscriber-meta">
-                                <span>Дата рождения: {formatBirthDate(subscriber.birth_date)}</span>
+                                <span>Дата рождения: {formatDateForDisplay(subscriber.birth_date)}</span>
                             </div>
                         </div>
                     </div>
@@ -201,7 +270,7 @@
                     <!-- Кнопки управления -->
                     <div class="subscriber-controls">
                         <!-- Кнопка подписки/отписки -->
-                        <button
+                        <!-- <button
                             class="control-button {subscriber.am_i_subscribed_to_them ? 'subscribed-btn' : 'subscribe-btn'}"
                             on:click|stopPropagation={() => handleToggleSubscription(subscriber.id)}
                             aria-label="{subscriber.am_i_subscribed_to_them ? 'Отписаться' : 'Подписаться'}"
@@ -212,9 +281,17 @@
                             {:else}
                                 <span>Подписаться</span>
                             {/if}
+                        </button> -->
+
+                        <button
+                            class="control-button subscribe-btn"
+                            on:click|stopPropagation={(e) => handleToggleSubscription(subscriber, e)}
+                            aria-label="Подписаться"
+                        >
+                            Подписаться
                         </button>
 
-                        <!-- Чекбоксы управления доступом -->
+                        <!-- Чекбоксы управления доступом
                         <div class="access-controls">
                             <label class="access-checkbox">
                                 <input 
@@ -234,13 +311,13 @@
                                     class="access-input"
                                 />
                                 <span class="access-label">Доступ к вишлистам</span>
-                            </label>
+                            </label> -->
 
                             <!-- Надпись со статусом блокировки -->
-                            <div class="block-status {getBlockStatus(subscriber)}">
+                            <!-- <div class="block-status {getBlockStatus(subscriber)}">
                                 {getBlockStatusText(subscriber)}
                             </div>
-                        </div>
+                        </div>  -->
 
                         <!-- Стрелка для перехода -->
                         <button
