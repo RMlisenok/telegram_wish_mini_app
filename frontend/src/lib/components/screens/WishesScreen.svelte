@@ -204,13 +204,13 @@
         loadingReservation.set(connectionId, true);
         
         try {
-            // Создаем резервацию
-            await createReservation(token, connectionId);
+            // Создаем резервацию и получаем результат
+            const reservationResult = await createReservation(token, connectionId);
 
             // Обновляем информацию о бронировании
             reservationInfo.set(connectionId, {
                 isReserved: true,
-                reservedByUserId: reservation.reserved_by_id
+                reservedByUserId: reservationResult.reserved_by_id  // Используем результат
             });
             
             // Обновляем локальное состояние - помечаем как забронированное
@@ -420,7 +420,6 @@
         showDetailModal = false;
         selectedWish = null;
     };
-    $: reservationInfoForWish = getReservationInfo(wish.connection_id);
     $: pinnedWishesCount = wishlistId 
         ? $wishWishlistsStore.filter(wish => wish.is_pinned).length
         : 0;
@@ -1166,7 +1165,7 @@
                         {/if}
 
                         <!-- Индикатор "Забронировано" (если уже забронировано) -->
-                        {#if isExternalWishlist && wish.is_booked}
+                        {#if isExternalWishlist && getReservationInfo(wish.connection_id).isReserved}
                             <div class="reservation-badge">
                                 Забронировано
                             </div>
@@ -1206,9 +1205,9 @@
                                         <button class="reservation-button loading" disabled>
                                             <span class="spinner"></span> Загрузка...
                                         </button>
-                                    {:else if reservationInfoForWish.isReserved}
+                                    {:else if getReservationInfo(wish.connection_id).isReserved}
                                         <!-- Если забронировано -->
-                                        {#if reservationInfoForWish.reservedByUserId === currentUserId}
+                                        {#if getReservationInfo(wish.connection_id).reservedByUserId === currentUserId}
                                             <!-- Если забронировал текущий пользователь - кнопка отмены -->
                                             <button 
                                                 class="reservation-button cancel" 
