@@ -117,17 +117,19 @@
                         {/if}
                         
                         <!-- Добавляем кнопки действий -->
-                        <div class="wish-actions">
+                        <div class="wish-actions-container">
                             <div class="wish-actions">
                                 <Button 
                                     kind="primary" 
                                     on:click={() => returnToActive(wish.id)}
+                                    class="action-btn"
                                 >
                                     Вернуть в активные
                                 </Button>
                                 <Button 
                                     kind="ghost" 
                                     on:click={() => deletePermanently(wish.id)}
+                                    class="action-btn"
                                 >
                                     Удалить
                                 </Button>
@@ -156,7 +158,7 @@
     
     .wish-card {
         width: 214px;
-        height: 325px;
+        height: auto;
         border-radius: 16px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
@@ -214,6 +216,7 @@
         flex: 1;
         min-height: 111px;
         box-sizing: border-box;
+        flex-grow: 1;
     }
     
     .wish-title {
@@ -242,6 +245,26 @@
         padding: 40px 16px;
         color: #6b7280;
         font-size: 16px;
+    }
+
+    .wish-actions-container {
+        margin-top: auto;
+        padding-top: 8px;
+        flex-shrink: 0;
+    }
+
+    .wish-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+    .action-btn {
+        height: 36px !important;
+        min-height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
 </style>
