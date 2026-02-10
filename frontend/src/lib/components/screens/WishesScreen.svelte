@@ -24,7 +24,7 @@
     import { deleteFile } from '../../../types/storage3.ts';
     import { 
         createReservation,
-        checkReservationStatus 
+        getReservationByWishWishlistId
     } from '../../../types/wish_reservation.ts';
 
     const dispatch = createEventDispatcher();
@@ -49,6 +49,115 @@
     // Состояние загрузки для каждой кнопки бронирования
     let loadingReservation = new Map(); // Map<connection_id, boolean>
 
+    // Для хранения информации о том, кто забронировал каждое желание
+    let reservationInfo = new Map(); // Map<connection_id, {isReserved: boolean, reservedByUserId: string}>
+
+    // Функция для загрузки информации о бронировании всех желаний
+    async function loadAllReservationsInfo() {
+        if (!token || !wishlistId || !isExternalWishlist) return;
+        
+        try {
+            const newReservationInfo = new Map();
+            
+            // Для каждого желания в вишлисте проверяем, кто его забронировал
+            for (const wish of $wishWishlistsStore) {
+                if (!wish.connection_id) continue;
+                
+                const reservationData = await getReservationByWishWishlistId(
+                    token, 
+                    wish.connection_id
+                );
+                
+                newReservationInfo.set(wish.connection_id, {
+                    isReserved: reservationData.isReserved,
+                    reservedByUserId: reservationData.reservedByUserId
+                });
+                
+                console.log(`Инфо о брони для wish ${wish.id}:`, reservationData);
+            }
+            
+            reservationInfo = newReservationInfo;
+        } catch (error) {
+            console.error('Ошибка загрузки информации о бронировании:', error);
+        }
+    }
+
+    // Функция для получения информации о бронировании для конкретного желания
+    const getReservationInfo = (connectionId) => {
+        if (!connectionId) return { isReserved: false, reservedByUserId: null };
+        return reservationInfo.get(connectionId) || { isReserved: false, reservedByUserId: null };
+    };
+
+    // Функция для проверки, может ли текущий пользователь отменить бронь
+    const canCancelReservation = (connectionId) => {
+        if (!connectionId || !currentUserId) return false;
+        
+        const info = getReservationInfo(connectionId);
+        return info.isReserved && info.reservedByUserId === currentUserId;
+    };
+
+    // Функция для проверки, может ли текущий пользователь забронировать
+    const canReserve = (connectionId) => {
+        if (!connectionId || !currentUserId || currentUserId === wishlistOwnerId) return false;
+        
+        const info = getReservationInfo(connectionId);
+        return !info.isReserved; // Может забронировать только если еще не забронировано
+    };
+
+    // Функция для отмены брони
+    async function handleCancelReservation(wishId, connectionId) {
+        if (!token || !connectionId) {
+            showNotification('Необходима авторизация для отмены брони');
+            return;
+        }
+        
+        // Проверяем, что пользователь может отменить бронь
+        if (!canCancelReservation(connectionId)) {
+            showNotification('Вы не можете отменить чужую бронь');
+            return;
+        }
+        
+        // Устанавливаем флаг загрузки
+        loadingReservation.set(connectionId, true);
+        
+        try {
+            // Удаляем резервацию
+            await deleteReservation(token, connectionId);
+            
+            // Обновляем локальное состояние
+            reservationInfo.set(connectionId, {
+                isReserved: false,
+                reservedByUserId: null
+            });
+            
+            // Обновляем состояние wish
+            wishWishlistsStore.update(items => 
+                items.map(item => 
+                    item.connection_id === connectionId
+                        ? { ...item, is_booked: false }
+                        : item
+                )
+            );
+            
+            // Обновляем также в основном списке желаний
+            wishesStore.update(wishes =>
+                wishes.map(wish =>
+                    wish.id === wishId
+                        ? { ...wish, is_booked: false }
+                        : wish
+                )
+            );
+            
+            showNotification('Бронь успешно отменена');
+            
+        } catch (error) {
+            console.error('Ошибка при отмене брони:', error);
+            showNotification(error.message || 'Не удалось отменить бронь');
+        } finally {
+            loadingReservation.delete(connectionId);
+        }
+    }
+
     onMount(async () => {
         console.log(1);
         if (token) {
@@ -67,6 +176,8 @@
                 // Проверяем подписку на вишлист (только для внешних вишлистов)
                 if (isExternalWishlist && token) {
                     await checkWishlistSubscriptionStatus();
+                    // Загружаем информацию о бронировании
+                    await loadAllReservationsInfo();
                 }
                 
                 // Загружаем информацию о владельце вишлиста
@@ -82,6 +193,12 @@
             showNotification('Необходима авторизация для бронирования');
             return;
         }
+
+        // Проверяем, что пользователь может забронировать
+        if (!canReserve(connectionId)) {
+            showNotification('Невозможно забронировать это желание');
+            return;
+        }
         
         // Устанавливаем флаг загрузки
         loadingReservation.set(connectionId, true);
@@ -89,6 +206,12 @@
         try {
             // Создаем резервацию
             await createReservation(token, connectionId);
+
+            // Обновляем информацию о бронировании
+            reservationInfo.set(connectionId, {
+                isReserved: true,
+                reservedByUserId: reservation.reserved_by_id
+            });
             
             // Обновляем локальное состояние - помечаем как забронированное
             wishWishlistsStore.update(items => 
@@ -188,10 +311,9 @@
     let isCurrentWishOwner = false;
 
     const checkWishOwnership = async (wishId) => {
-        if (!token || !wishId) return false;
+        if (!token || !wishId || !currentUserId) return false;
         
         try {
-            // Загружаем информацию о желании
             const wishResponse = await fetch(`/api/v1/wishes/${wishId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -200,29 +322,16 @@
             
             if (wishResponse.ok) {
                 const wishData = await wishResponse.json();
+                const wishOwnerId = wishData.user_id.toString();
                 
-                // Получаем ID текущего пользователя
-                const userResponse = await fetch('/api/v1/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                isCurrentWishOwner = currentUserId === wishOwnerId;
+                console.log('checkWishOwnership:', {
+                    currentUserId,
+                    wishOwnerId,
+                    isCurrentWishOwner
                 });
                 
-                if (userResponse.ok) {
-                    const userData = await userResponse.json();
-                    console.log('checkWishOwnership - userData:', userData);
-                    const currentUserId = userData.id.toString();
-                    const wishOwnerId = wishData.user_id.toString();
-                    
-                    isCurrentWishOwner = currentUserId === wishOwnerId;
-                    console.log('checkWishOwnership:', {
-                        currentUserId,
-                        wishOwnerId,
-                        isCurrentWishOwner
-                    });
-                    
-                    return isCurrentWishOwner;
-                }
+                return isCurrentWishOwner;
             }
         } catch (error) {
             console.error('Ошибка проверки владельца желания:', error);
@@ -311,7 +420,7 @@
         showDetailModal = false;
         selectedWish = null;
     };
-
+    $: reservationInfoForWish = getReservationInfo(wish.connection_id);
     $: pinnedWishesCount = wishlistId 
         ? $wishWishlistsStore.filter(wish => wish.is_pinned).length
         : 0;
@@ -1071,7 +1180,7 @@
                         {/if}
 
                         <!-- Кнопка бронирования (только для внешних вишлистов) -->
-                        {#if isExternalWishlist && wish.connection_id}
+                        <!-- {#if isExternalWishlist && wish.connection_id}
                             <div class="reservation-section">
                                 {#if loadingReservation.get(wish.connection_id)}
                                     <button class="reservation-button loading" disabled>
@@ -1090,7 +1199,41 @@
                                     </button>
                                 {/if}
                             </div>
+                        {/if} -->
+                        {#if isExternalWishlist && wish.connection_id && currentUserId && wishlistOwnerId && currentUserId !== wishlistOwnerId}
+                            <div class="reservation-section">
+                                    {#if loadingReservation.get(wish.connection_id)}
+                                        <button class="reservation-button loading" disabled>
+                                            <span class="spinner"></span> Загрузка...
+                                        </button>
+                                    {:else if reservationInfoForWish.isReserved}
+                                        <!-- Если забронировано -->
+                                        {#if reservationInfoForWish.reservedByUserId === currentUserId}
+                                            <!-- Если забронировал текущий пользователь - кнопка отмены -->
+                                            <button 
+                                                class="reservation-button cancel" 
+                                                on:click|stopPropagation={() => handleCancelReservation(wish.id, wish.connection_id)}
+                                            >
+                                                Отменить бронь
+                                            </button>
+                                        {:else}
+                                            <!-- Если забронировал другой пользователь - только индикатор -->
+                                            <button class="reservation-button reserved-by-other" disabled>
+                                                Забронировано
+                                            </button>
+                                        {/if}
+                                    {:else}
+                                        <!-- Если не забронировано - кнопка бронирования -->
+                                        <button 
+                                            class="reservation-button reserve" 
+                                            on:click|stopPropagation={() => handleReservation(wish.id, wish.connection_id)}
+                                        >
+                                            Забронировать
+                                        </button>
+                                    {/if}
+                            </div>
                         {/if}
+
                     </div>
                 </article>
             {/each}
@@ -2307,17 +2450,30 @@
         text-align: center;
     }
     
-    .reservation-button:hover:not(:disabled) {
+    .reservation-button.reserve {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .reservation-button.reserve:hover {
         background-color: #2563eb;
     }
-    
-    .reservation-button:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
+
+    /* Кнопка "Отменить бронь" */
+    .reservation-button.cancel {
+        background-color: #ef4444;
+        color: white;
     }
     
-    .reservation-button.reserved {
+    .reservation-button.cancel:hover {
+        background-color: #dc2626;
+    }
+    
+    /* Кнопка "Забронировано" (другим пользователем) */
+    .reservation-button.reserved-by-other {
         background-color: #9ca3af;
+        color: white;
+        cursor: not-allowed;
     }
     
     .reservation-button.loading {
@@ -2335,6 +2491,11 @@
         border-top-color: transparent;
         border-radius: 50%;
         animation: spin 1s linear infinite;
+    }
+
+    .reservation-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
     }
     
     @keyframes spin {
