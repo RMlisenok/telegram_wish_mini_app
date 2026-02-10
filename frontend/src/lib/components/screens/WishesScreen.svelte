@@ -7,12 +7,14 @@
         loadWishes, 
         deleteWish, 
         updateWishStatus, 
-        removeWishFromAllWishlists,
+        removeWishFromAllWishlists
+    } from '../../../types/wishes.ts';
+    import { 
         checkWishReservation, 
         toggleReservation,
         getReservationForWishWishlist,
         reservationsStore
-    } from '../../../types/wishes.ts';
+    } from '../../../types/wish_reservation.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
         checkWishlistSubscription,
