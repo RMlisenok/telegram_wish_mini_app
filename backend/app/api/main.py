@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.core.db import init_database, drop_tables
+from app.core.db import init_database
 from app.core.data_tags import init_tags
 from app.api.routers.auth import router as auth_routers
 from app.api.routers.user import router as user_routers
@@ -20,7 +20,6 @@ async def lifespan(app: FastAPI):
     await init_tags()
     yield
     print('Stop work and clean tables')
-    # await drop_tables()
     print('clean completed')
 
 
