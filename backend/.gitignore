@@ -215,3 +215,4 @@ __marimo__/
 tests/__pycache__
 # Streamlit
 .streamlit/secrets.toml
+app/models/__pycache__
