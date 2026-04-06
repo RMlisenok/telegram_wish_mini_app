@@ -13,6 +13,7 @@ from app.schemas.access_request import (
     AccessRequestWithDetails,
     UpdateAccessRequest
 )
+from app.services.notification_service_bot import NotificationService
 
 
 class AccessRequestService():
@@ -46,20 +47,26 @@ class AccessRequestService():
         )
         if not access_request:
             raise ValueError("Dont created access")
-        # return  AccessRequestResponse.model_validate(access_request)
-        return AccessRequestResponse.model_validate(access_request)
 
-    async def get_request(
-        self,
-        request_id: int,
-        user_id: int
-    ) -> Optional[AccessRequestWithDetails]:
-        access_request = await self.rep_access.get_request_id(request_id)
-        if not access_request:
-            return None
-        if not await self.can_view_request(access_request, user_id):
-            raise ValueError("Dont access to view this request")
-        return await self.get_request_with_details(access_request.id)
+        try:
+            notif_service = NotificationService() # Убрали bot
+
+            # Получаем имя того, кто просит доступ
+            requester = await self.rep_user.get_user_by_id(user_id)
+            requester_name = requester.name if requester else "Пользователь"
+
+            await notif_service.send_access_request(
+                session=self.session,
+                owner_id=wishlist.user_id,
+                requester_id=user_id,
+                requester_name=requester_name,
+                wishlist_name=wishlist.name,
+                request_id=access_request.id
+            )
+        except Exception as e:
+            print(f"Ошибка уведомления о заявке: {e}")
+
+        return AccessRequestResponse.model_validate(access_request)
 
     async def update_request_status(
         self,
@@ -74,7 +81,7 @@ class AccessRequestService():
         if not wishlist or wishlist.user_id != user_id:
             raise ValueError("Only owned wishlist can change status")
         if access_request.status != AccessRequestStatus.PENDING:
-            raise ValueError("This request alreade handler")
+            raise ValueError("This request already handled")
 
         success = await self.rep_access.update_status(
             request_id=access_request.id,
@@ -83,7 +90,55 @@ class AccessRequestService():
 
         if not success:
             raise ValueError("Error for update status")
+        try:
+            from app.core.bot_setup import bot
+            status_action = "одобрил" if update_data.status == AccessRequestStatus.APPROVED else "отклонил"
+
+            # Находим данные того, кто просил доступ
+            requester = await self.rep_user.get_user_by_id(access_request.requester_id)
+            if requester and requester.telegram_id:
+                msg = f"Владелец {status_action} ваш доступ к вишлисту \"{wishlist.name}\"."
+                await bot.send_message(requester.telegram_id, msg)
+        except Exception as e:
+            print(f"Ошибка уведомления об ответе на заявку: {e}")
+
         return await self.get_request_with_details(access_request.id)
+
+    async def get_request(
+        self,
+        request_id: int,
+        user_id: int
+    ) -> Optional[AccessRequestWithDetails]:
+        access_request = await self.rep_access.get_request_id(request_id)
+        if not access_request:
+            return None
+        if not await self.can_view_request(access_request, user_id):
+            raise ValueError("Dont access to view this request")
+        return await self.get_request_with_details(access_request.id)
+
+    # async def update_request_status(
+    #     self,
+    #     request_id: int,
+    #     update_data: UpdateAccessRequest,
+    #     user_id: int
+    # ) -> Optional[AccessRequestWithDetails]:
+    #     access_request = await self.rep_access.get_request_id(request_id)
+    #     if not access_request:
+    #         raise ValueError("Access request not found")
+    #     wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
+    #     if not wishlist or wishlist.user_id != user_id:
+    #         raise ValueError("Only owned wishlist can change status")
+    #     if access_request.status != AccessRequestStatus.PENDING:
+    #         raise ValueError("This request alreade handler")
+    #
+    #     success = await self.rep_access.update_status(
+    #         request_id=access_request.id,
+    #         status=update_data.status
+    #     )
+    #
+    #     if not success:
+    #         raise ValueError("Error for update status")
+    #     return await self.get_request_with_details(access_request.id)
 
     async def delete_request(
         self,

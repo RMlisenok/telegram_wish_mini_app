@@ -188,3 +188,21 @@ class WishWishlistRepository:
         result = await self.session.execute(query)
         count = result.scalar_one_or_none()
         return count if count is not None else 0
+
+    async def delete_wish_in_wishlists(self, wish_id: int) -> int:
+        query = (
+            select(WishWishlist)
+            .where(WishWishlist.wish_id == wish_id)
+        )
+        result = await self.session.execute(query)
+        connections = result.scalars().all()
+
+        count = 0
+        for connection in connections:
+            await self.session.delete(connection)
+            count += 1
+
+        if count > 0:
+            await self.session.commit()
+
+        return count

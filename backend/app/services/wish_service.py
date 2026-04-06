@@ -87,6 +87,11 @@ class WishService:
         wish_id,
         wish_data: WishUpdate
     ) -> Optional[WishResponse]:
+        if wish_data.photo is None:
+            wish_data.photo = (
+                "https://e4a6ce86-682d-4bf7-921e-9a1f5c537501."
+                "selstorage.ru/d118dd34-8236-4e18-b22e-d7f03c1992c6.png"
+            )
         update_data = wish_data.model_dump(exclude_unset=True)
         wish = await self.rep_wish.update(wish_id, update_data)
         if wish:
@@ -101,6 +106,22 @@ class WishService:
         if success:
             await self.session.commit()
         return success
+
+    async def delete_wish_in_wishlists(
+        self,
+        wish_id: int,
+        # user_id: int
+    ) -> bool:
+        try:
+            wish = await self.get_wish(wish_id)
+            if not wish:
+                return False
+            deleted_count = await self.rep_wish_wishlist.delete_wish_in_wishlists(wish_id)
+            print(f"Deleted: {deleted_count}")
+            return True
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
 
     async def get_user_wish(
         self,

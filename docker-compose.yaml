@@ -1,21 +1,6 @@
 version: '3.5'
 
 services:
-
-  backend:
-    build: ./backend
-    container_name: backend-app
-    env_file:
-      - backend/.env
-    ports:
-      - "80:80"
-    # expose:
-    #   - "80"
-    depends_on:
-      - database
-    networks:
-      - app-network
-
   database:
     image: postgres:15
     container_name: database
@@ -29,6 +14,32 @@ services:
       - database-data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d telegram_app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build: ./backend
+    container_name: backend-app
+    env_file:
+      - backend/.env
+    ports:
+      - "80:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        uv run alembic upgrade head &&
+        uv run uvicorn app.api.main:app --host 0.0.0.0 --port 8000
+      "
 
 volumes:
   database-data:
