@@ -1,19 +1,10 @@
-import sys
-import os
 from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from dotenv import load_dotenv
 
 
-
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-print(f"DEBUG: Loaded token is: {TOKEN}")
-
-if not TOKEN:
-    TOKEN = "8558976967:AAFnChpNZ6TBoXOai-5OAilw0Mc1Dv_a7Go"
+TOKEN = "8621620410:AAEcEQs1e_G3reWDWZWZyk14xtFn8BBQUAA"
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
-
-from app.api.routers.bot_router import router as bot_router
-dp.include_router(bot_router)

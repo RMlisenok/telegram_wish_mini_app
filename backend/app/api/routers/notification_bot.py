@@ -1,48 +1,26 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
 from app.services.notification_service_bot import NotificationService
-from app.core.bot_setup import bot
-from datetime import date, timedelta
-from app.models.user import User
-from app.models.subscription import Subscription
-from app.core.dependencies import get_current_user_id
-from sqlalchemy import select
 
-router = APIRouter(tags=["Notifications"])
+router = APIRouter(prefix="/notifications", tags=["Notifications"])
+service = NotificationService()
 
-@router.post("/setup-test-birthday-data")
-async def setup_test_data(current_user_id: int = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
-    test_birthday_user = User(
-        name="Тестовый Именинник",
-        telegram_id=12345678, # Любое число
-        birth_date=date.today() + timedelta(days=7),
-        show_sub=True
-    )
-    db.add(test_birthday_user)
-    await db.flush()
-
-    new_sub = Subscription(
-        subscriber_id=current_user_id,
-        target_user_id=test_birthday_user.id,
-        type_sub=True
-    )
-    db.add(new_sub)
-
-    stmt = select(NotificationSettings).where(NotificationSettings.user_id == current_user_id)
-    settings = (await db.execute(stmt)).scalar()
-    if settings:
-        settings.birt_before = True
-    else:
-        db.add(NotificationSettings(user_id=current_user_id, birt_before=True))
-
-    await db.commit()
-    return {"message": f"User {test_birthday_user.id} created with birthday in 7 days. Subscription added."}
-
-
-
-@router.post("/test-birthday-notifications")
-async def test_birthdays(db: AsyncSession = Depends(get_db)):
-    service = NotificationService(bot)
+@router.post("/test-birthday-check")
+async def trigger_birthday_check(db: AsyncSession = Depends(get_db)):
+    """Ручной триггер для проверки всех ДР (обычно вызывается планировщиком)"""
+    # Тут должен быть вызов метода обхода базы, который мы писали ранее
     await service.check_birthdays_and_notify(db)
-    return {"status": "Birthday check completed"}
+    return {"status": "ok"}
+
+@router.post("/post-birthday/{user_id}")
+async def send_post_birthday(user_id: int, db: AsyncSession = Depends(get_db)):
+    """Триггер для FS-10.1.3 (после дня рождения)"""
+    await service.notify_post_birthday(db, user_id)
+    return {"status": "notification_sent"}
+
+@router.post("/new-subscriber")
+async def new_sub_event(owner_id: int, subscriber_id: int, subscriber_name: str, db: AsyncSession = Depends(get_db)):
+    """Вызывается из роутера подписок, когда кто-то подписался"""
+    await service.notify_new_subscriber(db, owner_id, subscriber_id, subscriber_name)
+    return {"status": "sent"}

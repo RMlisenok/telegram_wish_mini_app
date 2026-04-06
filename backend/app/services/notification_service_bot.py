@@ -1,154 +1,156 @@
-import datetime
 import os
-
+import logging
+from datetime import date, timedelta
 from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from aiogram import types, html
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from app.models.user import User
 from app.models.notification_settings import NotificationSettings
 from app.models.subscription import Subscription
-from aiogram import types
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from app.core.bot_setup import bot
 
-
-class NotificationService:
-    def __init__(self, bot):
-        self.bot = botimport datetime
-from sqlalchemy import select, extract
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.user import User
-from app.models.notification_settings import NotificationSettings
-from app.models.subscription import Subscription
-from aiogram import types
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
+logger = logging.getLogger(__name__)
 
 class NotificationService:
-    def __init__(self, bot):
+    def __init__(self):
         self.bot = bot
-        self.app_url = os.getenv("WEB_APP_URL")
+        self.web_app_url = os.getenv("WEB_APP_URL", "https://wishlistprice.ru/app")
 
-    def _format_birthday_text(self, name, user_id, days_left):
-        link = f'<a href="{self.app_url}?startapp=user_{user_id}">{name}</a>'
+    async def _get_user_info(self, session: AsyncSession, user_id: int):
+        stmt = select(User).where(User.id == user_id)
+        res = await session.execute(stmt)
+        return res.scalar_one_or_none()
 
-        if days_left == 7:
-            return f"Через неделю день рождения у {link}! Не забудь поздравить!"
-        elif days_left == 1:
-            return f"Завтра день рождения у {link}! Не забудь поздравить!"
-        else:
-            return f"Сегодня день рождения у {link}! 🎉"
+    async def _can_notify(self, session: AsyncSession, user_id: int, setting_field: str) -> bool:
+        """Проверка настроек пользователя FS-10.2"""
+        stmt = select(NotificationSettings).where(NotificationSettings.user_id == user_id)
+        res = await session.execute(stmt)
+        settings = res.scalar_one_or_none()
+        if not settings: 
+            return True  # По умолчанию уведомления включены
+        return getattr(settings, setting_field, True)
 
+    def _get_link(self, user_id: int, name: str):
+        """Создает безопасную HTML ссылку на профиль пользователя"""
+        safe_name = html.quote(name)
+        return f'<a href="{self.web_app_url}?user_id={user_id}">{safe_name}</a>'
+
+    # --- Метод-оркестратор для проверки ДР ---
+    
     async def check_birthdays_and_notify(self, session: AsyncSession):
-        today = datetime.date.today()
-        intervals = [0, 1, 7]
+        """
+        Проверяет ДР на сегодня, завтра и через 7 дней.
+        Находит подписчиков именинников и отправляет им уведомления.
+        """
+        today = date.today()
+        
+        # Конфигурация: через сколько дней уведомлять и какой тип сообщения слать
+        notification_targets = {
+            0: "today",
+            1: "1_day",
+            7: "7_days"
+        }
 
-        for interval in intervals:
-            target_date = today + datetime.timedelta(days=interval)
-
+        for days_delta, msg_type in notification_targets.items():
+            target_date = today + timedelta(days=days_delta)
+            
+            # 1. Ищем всех именинников на целевую дату (сравнение по дню и месяцу)
             stmt = select(User).where(
                 extract('month', User.birth_date) == target_date.month,
                 extract('day', User.birth_date) == target_date.day
             )
-            result = await session.execute(stmt)
-            birthday_users = result.scalars().all()
+            res = await session.execute(stmt)
+            birthday_users = res.scalars().all()
 
             for b_user in birthday_users:
-                sub_stmt = select(User).join(
-                    Subscription, Subscription.follower_id == User.id
-                ).where(Subscription.target_id == b_user.id)
-
-                followers_result = await session.execute(sub_stmt)
-                followers = followers_result.scalars().all()
-
-                for follower in followers:
-                    set_stmt = select(NotificationSettings).where(
-                        NotificationSettings.user_id == follower.id
-                    )
-                    settings = (await session.execute(set_stmt)).scalar_one_or_none()
-
-                    if settings and settings.birt_before:
-                        text = self._format_birthday_text(b_user.name, b_user.id, interval)
-                        try:
-                            await self.bot.send_message(
-                                follower.telegram_id,
-                                text,
-                                parse_mode="HTML",
-                                disable_web_page_preview=True
-                            )
-                        except Exception as e:
-                            print(f"Ошибка отправки уведомления для {follower.id}: {e}")
-
-    def _format_birthday_text(self, name, days_left):
-        link = f"<b>{name}</b>" # ДОБАВИТЬ ССЫЛКУ НА ЧЕЛОВЕЧКА
-        if days_left == 7:
-            return f"Через неделю день рождения у {link}! Не забудь поздравить!"
-        elif days_left == 1:
-            return f"Завтра день рождения у {link}! Не забудь поздравить!"
-        else:
-            return f"Сегодня день рождения у {link}! 🎉"
-
-    async def notify_new_follower(self, session: AsyncSession, follower_id: int, target_id: int):
-        stmt = select(User).where(User.id == follower_id)
-        follower = (await session.execute(stmt)).scalar()
-
-        settings_stmt = select(NotificationSettings).where(NotificationSettings.user_id == target_id)
-        settings = (await session.execute(settings_stmt)).scalar()
-
-        if settings and settings.new_followers and follower:
-            link = f'<a href="https://t.me/your_bot/app?startapp=user_{follower.id}">{follower.full_name}</a>'
-            text = f"👤 У вас новый подписчик: {link}"
-
-            target_stmt = select(User).where(User.id == target_id)
-            target = (await session.execute(target_stmt)).scalar()
-
-            if target and target.telegram_id:
-                await self.bot.send_message(target.telegram_id, text, parse_mode="HTML")
-
-    async def notify_access_request(self, session: AsyncSession, requester_id: int, owner_id: int, wishlist_name: str,
-                                    request_id: int):
-        settings_stmt = select(NotificationSettings).where(NotificationSettings.user_id == owner_id)
-        settings = (await session.execute(settings_stmt)).scalar()
-
-        if settings and settings.access_requests:
-            requester_stmt = select(User).where(User.id == requester_id)
-            requester = (await session.execute(requester_stmt)).scalar()
-
-            owner_stmt = select(User).where(User.id == owner_id)
-            owner = (await session.execute(owner_stmt)).scalar()
-
-            if requester and owner:
-                text = (f"📩 Пользователь {requester.full_name} отправил заявку на доступ "
-                        f"к вашему вишлисту \"{wishlist_name}\"")
-
-                builder = InlineKeyboardBuilder()
-                builder.row(
-                    types.InlineKeyboardButton(text="✅ Одобрить", callback_data=f"approve_{request_id}"),
-                    types.InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{request_id}")
+                # 2. Ищем всех подписчиков (type_sub=True означает подписку на профиль)
+                sub_stmt = select(Subscription).where(
+                    Subscription.target_user_id == b_user.id,
+                    Subscription.type_sub == True
                 )
-                builder.row(
-                    types.InlineKeyboardButton(text="👀 Посмотреть профиль",
-                                               url=f"https://t.me/your_bot/app?startapp=user_{requester.id}")
-                )
+                sub_res = await session.execute(sub_stmt)
+                subscribers = sub_res.scalars().all()
 
-                await self.bot.send_message(owner.telegram_id, text, reply_markup=builder.as_markup())
+                for sub in subscribers:
+                    try:
+                        # 3. Вызываем метод отправки для каждого подписчика
+                        await self.notify_birthday(
+                            session=session,
+                            user_id=sub.subscriber_id,
+                            friend_id=b_user.id,
+                            friend_name=b_user.name,
+                            msg_type=msg_type
+                        )
+                    except Exception as e:
+                        logger.error(f"Ошибка при уведомлении о ДР для пользователя {sub.subscriber_id}: {e}")
 
-    async def check_post_birthday(self, session: AsyncSession):
-        yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    # --- Конкретные типы уведомлений ---
 
-        stmt = select(User).where(
-            extract('month', User.birth_date) == yesterday.month,
-            extract('day', User.birth_date) == yesterday.day
-        )
-        birthday_people = (await session.execute(stmt)).scalars().all()
+    # FS-10.1.1 Напоминания о ДР друзей
+    async def notify_birthday(self, session: AsyncSession, user_id: int, friend_id: int, friend_name: str, msg_type: str):
+        if not await self._can_notify(session, user_id, "birt_before"): 
+            return
+        
+        user = await self._get_user_info(session, user_id)
+        if not user or not user.telegram_id: 
+            return
 
-        for person in birthday_people:
-            set_stmt = select(NotificationSettings).where(NotificationSettings.user_id == person.id)
-            settings = (await session.execute(set_stmt)).scalar()
+        link = self._get_link(friend_id, friend_name)
+        messages = {
+            "7_days": f"⏳ Через неделю день рождения у {link}! Не забудь поздравить!",
+            "1_day": f"🎈 Завтра день рождения у {link}! Почти пора!",
+            "today": f"🥳 Сегодня день рождения у {link}! Поздравляем!"
+        }
+        
+        text = messages.get(msg_type, f"Скоро день рождения у {link}")
+        await self.bot.send_message(user.telegram_id, text, parse_mode="HTML")
 
-            if settings and settings.birt_after:
-                text = "🎁 У вас были забронированы желания. Хотите переместить их в исполненные?"
-                builder = InlineKeyboardBuilder()
-                builder.row(
-                    types.InlineKeyboardButton(text="✅ Переместить", callback_data="move_to_executed"),
-                    types.InlineKeyboardButton(text="❌ Не перемещать", callback_data="keep_as_is")
-                )
-                await self.bot.send_message(person.telegram_id, text, reply_markup=builder.as_markup())
+    # FS-10.1.2 Новый подписчик
+    async def notify_new_subscriber(self, session: AsyncSession, owner_id: int, subscriber_id: int, subscriber_name: str):
+        if not await self._can_notify(session, owner_id, "new_followers"): 
+            return
+        
+        owner = await self._get_user_info(session, owner_id)
+        if owner and owner.telegram_id:
+            link = self._get_link(subscriber_id, subscriber_name)
+            await self.bot.send_message(
+                owner.telegram_id, 
+                f"👤 У вас новый подписчик: {link}", 
+                parse_mode="HTML"
+            )
+
+    # FS-10.1.3 Пост-ДР (Архивация подарков)
+    async def notify_post_birthday(self, session: AsyncSession, user_id: int):
+        if not await self._can_notify(session, user_id, "post_birt_action"): 
+            return
+        
+        user = await self._get_user_info(session, user_id)
+        if user and user.telegram_id:
+            builder = InlineKeyboardBuilder()
+            builder.row(
+                types.InlineKeyboardButton(text="✅ Переместить", callback_data="archive_gifts_yes"),
+                types.InlineKeyboardButton(text="❌ Не перемещать", callback_data="archive_gifts_no")
+            )
+            text = "🎂 Надеемся, день рождения прошел отлично! Хотите переместить забронированные подарки в «исполненные»?"
+            await self.bot.send_message(user.telegram_id, text, reply_markup=builder.as_markup())
+
+    # FS-10.1.4 Заявка на доступ
+    async def send_access_request(self, session: AsyncSession, owner_id: int, requester_id: int, requester_name: str, wishlist_name: str, request_id: int):
+        if not await self._can_notify(session, owner_id, "access_requests"): 
+            return
+        
+        owner = await self._get_user_info(session, owner_id)
+        if owner and owner.telegram_id:
+            builder = InlineKeyboardBuilder()
+            builder.row(
+                types.InlineKeyboardButton(text="✅ Одобрить", callback_data=f"approve_{request_id}"),
+                types.InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{request_id}")
+            )
+            builder.row(types.InlineKeyboardButton(text="👁 Профиль", url=f"{self.web_app_url}?user_id={requester_id}"))
+            
+            link = self._get_link(requester_id, requester_name)
+            text = f'🔑 Пользователь {link} просит доступ к вашему вишлисту <b>"{wishlist_name}"</b>.'
+            await self.bot.send_message(owner.telegram_id, text, reply_markup=builder.as_markup(), parse_mode="HTML")

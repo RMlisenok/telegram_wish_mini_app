@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.recommendations import GiftSuggestion
+from app.core.db import async_engine
 
 GIFT_DATA = [
     {"tag_value": "лего", "title": "LEGO Technic: Гоночный автомобиль", "category": "Игрушки",
@@ -49,14 +50,19 @@ GIFT_DATA = [
 ]
 
 
-async def init_gifts(session: AsyncSession):
-    check = await session.execute(select(GiftSuggestion).limit(1))
-    if check.scalars().first():
-        print("База подарков уже наполнена.")
-        return
+async def init_gifts():
+    async with AsyncSession(bind=async_engine) as session:
+        try:
+            check = await session.execute(select(GiftSuggestion).limit(1))
+            if check.scalars().first():
+                print("База подарков уже наполнена.")
+                return
 
-    for g in GIFT_DATA:
-        session.add(GiftSuggestion(**g))
+            for g in GIFT_DATA:
+                session.add(GiftSuggestion(**g))
 
-    await session.commit()
+            await session.commit()
+        except Exception as e:
+            print(f'ERRROOOR - {e}')
+            raise
     print(f"Успешно добавлено {len(GIFT_DATA)} идей для подарков.")

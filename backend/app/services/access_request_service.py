@@ -13,6 +13,7 @@ from app.schemas.access_request import (
     AccessRequestWithDetails,
     UpdateAccessRequest
 )
+from app.services.notification_service_bot import NotificationService
 
 
 class AccessRequestService():
@@ -23,9 +24,9 @@ class AccessRequestService():
         self.rep_wishlist = WishlistRepository(session)
 
     async def create_request(
-            self,
-            user_id: int,
-            request_data: AccessRequestCreate
+        self,
+        user_id: int,
+        request_data: AccessRequestCreate
     ) -> Optional[AccessRequestResponse]:
         wishlist = await self.rep_wishlist.get(request_data.wishlist_id)
         if not wishlist:
@@ -34,31 +35,31 @@ class AccessRequestService():
             raise ValueError("You cannot request access to your wishlist")
         if wishlist.typeprivacy == TypePrivacyEnum.public:
             raise ValueError("Wishlist is public, request not needed")
-
         has_access = await self.rep_access.has_access(
             wishlist_id=request_data.wishlist_id,
             user_id=user_id
         )
         if has_access:
             raise ValueError("You have access for this wishlsit")
-
         access_request = await self.rep_access.create(
             request_data.wishlist_id,
             requester_id=user_id
         )
-
         if not access_request:
             raise ValueError("Dont created access")
 
         try:
-            from app.services.notification_service_bot import NotificationService
-            from app.core.bot_setup import bot
-            notif_service = NotificationService(bot)
+            notif_service = NotificationService()
 
-            await notif_service.notify_access_request(
+            # Получаем имя того, кто просит доступ
+            requester = await self.rep_user.get_user_by_id(user_id)
+            requester_name = requester.name if requester else "Пользователь"
+
+            await notif_service.send_access_request(
                 session=self.session,
-                requester_id=user_id,
                 owner_id=wishlist.user_id,
+                requester_id=user_id,
+                requester_name=requester_name,
                 wishlist_name=wishlist.name,
                 request_id=access_request.id
             )
@@ -68,19 +69,17 @@ class AccessRequestService():
         return AccessRequestResponse.model_validate(access_request)
 
     async def update_request_status(
-            self,
-            request_id: int,
-            update_data: UpdateAccessRequest,
-            user_id: int
+        self,
+        request_id: int,
+        update_data: UpdateAccessRequest,
+        user_id: int
     ) -> Optional[AccessRequestWithDetails]:
         access_request = await self.rep_access.get_request_id(request_id)
         if not access_request:
             raise ValueError("Access request not found")
-
         wishlist = await self.rep_wishlist.get(access_request.wishlist_id)
         if not wishlist or wishlist.user_id != user_id:
             raise ValueError("Only owned wishlist can change status")
-
         if access_request.status != AccessRequestStatus.PENDING:
             raise ValueError("This request already handled")
 
@@ -91,7 +90,6 @@ class AccessRequestService():
 
         if not success:
             raise ValueError("Error for update status")
-
         try:
             from app.core.bot_setup import bot
             status_action = "одобрил" if update_data.status == AccessRequestStatus.APPROVED else "отклонил"
@@ -105,7 +103,6 @@ class AccessRequestService():
             print(f"Ошибка уведомления об ответе на заявку: {e}")
 
         return await self.get_request_with_details(access_request.id)
-
 
     async def get_request(
         self,

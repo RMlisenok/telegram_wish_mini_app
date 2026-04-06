@@ -1,3 +1,4 @@
+# app/models/__init__.py
 from .user import User
 from .wish import Wish
 from .wishlist import Wishlist
@@ -7,7 +8,7 @@ from .subscription import Subscription
 from .notification_settings import NotificationSettings
 from .questionnaire import UserForm
 from .access_request import AccessRequest
-from .recommendations import GiftSuggestion, RecommendationLog
+from .recommendations import GiftSuggestion
 
 
 __all__ = [
@@ -20,6 +21,5 @@ __all__ = [
     "NotificationSettings",
     "UserForm",
     "AccessRequest",
-    "GiftSuggestion",
-    "RecommendationLog"
+    "GiftSuggestion"
 ]

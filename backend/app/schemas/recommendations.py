@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class GiftResponse(BaseModel):
     title: str
     description: str

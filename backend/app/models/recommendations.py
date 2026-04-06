@@ -1,9 +1,8 @@
-from sqlalchemy import BigInteger, String, Text
+from sqlalchemy import BigInteger, String, Text, DateTime, func
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.base import Base
-from sqlalchemy import Column, Integer, BigInteger, DateTime, func
-from app.core.db import Base
+
 
 class GiftSuggestion(Base):
     __tablename__ = 'gift_suggestions'
@@ -14,6 +13,7 @@ class GiftSuggestion(Base):
     url: Mapped[str] = mapped_column(String(1000), nullable=False)
     tag_value: Mapped[str] = mapped_column(String(255), nullable=False)
     category: Mapped[str] = mapped_column(String(100), nullable=False)
+
 
 class RecommendationLog(Base):
     __tablename__ = "recommendation_logs"
