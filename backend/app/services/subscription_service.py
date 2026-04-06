@@ -58,14 +58,18 @@ class SubscriptionService:
 
         if subscription:
             try:
-                # from app.services.notification_service_bot import NotificationService # noqa
-                # from app.core.bot_setup import bot
+                # Инициализируем БЕЗ bot в скобках
+                notif_service = NotificationService() 
 
-                notif_service = NotificationService(bot)
-                await notif_service.notify_new_follower(
-                    self.session,
-                    user_id,
-                    target_user_id
+                # Получаем данные подписчика, чтобы передать имя
+                subscriber = await self.rep_user.get_user_by_id(user_id)
+                subscriber_name = subscriber.name if subscriber else "Кто-то"
+
+                await notif_service.notify_new_subscriber(
+                    session=self.session,
+                    owner_id=target_user_id,    # Кому придет уведомление
+                    subscriber_id=user_id,      # Кто подписался
+                    subscriber_name=subscriber_name
                 )
             except Exception as e:
                 print(f"Ошибка отправки уведомления о подписке: {e}")

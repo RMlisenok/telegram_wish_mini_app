@@ -13,6 +13,7 @@ from app.schemas.access_request import (
     AccessRequestWithDetails,
     UpdateAccessRequest
 )
+from app.services.notification_service_bot import NotificationService
 
 
 class AccessRequestService():
@@ -48,14 +49,17 @@ class AccessRequestService():
             raise ValueError("Dont created access")
 
         try:
-            from app.services.notification_service_bot import NotificationService
-            from app.core.bot_setup import bot
-            notif_service = NotificationService(bot)
+            notif_service = NotificationService() # Убрали bot
 
-            await notif_service.notify_access_request(
+            # Получаем имя того, кто просит доступ
+            requester = await self.rep_user.get_user_by_id(user_id)
+            requester_name = requester.name if requester else "Пользователь"
+
+            await notif_service.send_access_request(
                 session=self.session,
-                requester_id=user_id,
                 owner_id=wishlist.user_id,
+                requester_id=user_id,
+                requester_name=requester_name,
                 wishlist_name=wishlist.name,
                 request_id=access_request.id
             )
