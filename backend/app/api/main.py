@@ -16,7 +16,7 @@ from app.api.routers.s3_client import router as s3_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_database()
+    # await init_database()
     await init_tags()
     yield
     print('Stop work and clean tables')
