@@ -8,6 +8,7 @@ from .subscription import Subscription
 from .notification_settings import NotificationSettings
 from .questionnaire import UserForm
 from .access_request import AccessRequest
+from .recommendations import GiftSuggestion
 
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "Subscription",
     "NotificationSettings",
     "UserForm",
-    "AccessRequest"
+    "AccessRequest",
+    "GiftSuggestion"
 ]
