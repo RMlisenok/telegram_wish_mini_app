@@ -1,18 +1,6 @@
-version: '3.5'
-
 services:
 
   frontend:
-    # build: ./frontend
-    # container_name: frontend-app
-    # expose:
-    #   - "3000"  # SvelteKit adapter-node по умолчанию на 3000
-    # environment:
-    #   - NODE_ENV=production
-    #   - ORIGIN=https://wishlistprice.ru
-    #   # - PUBLIC_API_URL=/api  # Внутренний путь для API
-    # networks:
-    #   - app-network
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -38,6 +26,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - frontend
+      - backend
     networks:
       - app-network
 
@@ -76,8 +65,8 @@ services:
     container_name: backend-app
     env_file:
       - backend/.env
-    ports:
-      - "80:8000"
+    expose:
+      - "8000"  # Не публикуем на хост, только внутри сети
     volumes:
       - ./backend:/app
     depends_on:
@@ -97,4 +86,3 @@ volumes:
 networks:
   app-network:
     driver: bridge
-    
