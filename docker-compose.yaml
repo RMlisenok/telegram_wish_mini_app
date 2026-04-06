@@ -1,6 +1,56 @@
 version: '3.5'
 
 services:
+
+  frontend:
+    # build: ./frontend
+    # container_name: frontend-app
+    # expose:
+    #   - "3000"  # SvelteKit adapter-node по умолчанию на 3000
+    # environment:
+    #   - NODE_ENV=production
+    #   - ORIGIN=https://wishlistprice.ru
+    #   # - PUBLIC_API_URL=/api  # Внутренний путь для API
+    # networks:
+    #   - app-network
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    expose:
+      - "80"
+    environment:
+      - DOMAIN=wishlistprice.ru
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx-temp.conf:/etc/nginx/nginx-temp.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on:
+      - frontend
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - app-network
+
   database:
     image: postgres:15
     container_name: database
@@ -47,3 +97,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    
