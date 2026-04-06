@@ -17,6 +17,7 @@ from app.core.bot_setup import bot, dp
 import asyncio
 from app.core.init_gifts import init_gifts
 from app.api.routers.notification_bot import router as notification_router
+from app.api.routers.bot_router import router as bot_tg_router
 
 
 @asynccontextmanager
@@ -25,8 +26,11 @@ async def lifespan(app: FastAPI):
     await init_tags()
     await init_gifts()
 
+    dp.include_router(bot_tg_router)
+
     polling_task = asyncio.create_task(dp.start_polling(bot))
     print("✅ Backend и Бот запущены")
+
     yield
     polling_task.cancel()
     await bot.session.close()

@@ -42,7 +42,7 @@ makemigration:
 		echo "Ошибка: укажите сообщение: make makemigration m=\"текст\""; \
 		exit 1; \
 	fi
-	cd backend && uv run alembic revision --autogenerate -m "$(m)"
+	cd backend && DB_HOST=localhost DB_PORT=5437 uv run alembic revision --autogenerate -m "$(m)"
 
 downgrade:
 	docker compose exec backend uv run alembic downgrade -1
