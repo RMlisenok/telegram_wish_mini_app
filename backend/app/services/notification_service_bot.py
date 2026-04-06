@@ -1,4 +1,6 @@
 import datetime
+import os
+
 from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
@@ -11,6 +13,17 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 class NotificationService:
     def __init__(self, bot):
         self.bot = bot
+        self.app_url = os.getenv("WEB_APP_URL")
+
+    def _format_birthday_text(self, name, user_id, days_left):
+        link = f'<a href="{self.app_url}?startapp=user_{user_id}">{name}</a>'
+
+        if days_left == 7:
+            return f"Через неделю день рождения у {link}! Не забудь поздравить!"
+        elif days_left == 1:
+            return f"Завтра день рождения у {link}! Не забудь поздравить!"
+        else:
+            return f"Сегодня день рождения у {link}! 🎉"
 
     async def check_birthdays_and_notify(self, session: AsyncSession):
         today = datetime.date.today()
@@ -19,7 +32,6 @@ class NotificationService:
         for interval in intervals:
             target_date = today + datetime.timedelta(days=interval)
 
-            # Ищем пользователей, у которых ДР в целевую дату
             stmt = select(User).where(
                 extract('month', User.birth_date) == target_date.month,
                 extract('day', User.birth_date) == target_date.day
@@ -28,32 +40,30 @@ class NotificationService:
             birthday_users = result.scalars().all()
 
             for b_user in birthday_users:
-                sub_stmt = select(User).join(Subscription, Subscription.follower_id == User.id).where(
-                    Subscription.target_id == b_user.id
-                )
-                sub_result = await session.execute(sub_stmt)
-                followers = sub_result.scalars().all()
+                sub_stmt = select(User).join(
+                    Subscription, Subscription.follower_id == User.id
+                ).where(Subscription.target_id == b_user.id)
+
+                followers_result = await session.execute(sub_stmt)
+                followers = followers_result.scalars().all()
 
                 for follower in followers:
-                    set_stmt = select(NotificationSettings).where(NotificationSettings.user_id == follower.id)
-                    res_set = await session.execute(set_stmt)
-                    settings = res_set.scalars().first()
+                    set_stmt = select(NotificationSettings).where(
+                        NotificationSettings.user_id == follower.id
+                    )
+                    settings = (await session.execute(set_stmt)).scalar_one_or_none()
 
                     if settings and settings.birt_before:
-                        text = self._format_birthday_text(b_user.full_name, interval)
+                        text = self._format_birthday_text(b_user.name, b_user.id, interval)
                         try:
-                            await self.bot.send_message(follower.telegram_id, text, parse_mode="HTML")
+                            await self.bot.send_message(
+                                follower.telegram_id,
+                                text,
+                                parse_mode="HTML",
+                                disable_web_page_preview=True
+                            )
                         except Exception as e:
-                            print(f"Ошибка отправки: {e}")
-
-    def _format_birthday_text(self, name, days_left):
-        link = f"<b>{name}</b>" # ДОБАВИТЬ ССЫЛКУ НА ЧЕЛОВЕЧКА
-        if days_left == 7:
-            return f"Через неделю день рождения у {link}! Не забудь поздравить!"
-        elif days_left == 1:
-            return f"Завтра день рождения у {link}! Не забудь поздравить!"
-        else:
-            return f"Сегодня день рождения у {link}! 🎉"
+                            print(f"Ошибка отправки уведомления для {follower.id}: {e}")
 
     async def notify_new_follower(self, session: AsyncSession, follower_id: int, target_id: int):
         stmt = select(User).where(User.id == follower_id)
