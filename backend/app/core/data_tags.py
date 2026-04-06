@@ -21,8 +21,8 @@ AVOID_TAGS = [
 ]
 
 
-async def init_tags(session: AsyncSession):
-    # async with AsyncSession(bind=async_engine) as session:
+async def init_tags():
+    async with AsyncSession(bind=async_engine) as session:
     try:
         check = await session.execute(select(TagForm).limit(1))
         if check.scalars().first():
