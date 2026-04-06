@@ -1,24 +1,26 @@
-from typing import Optional, List, Tuple
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.subscription import Subscription
+from app.models.subscription import Subscription # noqa
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.wishlist_repository import WishlistRepository
 from app.repositories.wish_wishlist_repository import WishWishlistRepository
-from app.schemas.subscription import (
-    SubscribeToWishlistRequest,
-    SubscribeToUserRequest,
+from app.schemas.subscription import ( # noqa
+    SubscribeToWishlistRequest, # noqa
+    SubscribeToUserRequest, # noqa
     SubscribersVisitUpdate,
     SubscriptionsResponse,
     SubscribersResponse
-    )
+)
+from app.services.notification_service_bot import NotificationService
+from app.core.bot_setup import bot
 
 
 class SubscriptionService:
     def __init__(
-        self,
-        session: AsyncSession
+            self,
+            session: AsyncSession
     ):
         self.session = session
         self.rep_subs = SubscriptionRepository(session)
@@ -27,16 +29,17 @@ class SubscriptionService:
         self.rep_wish_wishlist = WishWishlistRepository(session)
 
     async def subscribe_to_user(
-        self,
-        user_id: int,
-        target_user_id: int
+            self,
+            user_id: int,
+            target_user_id: int
     ) -> bool:
         if user_id == target_user_id:
             return False
+
         target_user = await self.rep_user.get_user_by_id(target_user_id)
         if not target_user:
             return False
-        
+
         existing = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
             type_sub=True,
@@ -44,14 +47,56 @@ class SubscriptionService:
         )
         if existing:
             return False
-        
+
         subscription_data = {
             "subscriber_id": user_id,
             "type_sub": True,
             "target_user_id": target_user_id
         }
+
         subscription = await self.rep_subs.create(subscription_data)
+
+        if subscription:
+            try:
+                # from app.services.notification_service_bot import NotificationService # noqa
+                # from app.core.bot_setup import bot
+
+                notif_service = NotificationService(bot)
+                await notif_service.notify_new_follower(
+                    self.session,
+                    user_id,
+                    target_user_id
+                )
+            except Exception as e:
+                print(f"Ошибка отправки уведомления о подписке: {e}")
         return subscription is not None
+
+    # async def subscribe_to_user(
+    #     self,
+    #     user_id: int,
+    #     target_user_id: int
+    # ) -> bool:
+    #     if user_id == target_user_id:
+    #         return False
+    #     target_user = await self.rep_user.get_user_by_id(target_user_id)
+    #     if not target_user:
+    #         return False
+    #
+    #     existing = await self.rep_subs.get_subscription(
+    #         subscriber_id=user_id,
+    #         type_sub=True,
+    #         target_user_id=target_user_id
+    #     )
+    #     if existing:
+    #         return False
+    #
+    #     subscription_data = {
+    #         "subscriber_id": user_id,
+    #         "type_sub": True,
+    #         "target_user_id": target_user_id
+    #     }
+    #     subscription = await self.rep_subs.create(subscription_data)
+    #     return subscription is not None
 
     async def subscribe_to_wishlist(
         self,
@@ -64,7 +109,6 @@ class SubscriptionService:
 
         if wishlist.user_id == user_id:
             return False
-        
         existing = await self.rep_subs.get_subscription(
             subscriber_id=user_id,
             type_sub=False,
@@ -72,7 +116,6 @@ class SubscriptionService:
         )
         if existing:
             return False
-        
         subscription_data = {
             "subscriber_id": user_id,
             "type_sub": False,
@@ -142,7 +185,7 @@ class SubscriptionService:
                 })
             else:
                 if sub.target_wishlist:
-                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist( # noqa
                         sub.target_wishlist_id
                     )
                     subscription_list.append({
@@ -213,7 +256,7 @@ class SubscriptionService:
         subscription_list = []
         for sub in subscriptions:
             if sub.target_wishlist:
-                count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist( # noqa
                     sub.target_wishlist_id
                 )
                 subscription_list.append({
@@ -268,7 +311,7 @@ class SubscriptionService:
                 })
             else:
                 if sub.target_wishlist:
-                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist(
+                    count_wishes = await self.rep_wish_wishlist.count_wishes_in_wishlist( # noqa
                         sub.target_wishlist_id
                     )
                     subscription_list.append({
