@@ -217,3 +217,4 @@ tests/__pycache__
 .streamlit/secrets.toml
 app/models/__pycache__
 /app/services/__pycache__
+.env.local
