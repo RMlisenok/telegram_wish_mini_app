@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-# from app.core.db import init_database, drop_tables, AsyncSessionLocal
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.core.data_tags import init_tags
 from app.api.routers.auth import router as auth_routers
 from app.api.routers.user import router as user_routers
@@ -20,26 +20,56 @@ from app.api.routers.notification_bot import router as notification_router
 from app.api.routers.bot_router import router as bot_tg_router
 
 
+from app.services.notification_service_bot import NotificationService
+from app.core.db import AsyncSessionLocal
+
+
+# Функция, которую будет вызывать планировщик
+async def scheduled_birthday_check():
+    service = NotificationService()
+    async with AsyncSessionLocal() as session:
+        try:
+            await service.check_birthdays_and_notify(session)
+            await session.commit()
+            print("✅ Плановая проверка завершена успешно")
+        except Exception as e:
+            print(f"❌ Ошибка в планировщике: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # await init_database()
+    # Инициализация данных
     await init_tags()
     await init_gifts()
 
-    dp.include_router(bot_tg_router)
+    # Настройка планировщика
+    scheduler = AsyncIOScheduler()
+    # --- НАСТРОЙКА ВРЕМЕНИ ЗДЕСЬ ---
+    # Вариант 1 (Для теста): запускать каждую минуту
+    # scheduler.add_job(scheduled_birthday_check, "interval", minutes=1)
 
+    # Вариант 2 (Для продакшена): запускать каждый день в 09:00 утра
+    scheduler.add_job(scheduled_birthday_check, "cron", hour=24, minute=0)
+
+    scheduler.start()
+
+    # Настройка бота
+    dp.include_router(bot_tg_router)
     polling_task = asyncio.create_task(dp.start_polling(bot))
     print("✅ Backend и Бот запущены")
 
     yield
+
+    # Завершение работы
+    scheduler.shutdown()  # Останавливаем планировщик
     polling_task.cancel()
     await bot.session.close()
-    print('Stop work and clean tables')
-    # await drop_tables()
-    print('clean completed')
+    print('Stop work and clean completed')
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Роутеры
 app.include_router(auth_routers, prefix='/v1')
 app.include_router(user_routers, prefix='/v1')
 app.include_router(wish_routers, prefix='/v1')
