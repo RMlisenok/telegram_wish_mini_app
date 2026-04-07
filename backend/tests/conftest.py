@@ -15,16 +15,6 @@ sys.path.insert(0, str(root_dir))
 from app.core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Импортируем все фикстуры из fixtures модуля
-from tests.fixtures.user_fixtures import *
-from tests.fixtures.subscription_fixtures import *
-from tests.fixtures.wishlist_fixtures import *
-from tests.fixtures.notification_fixtures import *
-from tests.fixtures.wish_fixtures import *
-from tests.fixtures.access_request_fixtures import *
-from tests.fixtures.questionnaire_fixtures import *
-from tests.fixtures.recommendations_fixtures import *
-
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
