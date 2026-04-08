@@ -1,5 +1,11 @@
 import { writable } from 'svelte/store';
 
+interface ReservationResponse {
+  wish_wishlist_id: number | string;
+  reserved_by_id: number | string;
+  created_at: string;
+}
+
 export interface WishReservation {
     wish_wishlist_id: string; // ID связи wish_wishlist
     reserved_by_id: string;   // ID пользователя, который зарезервировал
@@ -36,7 +42,7 @@ export async function getUserReservations(
         const data = await response.json();
         console.log('Получены резервации:', data);
         
-        const transformedReservations = data.map((reservation: any) => ({
+        const transformedReservations = data.map((reservation: ReservationResponse) => ({
             wish_wishlist_id: reservation.wish_wishlist_id.toString(),
             reserved_by_id: reservation.reserved_by_id.toString(),
             created_at: new Date(reservation.created_at)
