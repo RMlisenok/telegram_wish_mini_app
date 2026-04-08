@@ -1,3 +1,4 @@
+import asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.questionnaire import TagForm
@@ -24,7 +25,6 @@ AVOID_TAGS = [
 async def init_tags():
     async with AsyncSession(bind=async_engine) as session:
         try:
-
             async with session.begin():
                 check = await session.execute(select(TagForm).limit(1))
                 if check.scalars().first():
