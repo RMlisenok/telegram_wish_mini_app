@@ -42,8 +42,8 @@
     const ICON_ARROW_RIGHT = '../../../../static/icons/arrow-right.png';
 
     const getInitials = (name) => {
-        if (!name) return '??';
-        const parts = name.trim().split(' ');
+        if (!name || !name.trim()) return '??';
+        const parts = name.trim().split(/\s+/); // Split on any whitespace, ignore empty strings
         return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
     };
 
