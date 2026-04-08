@@ -1,0 +1,54 @@
+# .github/workflows/ci.yml
+name: CI - Unit Tests
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          uv sync --frozen
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          uv run pytest tests/unit/ -v --tb=short
+        env:
+          TELEGRAM_BOT_TOKEN: test_token_12345
+          SECRET_KEY: test_secret_key_for_tests
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASS: testpass
+          DB_NAME: testdb
+          S3_ACCESS_KEY: test
+          S3_SECRET_KEY: test
+          ENDPOINT_URL: http://localhost:9000
+          BUCKET_NAME: test
+          URL_DATA_SAVE: http://localhost:9000/test/
