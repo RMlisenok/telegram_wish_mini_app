@@ -17,6 +17,7 @@ dependencies = [
     "freezegun>=1.5.5",
     "greenlet>=3.3.0",
     "httpx>=0.28.1",
+    "moto[s3]>=5.1.22",
     "pillow>=12.1.0",
     "pydantic>=2.12.4",
     "pydantic-settings>=2.12.0",

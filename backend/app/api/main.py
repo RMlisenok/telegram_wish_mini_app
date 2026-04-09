@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
     # scheduler.add_job(scheduled_birthday_check, "interval", minutes=1)
 
     # Вариант 2 (Для продакшена): запускать каждый день в 09:00 утра
-    scheduler.add_job(scheduled_birthday_check, "cron", hour=24, minute=0)
+    scheduler.add_job(scheduled_birthday_check, "cron", hour=23, minute=0)
 
     scheduler.start()
 
