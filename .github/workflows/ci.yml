@@ -70,6 +70,7 @@ jobs:
           cd backend
           uv run pytest tests/unit/ -v --tb=short
         env:
+          # Все переменные из Settings
           TELEGRAM_BOT_TOKEN: test_token_12345
           SECRET_KEY: test_secret_key_for_tests
           ALGORITHM: HS256
@@ -138,6 +139,11 @@ jobs:
           SECRET_KEY: test_secret_key_for_tests
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASS: testpass
+          DB_NAME: testdb
           TEST_DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
           S3_ACCESS_KEY: test
           S3_SECRET_KEY: test
