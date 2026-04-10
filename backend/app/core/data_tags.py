@@ -21,23 +21,22 @@ AVOID_TAGS = [
 ]
 
 
-async def init_tags(session: AsyncSession):
-    # async with AsyncSession(bind=async_engine) as session:
-    try:
-        check = await session.execute(select(TagForm).limit(1))
-        if check.scalars().first():
-            return
+async def init_tags():
+    async with AsyncSession(bind=async_engine) as session:
+        try:
 
-        for t in INTEREST_TAGS:
-            session.add(TagForm(tag_value=t, type_tags=True))
+            async with session.begin():
+                check = await session.execute(select(TagForm).limit(1))
+                if check.scalars().first():
+                    return
 
-        for t in AVOID_TAGS:
-            session.add(TagForm(tag_value=t, type_tags=False))
+                for t in INTEREST_TAGS:
+                    session.add(TagForm(tag_value=t, type_tags=True))
 
-        await session.commit()
-        print("✅ Теги успешно инициализированы")
+                for t in AVOID_TAGS:
+                    session.add(TagForm(tag_value=t, type_tags=False))
 
-    except Exception as e:
-        await session.rollback()
-        print(f'❌ ERROR в init_tags - {e}')
-        raise
+                await session.commit()
+        except Exception as e:
+            print(f'ERRROOOR - {e}')
+            raise

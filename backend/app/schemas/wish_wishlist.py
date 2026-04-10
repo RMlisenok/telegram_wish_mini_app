@@ -38,7 +38,7 @@ class WishInWishlistResponse(BaseModel):
     photo: Optional[str] = None
     url_gift: Optional[str] = None
     price: Optional[float] = None
-    currency: Optional[CurrencyEnum] = None
+    currency: CurrencyEnum
     description: Optional[str] = None
     is_booked: bool
     status_is_finished: bool

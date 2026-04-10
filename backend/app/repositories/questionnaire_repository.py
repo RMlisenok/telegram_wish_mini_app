@@ -57,7 +57,7 @@ class QuestionnaireRepository:
 
         if new_items:
             self.session.add_all(new_items)
-            await self.session.commit()
+            self.session.commit()
 
         return new_items
 

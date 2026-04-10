@@ -1,6 +1,0 @@
-node_modules
-.svelte-kit
-.vite
-.env
-.DS_Store
-dist

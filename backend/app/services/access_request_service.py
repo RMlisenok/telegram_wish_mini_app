@@ -49,7 +49,7 @@ class AccessRequestService():
             raise ValueError("Dont created access")
 
         try:
-            notif_service = NotificationService()
+            notif_service = NotificationService() # Убрали bot
 
             # Получаем имя того, кто просит доступ
             requester = await self.rep_user.get_user_by_id(user_id)
