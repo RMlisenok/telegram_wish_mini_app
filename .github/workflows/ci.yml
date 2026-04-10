@@ -1,0 +1,147 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["unit_tests_backend"]
+  pull_request:
+    branches: [ main, backend ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          uv sync --frozen
+
+      - name: Check Python syntax
+        run: |
+          cd backend
+          uv run python -m py_compile app/**/*.py
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          uv sync --frozen
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          uv run pytest tests/unit/ -v --tb=short
+        env:
+          TELEGRAM_BOT_TOKEN: test_token_12345
+          SECRET_KEY: test_secret_key_for_tests
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASS: testpass
+          DB_NAME: testdb
+          S3_ACCESS_KEY: test
+          S3_SECRET_KEY: test
+          ENDPOINT_URL: http://localhost:9000
+          BUCKET_NAME: test
+          URL_DATA_SAVE: http://localhost:9000/test/
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          uv sync --frozen
+
+      - name: Wait for PostgreSQL
+        run: sleep 5
+
+      - name: Run integration tests
+        run: |
+          cd backend
+          uv run pytest tests/integration/ -v --tb=short
+        env:
+          TELEGRAM_BOT_TOKEN: test_token_12345
+          SECRET_KEY: test_secret_key_for_tests
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASS: testpass
+          DB_NAME: testdb
+          TEST_DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+          S3_ACCESS_KEY: test
+          S3_SECRET_KEY: test
+          ENDPOINT_URL: http://localhost:9000
+          BUCKET_NAME: test
+          URL_DATA_SAVE: http://localhost:9000/test/
