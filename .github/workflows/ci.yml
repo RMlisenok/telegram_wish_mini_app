@@ -1,15 +1,13 @@
-# .github/workflows/ci.yml
 name: CI Pipeline
 
 on:
   push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [ "backend",  ]
+  # pull_request:
+  #   branches: [ main, develop ]
   workflow_dispatch:
 
 jobs:
-  # ==================== BUILD JOB ====================
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -39,7 +37,6 @@ jobs:
           cd backend
           uv run python -m py_compile app/**/*.py
 
-  # ==================== UNIT TESTS ====================
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -70,7 +67,6 @@ jobs:
           cd backend
           uv run pytest tests/unit/ -v --tb=short
         env:
-          # Все переменные из Settings
           TELEGRAM_BOT_TOKEN: test_token_12345
           SECRET_KEY: test_secret_key_for_tests
           ALGORITHM: HS256
@@ -86,11 +82,10 @@ jobs:
           BUCKET_NAME: test
           URL_DATA_SAVE: http://localhost:9000/test/
 
-  # ==================== INTEGRATION TESTS ====================
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: build
+    needs: unit-tests
     
     services:
       postgres:
