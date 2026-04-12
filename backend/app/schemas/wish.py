@@ -1,7 +1,8 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, validator
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+
 
 
 class CurrencyEnum(str, Enum):
@@ -32,6 +33,12 @@ class WishCreate(BaseModel):
     price: Optional[float] = None
     currency: Optional[CurrencyEnum] = None
     description: Optional[str] = None
+    
+    @validator('price')
+    def price_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Price must be positive')
+        return v
 
 
 class WishCreateDb(WishCreate):

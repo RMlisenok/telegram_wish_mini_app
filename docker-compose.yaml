@@ -39,7 +39,6 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - app-network
-
   database:
     image: postgres:15
     container_name: database
@@ -76,6 +75,7 @@ services:
       - app-network
     command: >
       sh -c "
+        uv run uv run pytest tests/unit &&
         uv run alembic upgrade head &&
         uv run uvicorn app.api.main:app --host 0.0.0.0 --port 8000
       "

@@ -209,27 +209,3 @@ async def get_blocked_user_list(
             detail="No bloked users found"
         )
     return list_blocked
-
-
-@router.get("/{user_id}/wishlists")
-async def get_user_wishlists(
-    user_id: int,
-    current_user_id: int = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
-):
-    """Получить вишлисты пользователя (публичные или с доступом)"""
-    from app.services.wishlist_service import WishlistService
-
-    service = WishlistService(db)
-    wishlists = await service.get_user_wishlist(user_id, limit=50)
-
-    # Фильтруем вишлисты в зависимости от прав доступа
-    result = []
-    for wishlist in wishlists:
-        if wishlist.typeprivacy == 'public':
-            result.append(wishlist)
-        elif wishlist.typeprivacy == 'protected' and current_user_id == user_id:
-            result.append(wishlist)
-        # Для приватных - только владелец
-
-    return result
