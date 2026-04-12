@@ -63,3 +63,9 @@ clean:
 	docker compose down -v
 	rm -rf backend/.venv
 	find backend -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+
+clean-test:
+	cd backend
+	rm -rf .pytest_cache
+	rm -rf tests/__pycache__
+	rm -rf tests/integration/__pycache_

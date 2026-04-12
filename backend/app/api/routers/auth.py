@@ -9,12 +9,9 @@ from app.core.security import (
     verify_tg_init_data,
     create_jwt_token
 )
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import UserService
 from app.models.user import User
-from app.services.photo_update_service import PhotoUpdateService
-from app.core.s3_client import S3Client
-from app.core.dependencies import get_client_s3
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +54,7 @@ async def auth_test(
 @router.post('/telegram')
 async def auth_telegram(
     auth_data: dict,
-    db: AsyncSession = Depends(get_db),
-    s3_client: S3Client = Depends(get_client_s3)
+    db: AsyncSession = Depends(get_db)
 ):
     init_data = auth_data.get('initData')
     if not init_data:
@@ -92,57 +88,17 @@ async def auth_telegram(
     user_service = UserService(db)
     user = await user_service.get_user_by_telegram_id(telegram_id)
 
-    photo_service = PhotoUpdateService(s3_client)
     if not user:
         logger.error(f"Creating new user for telegram_id: {telegram_id}")
-
-        final_photo_url = photo_url
-        # if final_photo_url:
-        #     try:
-        #         migrated_url = await photo_service.migrate_telegram_photo(photo_url)
-        #         if migrated_url:
-        #             final_photo_url = migrated_url
-        #         else:
-        #             logger.error(f"Error, use old photo: {final_photo_url}")
-        #             final_photo_url = photo_url
-        #     except Exception as e:
-        #         logger.error(f"Error migrate photo: {e}")
-
         user_create = UserCreate(
             telegram_id=telegram_id,
             name=f'{first_name} {last_name}'.strip(),
-            photo=final_photo_url or ""
+            photo=photo_url
         )
         user = await user_service.create_user(user_create)
     else:
         logger.error(f"Found existing user for telegram_id: {telegram_id}")
         user = UserResponse.model_validate(user)
-        # final_photo_url = user.photo
-
-        # if photo_url and photo_url == user.photo:
-        #     logger.error(f"START REPLACE PHOTO: {telegram_id}")
-        #     if photo_url:
-        #         try:
-        #             logger.error(f"START FUNCTION MIGRATE: {photo_url}")
-        #             migrated_url = await photo_service.migrate_telegram_photo(photo_url)
-        #             logger.error(f"END FUNCTION MIGRATE: {migrated_url}")
-        #             if migrated_url:
-        #                 logger.error(f"NEW PHOTO")
-        #                 final_photo_url = migrated_url
-        #             else:
-        #                 logger.error(f"Error, use old photo: {final_photo_url}")
-        #                 final_photo_url = photo_url
-        #         except Exception as e:
-        #             logger.error(f"Error migrate photo: {e}")
-        #     user_update = UserUpdate(
-        #         name=user.name,
-        #         birth_date=user.birth_date,
-        #         photo=final_photo_url,
-        #         theme=user.theme,
-        #         show_sub=user.show_sub
-        #     )
-        #     await user_service.update_user(user.id, user_update)
-        #     user.photo = final_photo_url
 
     token_data = {
         'sub': str(user.id),
