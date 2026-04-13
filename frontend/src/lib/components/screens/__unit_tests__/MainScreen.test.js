@@ -207,4 +207,47 @@ describe('MainScreen', () => {
     expect(renderedSubscriberNames).toEqual(['Newest Subscriber', 'Middle Subscriber']);
     expect(screen.queryByText('Old Subscriber')).not.toBeInTheDocument();
   });
+
+  test('dispatches all primary navigation events', async () => {
+    const { container } = render(MainScreenEventHarness, {
+      token: '',
+      user: baseUser
+    });
+
+    const settingsButton = container.querySelector('.icon-btn');
+    const profileActionButtons = container.querySelectorAll('.profile-actions .ui-button');
+    const openWishesButton = container.querySelector('.ghost-link');
+    const tinyLinks = container.querySelectorAll('.tiny-link');
+    const createWishlistButton = container.querySelector('.ui-button.full');
+
+    expect(settingsButton).toBeTruthy();
+    expect(profileActionButtons).toHaveLength(2);
+    expect(openWishesButton).toBeTruthy();
+    expect(tinyLinks).toHaveLength(3);
+    expect(createWishlistButton).toBeTruthy();
+
+    await fireEvent.click(settingsButton);
+    await fireEvent.click(profileActionButtons[0]);
+    await fireEvent.click(profileActionButtons[1]);
+    await fireEvent.click(openWishesButton);
+    await fireEvent.click(tinyLinks[0]);
+    await fireEvent.click(tinyLinks[1]);
+    await fireEvent.click(tinyLinks[2]);
+    await fireEvent.click(createWishlistButton);
+
+    const eventNames = Array.from(
+      screen.getByTestId('events-log').querySelectorAll('li')
+    ).map((node) => node.textContent);
+
+    expect(eventNames).toEqual([
+      'openSettings',
+      'openShareProfile',
+      'openQuestionnaire',
+      'openWishes',
+      'openWishlists',
+      'openSubscriptions',
+      'openSubscribers',
+      'openCreateWishlists'
+    ]);
+  });
 });
