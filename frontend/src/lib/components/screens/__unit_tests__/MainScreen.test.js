@@ -57,4 +57,25 @@ describe('MainScreen', () => {
     expect(screen.getByText('01.01.1990')).toBeInTheDocument();
     expect(screen.getByText('JD')).toBeInTheDocument();
   });
+
+  test('renders totals and empty states when stores are empty', () => {
+    totalWishesStore.set(9);
+    totalWishlistsStore.set(3);
+    totalSubscriptionsStore.set(4);
+    totalSubscribersStore.set(5);
+
+    const { container } = renderMainScreen();
+
+    expect(container.querySelector('.ghost-link')?.textContent).toContain('(9)');
+
+    const sectionTitles = Array.from(container.querySelectorAll('.h2')).map((node) =>
+      node.textContent?.trim() || ''
+    );
+
+    expect(sectionTitles[0]).toContain('(3)');
+    expect(sectionTitles[1]).toContain('(4)');
+    expect(sectionTitles[2]).toContain('(5)');
+
+    expect(container.querySelectorAll('.empty-note')).toHaveLength(3);
+  });
 });
