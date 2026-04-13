@@ -1,77 +1,253 @@
-/**
- * @jest-environment jsdom
- */
-import { describe, it, expect } from '@jest/globals';
+import { jest } from '@jest/globals';
+import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 
-// Тестируем вынесенную функцию getInitials
-// Для тестирования функций из Svelte-компонентов рекомендуется выносить их в отдельные файлы
+import MainScreen from '../MainScreen.svelte';
+import MainScreenEventHarness from './MainScreenEventHarness.svelte';
+import {
+  mainSubscribersStore,
+  mainSubscriptionsStore,
+  mainWishlistsStore,
+  totalSubscribersStore,
+  totalSubscriptionsStore,
+  totalWishesStore,
+  totalWishlistsStore
+} from '../../../../types/mainScreenData.ts';
 
-describe('MainScreen - getInitials function', () => {
-  
-  // Вспомогательная функция для тестов (дублирует логику из компонента)
-  function getInitials(name) {
-    if (!name || !name.trim()) return '??';
-    const parts = name.trim().split(/\s+/); // Split on any whitespace, ignore empty strings
-    return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
-  };
+const baseUser = {
+  fullName: 'John Doe',
+  birthDate: '01.01.1990',
+  avatarUrl: ''
+};
 
-  describe('обработка невалидных значений', () => {
-    it('должна возвращать "??" для null', () => {
-      expect(getInitials(null)).toBe('??');
-    });
+function resetMainScreenStores() {
+  mainWishlistsStore.set([]);
+  mainSubscriptionsStore.set([]);
+  mainSubscribersStore.set([]);
 
-    it('должна возвращать "??" для undefined', () => {
-      expect(getInitials(undefined)).toBe('??');
-    });
+  totalWishesStore.set(0);
+  totalWishlistsStore.set(0);
+  totalSubscriptionsStore.set(0);
+  totalSubscribersStore.set(0);
+}
 
-    it('должна возвращать "??" для пустой строки', () => {
-      expect(getInitials('')).toBe('??');
-    });
+function renderMainScreen(props = {}) {
+  return render(MainScreen, {
+    token: '',
+    user: baseUser,
+    ...props
+  });
+}
 
-    it('должна возвращать "??" для строки с пробелами', () => {
-      expect(getInitials('   ')).toBe('??');
-    });
+describe('MainScreen', () => {
+  beforeEach(() => {
+    resetMainScreenStores();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
-  describe('обработка одного слова', () => {
-    it('должна возвращать первую букву для одного слова', () => {
-      expect(getInitials('Алексей')).toBe('А');
-    });
-
-    it('должна возвращать первую букву в верхнем регистре', () => {
-      expect(getInitials('алексей')).toBe('А');
-    });
-
-    it('должна обрабатывать слова с пробелами в начале/конце', () => {
-      expect(getInitials('  Мария  ')).toBe('М');
-    });
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
   });
 
-  describe('обработка двух слов', () => {
-    it('должна возвращать первые буквы двух слов', () => {
-      expect(getInitials('Иван Петров')).toBe('ИП');
-    });
+  test('renders user information and avatar initials fallback', () => {
+    renderMainScreen();
 
-    it('должна работать с именами в нижнем регистре', () => {
-      expect(getInitials('анна соколова')).toBe('АС');
-    });
-
-    it('должна игнорировать лишние пробелы между словами', () => {
-      expect(getInitials('Дмитрий   Иванов')).toBe('ДИ');
-    });
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('01.01.1990')).toBeInTheDocument();
+    expect(screen.getByText('JD')).toBeInTheDocument();
   });
 
-  describe('обработка специальных случаев', () => {
-    it('должна корректно обрабатывать имена с дефисом как одно слово', () => {
-      expect(getInitials('Анна-Мария')).toBe('А');
+  test('renders totals and empty states when stores are empty', () => {
+    totalWishesStore.set(9);
+    totalWishlistsStore.set(3);
+    totalSubscriptionsStore.set(4);
+    totalSubscribersStore.set(5);
+
+    const { container } = renderMainScreen();
+
+    expect(container.querySelector('.ghost-link')?.textContent).toContain('(9)');
+
+    const sectionTitles = Array.from(container.querySelectorAll('.h2')).map((node) =>
+      node.textContent?.trim() || ''
+    );
+
+    expect(sectionTitles[0]).toContain('(3)');
+    expect(sectionTitles[1]).toContain('(4)');
+    expect(sectionTitles[2]).toContain('(5)');
+
+    expect(container.querySelectorAll('.empty-note')).toHaveLength(3);
+  });
+
+  test('shows only first three wishlists', () => {
+    mainWishlistsStore.set([
+      {
+        id: 'wl-1',
+        name: 'Wishlist 1',
+        description: 'First',
+        photo: '',
+        typeprivacy: 'public',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        count: 2
+      },
+      {
+        id: 'wl-2',
+        name: 'Wishlist 2',
+        description: 'Second',
+        photo: '',
+        typeprivacy: 'restricted',
+        created_at: '2026-01-02T00:00:00.000Z',
+        updated_at: '2026-01-02T00:00:00.000Z',
+        count: 5
+      },
+      {
+        id: 'wl-3',
+        name: 'Wishlist 3',
+        description: 'Third',
+        photo: '',
+        typeprivacy: 'private',
+        created_at: '2026-01-03T00:00:00.000Z',
+        updated_at: '2026-01-03T00:00:00.000Z',
+        count: 7
+      },
+      {
+        id: 'wl-4',
+        name: 'Wishlist 4',
+        description: 'Fourth',
+        photo: '',
+        typeprivacy: 'public',
+        created_at: '2026-01-04T00:00:00.000Z',
+        updated_at: '2026-01-04T00:00:00.000Z',
+        count: 1
+      }
+    ]);
+
+    const { container } = renderMainScreen();
+
+    expect(container.querySelectorAll('.wishlist-row')).toHaveLength(3);
+    expect(screen.getByText('Wishlist 1')).toBeInTheDocument();
+    expect(screen.getByText('Wishlist 2')).toBeInTheDocument();
+    expect(screen.getByText('Wishlist 3')).toBeInTheDocument();
+    expect(screen.queryByText('Wishlist 4')).not.toBeInTheDocument();
+  });
+
+  test('shows only first two subscriptions', () => {
+    mainSubscriptionsStore.set([
+      {
+        type_sub: true,
+        user: {
+          name: 'Alice',
+          photo: '',
+          user_id: 10,
+          birth_date: '03.03.1993'
+        }
+      },
+      {
+        type_sub: false,
+        wishlist: {
+          name: 'Travel Wishlist',
+          photo: '',
+          description: 'Trips',
+          typeprivacy: 'public',
+          owner_name: 'Max',
+          id: 99,
+          count: 6
+        }
+      },
+      {
+        type_sub: true,
+        user: {
+          name: 'Bob',
+          photo: '',
+          user_id: 11,
+          birth_date: '04.04.1994'
+        }
+      }
+    ]);
+
+    renderMainScreen();
+
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('Travel Wishlist')).toBeInTheDocument();
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+  });
+
+  test('shows two latest subscribers sorted by subscription date', () => {
+    mainSubscribersStore.set([
+      {
+        name: 'Old Subscriber',
+        photo: '',
+        birth_date: '01.01.1991',
+        subscription_date: '2024-01-10T10:00:00.000Z'
+      },
+      {
+        name: 'Newest Subscriber',
+        photo: '',
+        birth_date: '02.02.1992',
+        subscription_date: '2026-02-10T10:00:00.000Z'
+      },
+      {
+        name: 'Middle Subscriber',
+        photo: '',
+        birth_date: '03.03.1993',
+        subscription_date: '2025-06-10T10:00:00.000Z'
+      }
+    ]);
+
+    const { container } = renderMainScreen();
+    const subscribersSection = container.querySelectorAll('.section-card')[3];
+
+    expect(subscribersSection).toBeTruthy();
+
+    const renderedSubscriberNames = Array.from(
+      subscribersSection.querySelectorAll('.subs-row .subs-name')
+    ).map((node) => node.textContent?.trim());
+
+    expect(renderedSubscriberNames).toEqual(['Newest Subscriber', 'Middle Subscriber']);
+    expect(screen.queryByText('Old Subscriber')).not.toBeInTheDocument();
+  });
+
+  test('dispatches all primary navigation events', async () => {
+    const { container } = render(MainScreenEventHarness, {
+      token: '',
+      user: baseUser
     });
 
-    it('должна обрабатывать латинские имена', () => {
-      expect(getInitials('John Doe')).toBe('JD');
-    });
+    const settingsButton = container.querySelector('.icon-btn');
+    const profileActionButtons = container.querySelectorAll('.profile-actions .ui-button');
+    const openWishesButton = container.querySelector('.ghost-link');
+    const tinyLinks = container.querySelectorAll('.tiny-link');
+    const createWishlistButton = container.querySelector('.ui-button.full');
 
-    it('должна обрабатывать смешанные регистры', () => {
-      expect(getInitials('aNnA pEtRoVa')).toBe('AP');
-    });
+    expect(settingsButton).toBeTruthy();
+    expect(profileActionButtons).toHaveLength(2);
+    expect(openWishesButton).toBeTruthy();
+    expect(tinyLinks).toHaveLength(3);
+    expect(createWishlistButton).toBeTruthy();
+
+    await fireEvent.click(settingsButton);
+    await fireEvent.click(profileActionButtons[0]);
+    await fireEvent.click(profileActionButtons[1]);
+    await fireEvent.click(openWishesButton);
+    await fireEvent.click(tinyLinks[0]);
+    await fireEvent.click(tinyLinks[1]);
+    await fireEvent.click(tinyLinks[2]);
+    await fireEvent.click(createWishlistButton);
+
+    const eventNames = Array.from(
+      screen.getByTestId('events-log').querySelectorAll('li')
+    ).map((node) => node.textContent);
+
+    expect(eventNames).toEqual([
+      'openSettings',
+      'openShareProfile',
+      'openQuestionnaire',
+      'openWishes',
+      'openWishlists',
+      'openSubscriptions',
+      'openSubscribers',
+      'openCreateWishlists'
+    ]);
   });
 });
