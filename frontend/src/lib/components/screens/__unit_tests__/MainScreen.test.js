@@ -78,4 +78,57 @@ describe('MainScreen', () => {
 
     expect(container.querySelectorAll('.empty-note')).toHaveLength(3);
   });
+
+  test('shows only first three wishlists', () => {
+    mainWishlistsStore.set([
+      {
+        id: 'wl-1',
+        name: 'Wishlist 1',
+        description: 'First',
+        photo: '',
+        typeprivacy: 'public',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        count: 2
+      },
+      {
+        id: 'wl-2',
+        name: 'Wishlist 2',
+        description: 'Second',
+        photo: '',
+        typeprivacy: 'restricted',
+        created_at: '2026-01-02T00:00:00.000Z',
+        updated_at: '2026-01-02T00:00:00.000Z',
+        count: 5
+      },
+      {
+        id: 'wl-3',
+        name: 'Wishlist 3',
+        description: 'Third',
+        photo: '',
+        typeprivacy: 'private',
+        created_at: '2026-01-03T00:00:00.000Z',
+        updated_at: '2026-01-03T00:00:00.000Z',
+        count: 7
+      },
+      {
+        id: 'wl-4',
+        name: 'Wishlist 4',
+        description: 'Fourth',
+        photo: '',
+        typeprivacy: 'public',
+        created_at: '2026-01-04T00:00:00.000Z',
+        updated_at: '2026-01-04T00:00:00.000Z',
+        count: 1
+      }
+    ]);
+
+    const { container } = renderMainScreen();
+
+    expect(container.querySelectorAll('.wishlist-row')).toHaveLength(3);
+    expect(screen.getByText('Wishlist 1')).toBeInTheDocument();
+    expect(screen.getByText('Wishlist 2')).toBeInTheDocument();
+    expect(screen.getByText('Wishlist 3')).toBeInTheDocument();
+    expect(screen.queryByText('Wishlist 4')).not.toBeInTheDocument();
+  });
 });
