@@ -131,4 +131,45 @@ describe('MainScreen', () => {
     expect(screen.getByText('Wishlist 3')).toBeInTheDocument();
     expect(screen.queryByText('Wishlist 4')).not.toBeInTheDocument();
   });
+
+  test('shows only first two subscriptions', () => {
+    mainSubscriptionsStore.set([
+      {
+        type_sub: true,
+        user: {
+          name: 'Alice',
+          photo: '',
+          user_id: 10,
+          birth_date: '03.03.1993'
+        }
+      },
+      {
+        type_sub: false,
+        wishlist: {
+          name: 'Travel Wishlist',
+          photo: '',
+          description: 'Trips',
+          typeprivacy: 'public',
+          owner_name: 'Max',
+          id: 99,
+          count: 6
+        }
+      },
+      {
+        type_sub: true,
+        user: {
+          name: 'Bob',
+          photo: '',
+          user_id: 11,
+          birth_date: '04.04.1994'
+        }
+      }
+    ]);
+
+    renderMainScreen();
+
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('Travel Wishlist')).toBeInTheDocument();
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+  });
 });
