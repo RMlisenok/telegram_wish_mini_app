@@ -172,4 +172,39 @@ describe('MainScreen', () => {
     expect(screen.getByText('Travel Wishlist')).toBeInTheDocument();
     expect(screen.queryByText('Bob')).not.toBeInTheDocument();
   });
+
+  test('shows two latest subscribers sorted by subscription date', () => {
+    mainSubscribersStore.set([
+      {
+        name: 'Old Subscriber',
+        photo: '',
+        birth_date: '01.01.1991',
+        subscription_date: '2024-01-10T10:00:00.000Z'
+      },
+      {
+        name: 'Newest Subscriber',
+        photo: '',
+        birth_date: '02.02.1992',
+        subscription_date: '2026-02-10T10:00:00.000Z'
+      },
+      {
+        name: 'Middle Subscriber',
+        photo: '',
+        birth_date: '03.03.1993',
+        subscription_date: '2025-06-10T10:00:00.000Z'
+      }
+    ]);
+
+    const { container } = renderMainScreen();
+    const subscribersSection = container.querySelectorAll('.section-card')[3];
+
+    expect(subscribersSection).toBeTruthy();
+
+    const renderedSubscriberNames = Array.from(
+      subscribersSection.querySelectorAll('.subs-row .subs-name')
+    ).map((node) => node.textContent?.trim());
+
+    expect(renderedSubscriberNames).toEqual(['Newest Subscriber', 'Middle Subscriber']);
+    expect(screen.queryByText('Old Subscriber')).not.toBeInTheDocument();
+  });
 });
