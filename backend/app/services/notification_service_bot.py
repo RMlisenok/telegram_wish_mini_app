@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class NotificationService:
     def __init__(self):
         self.bot = bot
-        self.web_app_url = os.getenv("WEB_APP_URL", "https://wishlistprice.ru/app")
+        self.web_app_url = os.getenv("WEB_APP_URL", "https://t.me/testworkwishbot/")
 
     async def _get_user_info(self, session: AsyncSession, user_id: int):
         stmt = select(User).where(User.id == user_id)
@@ -36,7 +36,8 @@ class NotificationService:
     def _get_link(self, user_id: int, name: str):
         """Создает безопасную HTML ссылку на профиль пользователя"""
         safe_name = html.quote(name)
-        return f'<a href="{self.web_app_url}?user_id={user_id}">{safe_name}</a>'
+        return f'<a href="{self.web_app_url}?startapp=profile_{user_id}">{safe_name}</a>'
+
 
     # --- Метод-оркестратор для проверки ДР ---
     
@@ -149,7 +150,7 @@ class NotificationService:
                 types.InlineKeyboardButton(text="✅ Одобрить", callback_data=f"approve_{request_id}"),
                 types.InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{request_id}")
             )
-            builder.row(types.InlineKeyboardButton(text="👁 Профиль", url=f"{self.web_app_url}?user_id={requester_id}"))
+            builder.row(types.InlineKeyboardButton(text="👁 Профиль", url=f"{self.web_app_url}?startapp=profile_{requester_id}"))
             
             link = self._get_link(requester_id, requester_name)
             text = f'🔑 Пользователь {link} просит доступ к вашему вишлисту <b>"{wishlist_name}"</b>.'
