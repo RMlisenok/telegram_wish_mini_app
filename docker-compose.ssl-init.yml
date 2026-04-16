@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
   nginx-temp:
@@ -16,3 +16,4 @@ services:
 networks:
   app-network:
     driver: bridge
+    name: telegram_wish_mini_app_app-network
