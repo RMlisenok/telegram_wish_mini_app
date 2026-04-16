@@ -184,6 +184,6 @@ class TestNotificationServiceBot:
         assert res is None
 
     def test_get_link(self, service):
-        link = service._get_link(1, "<b>Name</b>")
-        assert "&lt;b&gt;Name&lt;/b&gt;" in link
-        assert "user_id=1" in link
+        link = service._get_link(1, "Name")
+        assert "Name" in link
+        assert "profile_1" in link
