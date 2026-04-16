@@ -26,7 +26,7 @@ echo "Waiting for nginx to start..."
 sleep 5
 
 echo "Requesting SSL certificates..."
-docker run -it --rm \
+docker run --rm \
   --name certbot-generate \
   -v $(pwd)/certbot/conf:/etc/letsencrypt \
   -v $(pwd)/certbot/www:/var/www/certbot \
