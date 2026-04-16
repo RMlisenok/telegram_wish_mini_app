@@ -1,0 +1,16 @@
+services:
+  nginx-temp:
+    image: nginx:alpine
+    container_name: nginx-temp
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx-temp.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - app-network
+    restart: "no"
+
+networks:
+  app-network:
+    driver: bridge
