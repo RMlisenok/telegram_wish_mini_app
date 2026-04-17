@@ -21,8 +21,8 @@ services:
       - backend/.env
     expose:
       - "8000"
-    volumes:
-      - ./backend:/app
+    # volumes:
+    #   - ./backend:/app
     depends_on:
       - database
     networks:
