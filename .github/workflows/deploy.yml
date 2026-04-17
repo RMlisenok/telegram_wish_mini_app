@@ -11,21 +11,17 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     
     steps:
-      - name: Clean workspace with sudo
-        run: |
-          # Очищаем только виртуальное окружение, НЕ сертификаты
-          sudo rm -rf backend/.venv 2>/dev/null || true
-          sudo rm -rf frontend/node_modules 2>/dev/null || true
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           clean: true
 
-      - name: Fix permissions after checkout
+      - name: Remove problematic directories (without sudo)
         run: |
-          sudo chown -R runner:runner .
-          chmod -R 755 .
+          # Удаляем только то, что можем без sudo
+          rm -rf backend/.venv 2>/dev/null || true
+          rm -rf frontend/node_modules 2>/dev/null || true
+          rm -rf **/__pycache__ 2>/dev/null || true
 
       - name: Create necessary directories
         run: |
@@ -59,82 +55,56 @@ jobs:
           if [ -d "certbot/conf/live/wishlistprice.ru" ] && [ -f "certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "✅ SSL certificates already exist"
-            
-            # Проверяем срок действия
-            expiry_date=$(sudo docker run --rm \
-              -v $(pwd)/certbot/conf:/etc/letsencrypt \
-              certbot/certbot certificates 2>/dev/null \
-              | grep -A 2 "wishlistprice.ru" \
-              | grep "Expiry Date" \
-              | awk -F'Expiry Date: ' '{print $2}' || echo "Unknown")
-            
-            echo "📅 Current certificate expires on: $expiry_date"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No SSL certificates found"
+            echo "⚠️ No SSL certificates found - will obtain on first run"
           fi
 
       - name: Stop services
         run: |
-          sudo docker-compose down --remove-orphans || true
+          docker-compose down --remove-orphans || true
+          docker stop nginx-temp 2>/dev/null || true
+          docker rm nginx-temp 2>/dev/null || true
 
       - name: Obtain SSL certificates (ONLY FIRST TIME)
         if: steps.check-certs.outputs.exists == 'false'
         run: |
           echo "🔐 First time setup - obtaining SSL certificates..."
           chmod +x scripts/init-certs.sh
-          sudo bash scripts/init-certs.sh
-          sudo chown -R runner:runner certbot/conf
+          ./scripts/init-certs.sh
 
-      - name: Renew certificates if needed (always, but renew only when due)
+      - name: Renew certificates if needed
         run: |
           echo "🔄 Checking if certificates need renewal..."
-          
-          # Проверяем необходимость обновления (не принудительно)
-          sudo docker run --rm \
+          docker run --rm \
             -v $(pwd)/certbot/conf:/etc/letsencrypt \
             -v $(pwd)/certbot/www:/var/www/certbot \
             certbot/certbot renew \
             --webroot -w /var/www/certbot \
-            --quiet \
-            --no-random-sleep-on-renew || true
-          
-          echo "✅ Certificate renewal check completed"
+            --quiet || true
 
       - name: Deploy with docker-compose
         run: |
-          sudo docker-compose up -d --build
+          docker-compose up -d --build
 
       - name: Wait for services
         run: |
           echo "Waiting for services to start..."
           sleep 20
-          sudo docker-compose ps
+          docker-compose ps
 
       - name: Health check
         run: |
-          # Проверяем через HTTP если HTTPS не готов
           if curl -f http://localhost/health 2>/dev/null; then
-            echo "✅ Health check passed (HTTP)"
-          elif curl -k -f https://wishlistprice.ru/health 2>/dev/null; then
-            echo "✅ Health check passed (HTTPS)"
+            echo "✅ Health check passed"
           else
             echo "❌ Health check failed"
-            sudo docker-compose logs --tail=50
+            docker-compose logs --tail=50
             exit 1
-          fi
-
-      - name: Show certificate info
-        run: |
-          if [ -d "certbot/conf/live/wishlistprice.ru" ]; then
-            echo "📋 Current SSL certificate information:"
-            sudo docker run --rm \
-              -v $(pwd)/certbot/conf:/etc/letsencrypt \
-              certbot/certbot certificates || true
           fi
 
       - name: Cleanup
         if: always()
         run: |
           rm -f backend/.env
-          sudo docker system prune -f --filter "until=24h" 2>/dev/null || true
+          docker system prune -f --filter "until=24h" 2>/dev/null || true

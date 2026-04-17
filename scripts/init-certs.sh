@@ -9,10 +9,10 @@ mkdir -p certbot/{conf,www}
 mkdir -p nginx
 
 echo "🛑 Stopping all services..."
-sudo docker-compose down --remove-orphans 2>/dev/null || true
+docker-compose down --remove-orphans 2>/dev/null || true
 
 echo "🔄 Starting temporary nginx..."
-sudo docker run -d \
+docker run -d \
   --name nginx-temp \
   -p 80:80 \
   -v $(pwd)/certbot/www:/var/www/certbot \
@@ -21,8 +21,8 @@ sudo docker run -d \
 
 sleep 5
 
-echo "🔐 Obtaining SSL certificates (this happens only once)..."
-sudo docker run --rm \
+echo "🔐 Obtaining SSL certificates..."
+docker run --rm \
   -v $(pwd)/certbot/conf:/etc/letsencrypt \
   -v $(pwd)/certbot/www:/var/www/certbot \
   --network host \
@@ -37,8 +37,7 @@ sudo docker run --rm \
   -d www.wishlistprice.ru
 
 echo "🛑 Stopping temporary nginx..."
-sudo docker stop nginx-temp
-sudo docker rm nginx-temp
+docker stop nginx-temp
+docker rm nginx-temp
 
 echo "✅ SSL certificates obtained and saved in certbot/conf/"
-echo "These certificates will be automatically renewed by certbot container"
