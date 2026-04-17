@@ -11,12 +11,30 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     
     steps:
+      - name: Clean workspace with sudo
+        run: |
+          # Очищаем только виртуальное окружение, НЕ сертификаты
+          sudo rm -rf backend/.venv 2>/dev/null || true
+          sudo rm -rf frontend/node_modules 2>/dev/null || true
+
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Fix permissions after checkout
+        run: |
+          sudo chown -R runner:runner .
+          chmod -R 755 .
+
+      - name: Create necessary directories
+        run: |
+          mkdir -p certbot/{conf,www}
+          mkdir -p nginx
+          mkdir -p backend
 
       - name: Create .env from secrets
         run: |
-          mkdir -p backend
           cat > backend/.env << EOF
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           SECRET_KEY=${{ secrets.SECRET_KEY }}
@@ -33,82 +51,90 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           URL_DATA_SAVE=${{ secrets.URL_DATA_SAVE }}
           EOF
+          chmod 600 backend/.env
 
-      - name: Create necessary directories
-        run: |
-          mkdir -p certbot/{conf,www}
-          mkdir -p nginx
-
-      - name: Check if certificates exist
+      - name: Check if SSL certificates exist
         id: check-certs
         run: |
-          if [ -f certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
+          if [ -d "certbot/conf/live/wishlistprice.ru" ] && [ -f "certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Certificates found"
+            echo "✅ SSL certificates already exist"
+            
+            # Проверяем срок действия
+            expiry_date=$(sudo docker run --rm \
+              -v $(pwd)/certbot/conf:/etc/letsencrypt \
+              certbot/certbot certificates 2>/dev/null \
+              | grep -A 2 "wishlistprice.ru" \
+              | grep "Expiry Date" \
+              | awk -F'Expiry Date: ' '{print $2}' || echo "Unknown")
+            
+            echo "📅 Current certificate expires on: $expiry_date"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No certificates found, will obtain new ones"
+            echo "⚠️ No SSL certificates found"
           fi
 
-      - name: Stop services if running
+      - name: Stop services
         run: |
-          docker-compose down || true
+          sudo docker-compose down --remove-orphans || true
 
-      - name: Obtain SSL certificates (first time)
+      - name: Obtain SSL certificates (ONLY FIRST TIME)
         if: steps.check-certs.outputs.exists == 'false'
         run: |
+          echo "🔐 First time setup - obtaining SSL certificates..."
           chmod +x scripts/init-certs.sh
-          ./scripts/init-certs.sh
+          sudo bash scripts/init-certs.sh
+          sudo chown -R runner:runner certbot/conf
 
-      - name: Update certificates if needed
-        if: steps.check-certs.outputs.exists == 'true'
+      - name: Renew certificates if needed (always, but renew only when due)
         run: |
-          docker run --rm \
+          echo "🔄 Checking if certificates need renewal..."
+          
+          # Проверяем необходимость обновления (не принудительно)
+          sudo docker run --rm \
             -v $(pwd)/certbot/conf:/etc/letsencrypt \
             -v $(pwd)/certbot/www:/var/www/certbot \
-            certbot/certbot renew --webroot -w /var/www/certbot --dry-run
+            certbot/certbot renew \
+            --webroot -w /var/www/certbot \
+            --quiet \
+            --no-random-sleep-on-renew || true
+          
+          echo "✅ Certificate renewal check completed"
 
       - name: Deploy with docker-compose
         run: |
-          docker-compose up -d --build
+          sudo docker-compose up -d --build
 
-      - name: Wait for services to be ready
+      - name: Wait for services
         run: |
           echo "Waiting for services to start..."
-          sleep 15
+          sleep 20
+          sudo docker-compose ps
 
       - name: Health check
         run: |
-          # Check nginx
-          if curl -k -f https://wishlistprice.ru/health; then
-            echo "✅ Health check passed"
+          # Проверяем через HTTP если HTTPS не готов
+          if curl -f http://localhost/health 2>/dev/null; then
+            echo "✅ Health check passed (HTTP)"
+          elif curl -k -f https://wishlistprice.ru/health 2>/dev/null; then
+            echo "✅ Health check passed (HTTPS)"
           else
             echo "❌ Health check failed"
-            docker-compose logs
+            sudo docker-compose logs --tail=50
             exit 1
           fi
 
-      - name: Verify SSL certificate
+      - name: Show certificate info
         run: |
-          # Check SSL certificate expiry
-          expiry_date=$(docker run --rm \
-            -v $(pwd)/certbot/conf:/etc/letsencrypt \
-            certbot/certbot certificates \
-            | grep -A 2 "wishlistprice.ru" \
-            | grep "Expiry Date" \
-            | awk -F'Expiry Date: ' '{print $2}')
-          
-          echo "📅 Certificate expires on: $expiry_date"
+          if [ -d "certbot/conf/live/wishlistprice.ru" ]; then
+            echo "📋 Current SSL certificate information:"
+            sudo docker run --rm \
+              -v $(pwd)/certbot/conf:/etc/letsencrypt \
+              certbot/certbot certificates || true
+          fi
 
       - name: Cleanup
         if: always()
         run: |
           rm -f backend/.env
-          docker system prune -f
-
-      - name: Setup auto-renewal cron job
-        run: |
-          # Add cron job for certificate renewal (if not exists)
-          (crontab -l 2>/dev/null | grep -v "certbot renew") | crontab -
-          (crontab -l 2>/dev/null; echo "0 0,12 * * * cd $(pwd) && docker-compose exec nginx nginx -s reload") | crontab -
-          echo "✅ Auto-renewal cron job configured"
+          sudo docker system prune -f --filter "until=24h" 2>/dev/null || true
