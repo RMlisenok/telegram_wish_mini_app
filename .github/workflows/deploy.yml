@@ -11,17 +11,20 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     
     steps:
-      - name: Checkout code
+      - name: Checkout code (без очистки)
         uses: actions/checkout@v4
         with:
-          clean: true
+          clean: false  # НЕ удаляем существующие файлы
+          persist-credentials: false
 
-      - name: Remove problematic directories (without sudo)
+      - name: Reset git and ignore permission errors
         run: |
-          # Удаляем только то, что можем без sudo
-          rm -rf backend/.venv 2>/dev/null || true
-          rm -rf frontend/node_modules 2>/dev/null || true
-          rm -rf **/__pycache__ 2>/dev/null || true
+          # Сбрасываем изменения, игнорируя ошибки прав
+          git reset --hard HEAD || true
+          # Удаляем только то, что можем
+          git clean -fd 2>/dev/null || true
+          # Игнорируем проблемные папки
+          git clean -fd -e backend/__pycache__ -e backend/.venv -e certbot/conf 2>/dev/null || true
 
       - name: Create necessary directories
         run: |
@@ -49,15 +52,15 @@ jobs:
           EOF
           chmod 600 backend/.env
 
-      - name: Check if SSL certificates exist
+      - name: Check if certificates exist
         id: check-certs
         run: |
-          if [ -d "certbot/conf/live/wishlistprice.ru" ] && [ -f "certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
+          if [ -f certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ SSL certificates already exist"
+            echo "✅ Certificates found"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No SSL certificates found - will obtain on first run"
+            echo "⚠️ No certificates found"
           fi
 
       - name: Stop services
@@ -66,22 +69,11 @@ jobs:
           docker stop nginx-temp 2>/dev/null || true
           docker rm nginx-temp 2>/dev/null || true
 
-      - name: Obtain SSL certificates (ONLY FIRST TIME)
+      - name: Obtain SSL certificates (first time only)
         if: steps.check-certs.outputs.exists == 'false'
         run: |
-          echo "🔐 First time setup - obtaining SSL certificates..."
           chmod +x scripts/init-certs.sh
           ./scripts/init-certs.sh
-
-      - name: Renew certificates if needed
-        run: |
-          echo "🔄 Checking if certificates need renewal..."
-          docker run --rm \
-            -v $(pwd)/certbot/conf:/etc/letsencrypt \
-            -v $(pwd)/certbot/www:/var/www/certbot \
-            certbot/certbot renew \
-            --webroot -w /var/www/certbot \
-            --quiet || true
 
       - name: Deploy with docker-compose
         run: |
@@ -107,4 +99,4 @@ jobs:
         if: always()
         run: |
           rm -f backend/.env
-          docker system prune -f --filter "until=24h" 2>/dev/null || true
+          docker system prune -f 2>/dev/null || true
