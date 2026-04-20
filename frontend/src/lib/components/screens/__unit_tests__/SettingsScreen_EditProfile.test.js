@@ -271,4 +271,28 @@ describe('EditProfile Component', () => {
         });
     });
 
+    //Тест №15 - валидация: имя слишком длинное (> 40 символов)
+    test('should show error if full name is longer than 40 chars', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const nameInput = screen.getByLabelText(/Имя и фамилия/i);
+        await fireEvent.input(nameInput, { target: { value: 'A'.repeat(41) } });
+        
+        await fireEvent.click(screen.getByText(/Сохранить изменения/i));
+        
+        expect(screen.getByText('Поле Имя и фамилия должно содержать от 1 до 40 символов')).toBeInTheDocument();
+    });
+
+    //Тест №16 - валидация: дата рождения не заполнена
+    test('should show error if birth date is empty', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const dateInput = screen.getByLabelText(/Дата рождения/i);
+        await fireEvent.input(dateInput, { target: { value: '' } });
+        
+        await fireEvent.click(screen.getByText(/Сохранить изменения/i));
+        
+        expect(screen.getByText('Дата рождения обязательна')).toBeInTheDocument();
+    });
+
 });
