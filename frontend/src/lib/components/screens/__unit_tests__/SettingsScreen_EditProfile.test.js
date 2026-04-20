@@ -149,4 +149,42 @@ describe('EditProfile Component', () => {
         expect(style.height).toBe('120px');
     });
 
+    //Тест №10 - показывает ошибку если дата рождения раньше 1900 года
+    test('should show error if birth date is before year 1900', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const dateInput = screen.getByLabelText(/Дата рождения/i);
+        await fireEvent.input(dateInput, { target: { value: '01.01.1899' } });
+        
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+        
+        expect(screen.getByText('Дата рождения не может быть раньше 01.01.1900')).toBeInTheDocument();
+    });
+
+    //Тест №11 - покрывает ветку замены файла в S3 и успешное обновление
+    test('should cover S3 file replacement and successful update', async () => {
+        // Используем URL с S3, чтобы зайти в ветку photoUrl.includes('selstorage.ru')
+        const s3User = { ...mockUser, avatarUrl: 'https://selstorage.ru/avatar.jpg' };
+        const onUpdateUser = jest.fn();
+
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ id: 1 })
+        });
+
+        render(EditProfile, { 
+            userStore: s3User, 
+            token: 'token', 
+            onUpdateUser 
+        });
+
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalled();
+        });
+    });
+    
 });
