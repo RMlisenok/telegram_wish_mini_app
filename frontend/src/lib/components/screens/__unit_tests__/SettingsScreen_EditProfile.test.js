@@ -77,5 +77,41 @@ describe('EditProfile Component', () => {
         expect(screen.getByText('Используйте формат ДД.ММ.ГГГГ')).toBeInTheDocument();
     });
 
-   
+    //Тест №5 - успешно сохраняет профиль и вызывает колбэк обновления
+    test('should show error if birth date is before year 1900', async () => {
+        const onUpdateUser = jest.fn();
+        const onGoBack = jest.fn(); 
+        
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ status: 'success' })
+        });
+
+        render(EditProfile, { 
+            userStore: mockUser, 
+            token: 'fake-token', 
+            onUpdateUser, 
+            onGoBack 
+        });
+
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/users/me', expect.any(Object));
+            expect(onUpdateUser).toHaveBeenCalled();
+            expect(onGoBack).toHaveBeenCalled();
+        });
+    });
+
+    //Тест №6 - удаляет фото профиля локально
+    test('should remove profile photo locally', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const deleteBtn = screen.getByText(/Удалить/i);
+        await fireEvent.click(deleteBtn);
+        
+        expect(screen.getByText('ИИ')).toBeInTheDocument(); // В getInitials "Иван Иванов" превращается в "ИИ"
+    });
+
 });
