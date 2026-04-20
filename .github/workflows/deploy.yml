@@ -45,8 +45,17 @@ jobs:
         run: |
           mkdir -p certbot/conf certbot/www
 
+      - name: Check if certificates exist
+        id: check-certs
+        run: |
+          if [ -f "certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Get certificates (ONLY FIRST TIME)
-        if: ${{ !fileExists('certbot/conf/live/wishlistprice.ru/fullchain.pem') }}
+        if: steps.check-certs.outputs.exists == 'false'
         run: |
           chmod +x scripts/init-certs.sh
           ./scripts/init-certs.sh
