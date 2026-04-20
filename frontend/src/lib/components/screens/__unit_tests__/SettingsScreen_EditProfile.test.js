@@ -130,4 +130,23 @@ describe('EditProfile Component', () => {
         consoleSpy.mockRestore();
     });
 
+    //Тест №8 - не падает при вызове goBack без пропса onGoBack
+    test('should not crash when goBack is called without onGoBack prop', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const backBtn = screen.getByText('←');
+        await fireEvent.click(backBtn);
+        expect(true).toBe(true);
+    });
+
+    //Тест №9 - проверяет стили контейнера аватара
+    test('should verify avatar container styles', () => {
+        const { container } = render(EditProfile, { userStore: mockUser });
+        const avatarContainer = container.querySelector('.avatar-container');
+        const style = window.getComputedStyle(avatarContainer);
+        
+        expect(style.width).toBe('120px');
+        expect(style.height).toBe('120px');
+    });
+
 });
