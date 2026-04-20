@@ -295,4 +295,43 @@ describe('EditProfile Component', () => {
         expect(screen.getByText('Дата рождения обязательна')).toBeInTheDocument();
     });
 
+    //Тест №17 - проверка getInitials на пустом имени
+    test('getInitials should return ?? for empty name and no photo', () => {
+        render(EditProfile, { 
+            userStore: { 
+                ...mockUser, 
+                fullName: '', 
+                avatarUrl: '' // очищаем аватар, чтобы компонент показал инициалы
+            } 
+        });
+        // Avatar не найдет src и отрисует инициалы, которые вернет getInitials('')
+        expect(screen.getByText('??')).toBeInTheDocument();
+    });
+
+    //Тест №18 - удаление фото не из S3
+    test('should just clear photoUrl if not from S3', async () => {
+        const onUpdateUser = jest.fn();
+        const nonS3User = { ...mockUser, avatarUrl: 'https://external-link.com/photo.jpg' };
+        
+        render(EditProfile, { 
+            userStore: nonS3User, 
+            token: 'tk', 
+            onUpdateUser
+        });
+
+        await fireEvent.click(screen.getByText(/Удалить/i));
+        
+        global.fetch.mockResolvedValueOnce({ 
+            ok: true, 
+            json: async () => ({ status: 'success' }) 
+        });
+        
+        await fireEvent.click(screen.getByText(/Сохранить изменения/i));
+
+        await waitFor(() => {
+            const lastCallBody = JSON.parse(global.fetch.mock.calls[0][1].body);
+            expect(lastCallBody.photo).toBe('');
+            expect(onUpdateUser).toHaveBeenCalled();
+        });
+    });
 });
