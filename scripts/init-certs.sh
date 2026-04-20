@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# НЕ используем sudo
-echo "Starting SSL certificates initialization..."
+echo "🚀 Starting SSL certificates initialization..."
 
 mkdir -p certbot/{conf,www}
 mkdir -p nginx
 
-# Убеждаемся что права правильные
 chmod -R 755 certbot
 
 echo "Stopping services..."
@@ -41,7 +39,6 @@ echo "Stopping temporary nginx..."
 docker stop nginx-temp
 docker rm nginx-temp
 
-# Меняем владельца на runner (если файлы создались от root)
-chown -R runner:runner certbot/conf 2>/dev/null || true
+chown -R $(whoami):$(whoami) certbot/conf 2>/dev/null || true
 
-echo "Done!"
+echo "✅ Certificates obtained successfully!"
