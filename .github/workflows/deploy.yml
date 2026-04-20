@@ -68,4 +68,4 @@ jobs:
       - name: Health check
         run: |
           sleep 10
-          curl -f http://localhost/health && echo "✅ OK"
+          curl -f http://localhost/health && echo "OK"
