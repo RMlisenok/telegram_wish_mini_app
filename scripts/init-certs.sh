@@ -1,14 +1,15 @@
 #!/bin/bash
 
-set -e
+# НЕ используем sudo
+echo "🚀 Starting SSL certificates initialization..."
 
-echo "🚀 FIRST TIME SSL CERTIFICATES SETUP"
-
-# Создаем необходимые директории
 mkdir -p certbot/{conf,www}
 mkdir -p nginx
 
-echo "🛑 Stopping all services..."
+# Убеждаемся что права правильные
+chmod -R 755 certbot
+
+echo "🛑 Stopping services..."
 docker-compose down --remove-orphans 2>/dev/null || true
 
 echo "🔄 Starting temporary nginx..."
@@ -40,4 +41,7 @@ echo "🛑 Stopping temporary nginx..."
 docker stop nginx-temp
 docker rm nginx-temp
 
-echo "✅ SSL certificates obtained and saved in certbot/conf/"
+# Меняем владельца на runner (если файлы создались от root)
+chown -R runner:runner certbot/conf 2>/dev/null || true
+
+echo "✅ Done!"
