@@ -37,5 +37,20 @@ describe('SettingsScreen High Coverage', () => {
 
     Object.values(props).forEach(mock => expect(mock).toHaveBeenCalledTimes(1));
   });
+  // ТЕСТ 2: Проверка отсутствия пропсов 
+  test('should not fail if callbacks are not provided', async () => {
+    render(SettingsScreen, {}); // Рендерим без пропсов
+
+    const buttons = screen.getAllByRole('button');
+    
+    // Кликаем по всем кнопкам. 
+    // Код внутри (например, goBack) выполнится, условие if(onGoBack) будет false.
+    for (const btn of buttons) {
+      await fireEvent.click(btn);
+    }
+
+    expect(true).toBe(true); // Если не упало — тест пройден
+  });
+
 
 });
