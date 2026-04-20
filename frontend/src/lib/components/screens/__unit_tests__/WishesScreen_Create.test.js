@@ -41,4 +41,43 @@ describe('WishesScreen_Create', () => {
     expect(global.fetch).not.toHaveBeenCalled();
     expect(onGoBack).not.toHaveBeenCalled();
   });
+  
+  test('loads wishlists on mount when token is provided', async () => {
+    global.fetch.mockResolvedValue(
+      jsonResponse([
+        {
+          id: 1,
+          name: 'Birthday',
+          description: '',
+          photo: '',
+          typeprivacy: 'public',
+          wishes_count: 2
+        },
+        {
+          id: 2,
+          name: 'Travel',
+          description: '',
+          photo: '',
+          typeprivacy: 'private',
+          wishes_count: 1
+        }
+      ])
+    );
+
+    const { container } = render(WishesScreenCreate, {
+      token: 'token-123',
+      onGoBack: jest.fn()
+    });
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishlists/',
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.wishlist-checkbox')).toHaveLength(2);
+    });
+  });
 });
