@@ -52,5 +52,20 @@ describe('SettingsScreen High Coverage', () => {
     expect(true).toBe(true); // Если не упало — тест пройден
   });
 
+  // ТЕСТ 3: Проверка структуры
+  test('renders correct subtitles', () => {
+    render(SettingsScreen);
+    
+    const subtitles = [
+      'Изменить личную информацию',
+      'Управление видимостью профиля и вишлистов',
+      'Тема, размер текста',
+      'Управление push-уведомлениями'
+    ];
+
+    subtitles.forEach(sub => {
+      expect(screen.getByText(sub)).toBeInTheDocument();
+    });
+  });
 
 });
