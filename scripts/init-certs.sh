@@ -2,17 +2,18 @@
 
 echo "🚀 Starting SSL certificates initialization..."
 
-# Создаем директории в HOME runner
+# Создаём папки
 mkdir -p /home/runner/ssl/certbot/{conf,www}
 
-echo "🛑 Stopping services..."
+echo "🛑 Stopping all services (особенно nginx)..."
 docker-compose down --remove-orphans 2>/dev/null || true
-
-# Останавливаем временный nginx
 docker stop nginx-temp 2>/dev/null || true
 docker rm nginx-temp 2>/dev/null || true
 
-echo "🔄 Starting temporary nginx..."
+# Убиваем процесс на порту 80 (если что-то ещё висит)
+sudo fuser -k 80/tcp 2>/dev/null || true
+
+echo "🔄 Starting temporary nginx with correct config..."
 docker run -d \
   --name nginx-temp \
   -p 80:80 \
@@ -20,6 +21,13 @@ docker run -d \
   nginx:alpine
 
 sleep 5
+
+# Проверка, что nginx отвечает
+if ! curl -sSf http://localhost/ > /dev/null; then
+    echo "❌ Temporary nginx is not responding"
+    docker logs nginx-temp
+    exit 1
+fi
 
 echo "🔐 Obtaining SSL certificates..."
 docker run --rm \
@@ -37,7 +45,6 @@ docker run --rm \
   -d www.wishlistprice.ru
 
 echo "🛑 Stopping temporary nginx..."
-docker stop nginx-temp
-docker rm nginx-temp
+docker stop nginx-temp && docker rm nginx-temp
 
-echo "✅ Certificates saved in /home/runner/ssl/certbot/conf/"
+echo "✅ Done! Certificates in /home/runner/ssl/certbot/conf/"
