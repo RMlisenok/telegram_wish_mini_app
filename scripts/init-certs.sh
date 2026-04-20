@@ -10,8 +10,11 @@ docker-compose down --remove-orphans 2>/dev/null || true
 docker stop nginx-temp 2>/dev/null || true
 docker rm nginx-temp 2>/dev/null || true
 
-# Убиваем процесс на порту 80 (если что-то ещё висит)
-sudo fuser -k 80/tcp 2>/dev/null || true
+# Проверяем, что порт 80 свободен
+if docker ps | grep -q ":80->"; then
+    echo "⚠️ Port 80 is still busy. Stopping remaining containers..."
+    docker stop $(docker ps | grep ":80->" | awk '{print $1}') 2>/dev/null || true
+fi
 
 echo "🔄 Starting temporary nginx with correct config..."
 docker run -d \
@@ -44,7 +47,22 @@ docker run --rm \
   -d wishlistprice.ru \
   -d www.wishlistprice.ru
 
+CERTBOT_EXIT=$?
+
 echo "🛑 Stopping temporary nginx..."
 docker stop nginx-temp && docker rm nginx-temp
 
-echo "✅ Done! Certificates in /home/runner/ssl/certbot/conf/"
+if [ $CERTBOT_EXIT -eq 0 ]; then
+    echo "✅ Certificates saved in /home/runner/ssl/certbot/conf/"
+    
+    # Проверяем, что сертификаты созданы
+    if [ -f /home/runner/ssl/certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
+        echo "✅ Certificate files verified"
+        ls -la /home/runner/ssl/certbot/conf/live/wishlistprice.ru/
+    fi
+else
+    echo "❌ Failed to obtain certificates!"
+    echo "Check that your domain DNS resolves to this server"
+    echo "And that port 80 is accessible from internet"
+    exit 1
+fi
