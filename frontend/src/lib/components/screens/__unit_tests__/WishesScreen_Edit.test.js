@@ -41,4 +41,57 @@ describe('WishesScreen_Edit', () => {
     expect(global.fetch).not.toHaveBeenCalled();
     expect(onGoBack).not.toHaveBeenCalled();
   });
+
+  test('loads wishlists and pre-fills form with existing wish data', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return jsonResponse([
+          {
+            id: 1,
+            name: 'Birthday',
+            description: '',
+            photo: '',
+            typeprivacy: 'public',
+            wishes_count: 2
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishes/42' && method === 'GET') {
+        return jsonResponse({
+          id: 42,
+          name: 'Old Lamp',
+          description: 'Old description',
+          url_gift: 'https://example.com/old',
+          price: 500,
+          currency: 'EUR',
+          photo: 'https://example.com/photo.jpg',
+          wishlists: [{ id: 1 }]
+        });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = render(WishesScreenEdit, {
+      token: 'token-123',
+      wishId: '42',
+      onGoBack: jest.fn()
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('input[type="text"]').value).toBe('Old Lamp');
+    });
+
+    expect(container.querySelector('input[type="url"]').value).toBe('https://example.com/old');
+    expect(container.querySelector('#price').value).toBe('500');
+    expect(container.querySelector('#currency').value).toBe('EUR');
+    expect(container.querySelector('#description').value).toBe('Old description');
+
+    const firstWishlistCheckbox = container.querySelector('.wishlist-checkbox[value="1"]');
+    expect(firstWishlistCheckbox).toBeTruthy();
+    expect(firstWishlistCheckbox.checked).toBe(true);
+  });
 });
