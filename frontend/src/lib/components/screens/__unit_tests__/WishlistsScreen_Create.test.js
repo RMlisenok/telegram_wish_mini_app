@@ -24,10 +24,8 @@ describe('WishlistsScreen_Create', () => {
 
   test('shows validation error and does not save when title is empty', async () => {
     const onGoBack = jest.fn();
-
-    const { container } = render(WishesScreenEdit, {
-      token: '',
-      wishId: '42',
+    const { container } = render(WishlistsScreenCreate, {
+      token: 'token-123',
       onGoBack
     });
 
@@ -39,88 +37,24 @@ describe('WishlistsScreen_Create', () => {
     expect(onGoBack).not.toHaveBeenCalled();
   });
 
-  test('saves edits and synchronizes wishlist connections', async () => {
-    global.fetch.mockImplementation(async (url, options = {}) => {
-      const method = options.method || 'GET';
-
-      if (url === '/api/v1/wishlists/' && method === 'GET') {
-        return jsonResponse([
-          {
-            id: 1,
-            name: 'Birthday',
-            description: '',
-            photo: '',
-            typeprivacy: 'public',
-            wishes_count: 2
-          },
-          {
-            id: 2,
-            name: 'Travel',
-            description: '',
-            photo: '',
-            typeprivacy: 'private',
-            wishes_count: 5
-          }
-        ]);
-      }
-
-      if (url === '/api/v1/wishes/42' && method === 'GET') {
-        return jsonResponse({
-          id: 42,
-          name: 'Old Lamp',
-          description: 'Old description',
-          url_gift: 'https://example.com/old',
-          price: 500,
-          currency: 'EUR',
-          photo: '',
-          wishlists: [{ id: 1 }]
-        });
-      }
-
-      if (url === '/api/v1/wishes/42' && method === 'PUT') {
-        return jsonResponse({ id: 42 });
-      }
-
-      if (url === '/api/v1/wishlists/2/wishes' && method === 'POST') {
-        return jsonResponse({
-          id: 100,
-          wish_id: 42,
-          wishlist_id: 2,
-          is_pinned: false,
-          order_position: 0,
-          created_at: '2026-04-14T10:00:00.000Z',
-          updated_at: '2026-04-14T10:00:00.000Z'
-        });
-      }
-
-      if (url === '/api/v1/wishlists/1/wishes/42' && method === 'DELETE') {
-        return jsonResponse({ success: true });
-      }
-
-      throw new Error(`Unexpected fetch call: ${url} (${method})`);
-    });
-
+  test('saves wishlist with trimmed values and mapped privacy', async () => {
+    global.fetch.mockResolvedValue(jsonResponse({ id: 'wl-10' }));
     const onGoBack = jest.fn();
 
-    const { container } = render(WishesScreenEdit, {
+    const { container } = render(WishlistsScreenCreate, {
       token: 'token-123',
-      wishId: '42',
       onGoBack
     });
 
-    await waitFor(() => {
-      expect(container.querySelector('input[type="text"]').value).toBe('Old Lamp');
-    });
-
     await fireEvent.input(container.querySelector('input[type="text"]'), {
-      target: { value: '  Updated Lamp  ' }
+      target: { value: '  Birthday Gifts  ' }
     });
 
-    const checkboxOne = container.querySelector('.wishlist-checkbox[value="1"]');
-    const checkboxTwo = container.querySelector('.wishlist-checkbox[value="2"]');
+    await fireEvent.input(container.querySelector('#description'), {
+      target: { value: '  For birthday party  ' }
+    });
 
-    await fireEvent.click(checkboxTwo);
-    await fireEvent.click(checkboxOne);
+    await fireEvent.click(container.querySelector('input[name="privacy"][value="restricted"]'));
 
     const saveButton = container.querySelectorAll('.form-actions .ui-button')[1];
     await fireEvent.click(saveButton);
@@ -129,23 +63,18 @@ describe('WishlistsScreen_Create', () => {
       expect(onGoBack).toHaveBeenCalledTimes(1);
     });
 
-    const updateWishCall = global.fetch.mock.calls.find(
-      ([url, opts]) => url === '/api/v1/wishes/42' && opts.method === 'PUT'
+    const createCall = global.fetch.mock.calls.find(
+      ([url, options]) => url === '/api/v1/wishlists/' && options.method === 'POST'
     );
 
-    expect(updateWishCall).toBeTruthy();
+    expect(createCall).toBeTruthy();
 
-    const updateWishPayload = JSON.parse(updateWishCall[1].body);
-    expect(updateWishPayload.name).toBe('Updated Lamp');
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      '/api/v1/wishlists/2/wishes',
-      expect.objectContaining({ method: 'POST' })
-    );
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      '/api/v1/wishlists/1/wishes/42',
-      expect.objectContaining({ method: 'DELETE' })
-    );
+    const payload = JSON.parse(createCall[1].body);
+    expect(payload).toMatchObject({
+      name: 'Birthday Gifts',
+      description: 'For birthday party',
+      typeprivacy: 'protected',
+      photo: ''
+    });
   });
 });
