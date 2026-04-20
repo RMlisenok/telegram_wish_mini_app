@@ -25,4 +25,15 @@ describe('SettingsScreen_LegalInformation', () => {
     expect(privacyLink.closest('a')).toHaveAttribute('target', '_blank');
   });
 
+  //Тест №2 проверка кнопки назад и вызов onGoBack
+  test('calls onGoBack when back button is clicked', async () => {
+    const onGoBack = jest.fn();
+    render(LegalInformation, { onGoBack });
+
+    const backBtn = screen.getByRole('button', { name: '←' });
+    await fireEvent.click(backBtn);
+
+    expect(onGoBack).toHaveBeenCalledTimes(1);
+  });
+
 });
