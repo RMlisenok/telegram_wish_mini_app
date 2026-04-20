@@ -162,7 +162,7 @@ describe('EditProfile Component', () => {
         expect(screen.getByText('Дата рождения не может быть раньше 01.01.1900')).toBeInTheDocument();
     });
 
-    //Тест №11 - покрывает ветку замены файла в S3 и успешное обновление
+    //Тест №11 - замена файла в S3 и успешное обновление
     test('should cover S3 file replacement and successful update', async () => {
         // Используем URL с S3, чтобы зайти в ветку photoUrl.includes('selstorage.ru')
         const s3User = { ...mockUser, avatarUrl: 'https://selstorage.ru/avatar.jpg' };
@@ -187,4 +187,88 @@ describe('EditProfile Component', () => {
         });
     });
     
+    //Тест №12 - проверка ограничения размера файла
+    test('should show alert if uploaded file is too large', async () => {
+        const { container } = render(EditProfile, { userStore: mockUser });
+        
+        // эмуляция создания input и выбор файла
+        const spy = jest.spyOn(document, 'createElement');
+        const uploadBtn = screen.getByText(/Загрузить фото/i);
+        await fireEvent.click(uploadBtn);
+
+        const mockInput = spy.mock.results[0].value;
+        const largeFile = new File([''], 'big-image.png', { type: 'image/png' });
+        Object.defineProperty(largeFile, 'size', { value: 11 * 1024 * 1024 }); // 11MB
+
+        mockInput.onchange({ target: { files: [largeFile] } });
+
+        expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('Файл слишком большой'));
+    });
+
+    //Тест №13 - успешная загрузка нового фото
+    test('should upload new photo and call uploadFile', async () => {
+        const storage = await import('../../../../types/storage3.ts');
+        
+        // создание моков для обязательных колбэков
+        const onUpdateUser = jest.fn();
+        const onGoBack = jest.fn();
+        
+        render(EditProfile, { 
+            userStore: { ...mockUser, avatarUrl: '' }, 
+            token: 'tk',
+            onUpdateUser,
+            onGoBack
+        });
+
+        const spy = jest.spyOn(document, 'createElement');
+        await fireEvent.click(screen.getByText(/Загрузить фото/i));
+        const mockInput = spy.mock.results[0].value;
+        const file = new File(['hello'], 'test.png', { type: 'image/png' });
+        
+        mockInput.onchange({ target: { files: [file] } });
+
+        global.fetch.mockResolvedValueOnce({ 
+            ok: true, 
+            json: async () => ({ status: 'success' }) 
+        });
+
+        await fireEvent.click(screen.getByText(/Сохранить изменения/i));
+
+        await waitFor(() => {
+            expect(storage.uploadFile).toHaveBeenCalledWith(file, 'tk');
+            expect(onUpdateUser).toHaveBeenCalled();
+            expect(onGoBack).toHaveBeenCalled();
+        });
+    });
+
+    //Тест №14 - удаление фото именно из S3
+    test('should call deleteFile when removing S3 photo', async () => {
+        const storage = await import('../../../../types/storage3.ts');
+        const onUpdateUser = jest.fn();
+        
+        const s3User = { ...mockUser, avatarUrl: 'https://selstorage.ru/old-photo.jpg' };
+        
+        render(EditProfile, { 
+            userStore: s3User, 
+            token: 'tk', 
+            onUpdateUser 
+        });
+
+        const deleteBtn = screen.getByText(/Удалить/i);
+        await fireEvent.click(deleteBtn);
+
+        global.fetch.mockResolvedValueOnce({ 
+            ok: true, 
+            json: async () => ({ status: 'success' }) 
+        });
+
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(storage.deleteFile).toHaveBeenCalledWith('https://selstorage.ru/old-photo.jpg', 'tk');
+            expect(onUpdateUser).toHaveBeenCalled();
+        });
+    });
+
 });
