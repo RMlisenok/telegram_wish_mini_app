@@ -23,4 +23,21 @@ describe('WishlistsScreen_Edit', () => {
     cleanup();
     jest.restoreAllMocks();
   });
+
+  test('shows validation error and does not save when title is empty', async () => {
+    const onGoBack = jest.fn();
+
+    const { container } = render(WishlistsScreenEdit, {
+      token: 'token-123',
+      wishlistId: 'unknown-id',
+      onGoBack
+    });
+
+    const saveButton = container.querySelectorAll('.form-actions .ui-button')[1];
+    await fireEvent.click(saveButton);
+
+    expect(container.querySelector('.field-error')).toBeTruthy();
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(onGoBack).not.toHaveBeenCalled();
+  });
 });
