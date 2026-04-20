@@ -41,20 +41,18 @@ jobs:
           URL_DATA_SAVE=${{ secrets.URL_DATA_SAVE }}
           EOF
 
-      - name: Create certbot dirs
-        run: |
-          mkdir -p certbot/conf certbot/www
-
       - name: Check if certificates exist
         id: check-certs
         run: |
-          if [ -f "certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
+          if [ -f "/opt/ssl/certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Certificates found"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No certificates found"
           fi
 
-      - name: Get certificates (ONLY FIRST TIME)
+      - name: Get certificates (ONLY FIRST TIME EVER)
         if: steps.check-certs.outputs.exists == 'false'
         run: |
           chmod +x scripts/init-certs.sh
@@ -68,4 +66,4 @@ jobs:
       - name: Health check
         run: |
           sleep 10
-          curl -f http://localhost/health && echo "OK"
+          curl -f http://localhost/health && echo "✅ OK"

@@ -2,28 +2,25 @@
 
 echo "🚀 Starting SSL certificates initialization..."
 
-mkdir -p certbot/{conf,www}
-mkdir -p nginx
+# Создаем директории для сертификатов (вне проекта)
+mkdir -p /opt/ssl/certbot/{conf,www}
 
-chmod -R 755 certbot
-
-echo "Stopping services..."
+echo "🛑 Stopping services..."
 docker-compose down --remove-orphans 2>/dev/null || true
 
-echo "Starting temporary nginx..."
+echo "🔄 Starting temporary nginx..."
 docker run -d \
   --name nginx-temp \
   -p 80:80 \
-  -v $(pwd)/certbot/www:/var/www/certbot \
-  -v $(pwd)/nginx/nginx-temp.conf:/etc/nginx/nginx.conf:ro \
+  -v /opt/ssl/certbot/www:/var/www/certbot \
   nginx:alpine
 
 sleep 5
 
-echo "Obtaining SSL certificates..."
+echo "🔐 Obtaining SSL certificates..."
 docker run --rm \
-  -v $(pwd)/certbot/conf:/etc/letsencrypt \
-  -v $(pwd)/certbot/www:/var/www/certbot \
+  -v /opt/ssl/certbot/conf:/etc/letsencrypt \
+  -v /opt/ssl/certbot/www:/var/www/certbot \
   --network host \
   certbot/certbot certonly \
   --webroot \
@@ -35,10 +32,8 @@ docker run --rm \
   -d wishlistprice.ru \
   -d www.wishlistprice.ru
 
-echo "Stopping temporary nginx..."
+echo "🛑 Stopping temporary nginx..."
 docker stop nginx-temp
 docker rm nginx-temp
 
-chown -R $(whoami):$(whoami) certbot/conf 2>/dev/null || true
-
-echo "✅ Certificates obtained successfully!"
+echo "✅ Certificates saved in /opt/ssl/certbot/conf/"
