@@ -114,4 +114,20 @@ describe('EditProfile Component', () => {
         expect(screen.getByText('ИИ')).toBeInTheDocument(); // В getInitials "Иван Иванов" превращается в "ИИ"
     });
 
+    //Тест №7 - обрабатывает ошибку сервера при сохранении и логирует её
+    test('should handle server error during save and log it', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        global.fetch.mockResolvedValueOnce({ ok: false }); // Эмуляция ошибки 500/400
+        
+        render(EditProfile, { userStore: mockUser });
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalled();
+            expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('Не удалось сохранить изменения'));
+        });
+        consoleSpy.mockRestore();
+    });
+
 });
