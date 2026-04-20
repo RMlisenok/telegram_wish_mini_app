@@ -17,20 +17,10 @@ jobs:
           clean: false  # НЕ удаляем существующие файлы
           persist-credentials: false
 
-      - name: Reset git and ignore permission errors
+      - name: Update code
         run: |
-          # Сбрасываем изменения, игнорируя ошибки прав
-          git reset --hard HEAD || true
-          # Удаляем только то, что можем
-          git clean -fd 2>/dev/null || true
-          # Игнорируем проблемные папки
-          git clean -fd -e backend/__pycache__ -e backend/.venv -e certbot/conf 2>/dev/null || true
-
-      - name: Create necessary directories
-        run: |
-          mkdir -p certbot/{conf,www}
-          mkdir -p nginx
-          mkdir -p backend
+          git fetch origin
+          git reset --hard origin/app_integration_into_tg
 
       - name: Create .env from secrets
         run: |
@@ -52,51 +42,17 @@ jobs:
           EOF
           chmod 600 backend/.env
 
-      - name: Check if certificates exist
-        id: check-certs
-        run: |
-          if [ -f certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Certificates found"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No certificates found"
-          fi
 
-      - name: Stop services
+      - name: Deploy
         run: |
           docker-compose down --remove-orphans || true
-          docker stop nginx-temp 2>/dev/null || true
-          docker rm nginx-temp 2>/dev/null || true
-
-      - name: Obtain SSL certificates (first time only)
-        if: steps.check-certs.outputs.exists == 'false'
-        run: |
-          chmod +x scripts/init-certs.sh
-          ./scripts/init-certs.sh
-
-      - name: Deploy with docker-compose
-        run: |
           docker-compose up -d --build
-
-      - name: Wait for services
-        run: |
-          echo "Waiting for services to start..."
-          sleep 20
-          docker-compose ps
 
       - name: Health check
         run: |
-          if curl -f http://localhost/health 2>/dev/null; then
-            echo "✅ Health check passed"
-          else
+          sleep 15
+          curl -f http://localhost/health || {
             echo "❌ Health check failed"
             docker-compose logs --tail=50
             exit 1
-          fi
-
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -f backend/.env
-          docker system prune -f 2>/dev/null || true
+          }
