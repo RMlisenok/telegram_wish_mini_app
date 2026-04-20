@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals';
 import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 
-// 1. Используем unstable_mockModule для ESM
+// Используем unstable_mockModule для ESM
 jest.unstable_mockModule('../../../../types/storage3.ts', () => ({
     uploadFile: jest.fn(() => Promise.resolve({ file_url: 'http://new-photo.jpg' })),
     replaceFile: jest.fn(() => Promise.resolve({ file_url: 'http://replaced.jpg' })),
     deleteFile: jest.fn(() => Promise.resolve({ message: 'success' }))
 }));
 
-// 2. Динамически импортируем компонент
+// Динамически импортируем компонент
 const { default: EditProfile } = await import('../settings/SettingsScreen_EditProfile.svelte');
 
 const mockUser = {
@@ -54,4 +54,28 @@ describe('EditProfile Component', () => {
         expect(screen.queryByText('←')).not.toBeInTheDocument();
     });
 
+    //Тест №3 - показывает ошибку при пустом имени
+    test('should show error when full name is empty', async () => {
+        render(EditProfile, { userStore: { ...mockUser, fullName: '' } });
+        
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+        
+        expect(screen.getByText('Поле Имя и фамилия должно содержать от 1 до 40 символов')).toBeInTheDocument();
+    });
+
+    //Тест №4 - проверяет валидность формата даты рождения
+    test('should validate birth date format', async () => {
+        render(EditProfile, { userStore: mockUser });
+        
+        const dateInput = screen.getByLabelText(/Дата рождения/i);
+        await fireEvent.input(dateInput, { target: { value: '99.99.99' } });
+        
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+        
+        expect(screen.getByText('Используйте формат ДД.ММ.ГГГГ')).toBeInTheDocument();
+    });
+
+   
 });
