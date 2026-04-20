@@ -11,18 +11,32 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          clean: false
-
-      - name: Pull latest changes
+      - name: Update code with git (без actions/checkout)
         run: |
-          git fetch origin
-          git merge origin/app_integration_into_tg --ff-only || git reset --hard origin/app_integration_into_tg
+          REPO_DIR="/home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app"
+          REPO_URL="https://github.com/Konstanta202/telegram_wish_mini_app.git"
+          BRANCH="app_integration_into_tg"
+          
+          if [ -d "$REPO_DIR/.git" ]; then
+            echo "📦 Updating existing repository..."
+            cd $REPO_DIR
+            git fetch origin
+            git reset --hard origin/$BRANCH
+            # Очищаем только безопасные файлы, НЕ трогаем certbot
+            git clean -fd -e certbot 2>/dev/null || true
+          else
+            echo "📦 Cloning repository..."
+            mkdir -p $REPO_DIR
+            cd /home/runner/actions-runner/_work/telegram_wish_mini_app
+            git clone --branch $BRANCH $REPO_URL
+          fi
+          
+          cd $REPO_DIR
+          echo "✅ Current commit: $(git log -1 --oneline)"
 
-      - name: Create .env
+      - name: Create .env from secrets
         run: |
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
           mkdir -p backend
           cat > backend/.env << EOF
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -40,14 +54,42 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           URL_DATA_SAVE=${{ secrets.URL_DATA_SAVE }}
           EOF
+          chmod 600 backend/.env
 
-      - name: Deploy
+      - name: Create necessary directories
         run: |
-          docker-compose down || true
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
+          mkdir -p certbot/{conf,www}
+          mkdir -p nginx
+
+      - name: Stop old containers
+        run: |
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
+          docker-compose down --remove-orphans || true
+
+      - name: Start new containers
+        run: |
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
           docker-compose up -d --build
 
-      - name: Check
+      - name: Wait for services
         run: |
-          sleep 10
+          echo "⏳ Waiting for services to start..."
+          sleep 15
+
+      - name: Health check
+        run: |
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
+          if curl -f http://localhost/health 2>/dev/null; then
+            echo "✅ Health check passed!"
+          else
+            echo "❌ Health check failed!"
+            docker-compose logs --tail=50
+            exit 1
+          fi
+
+      - name: Show status
+        run: |
+          cd /home/runner/actions-runner/_work/telegram_wish_mini_app/telegram_wish_mini_app
           docker-compose ps
-          curl -f http://localhost/health && echo "✅ Deployed successfully!"
+          echo "✅ Deployment completed successfully!"
