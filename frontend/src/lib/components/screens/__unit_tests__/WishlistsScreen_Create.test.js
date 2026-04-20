@@ -77,4 +77,72 @@ describe('WishlistsScreen_Create', () => {
       photo: ''
     });
   });
+
+  test('uploads selected photo before creating wishlist', async () => {
+    const originalFileReader = global.FileReader;
+
+    class MockFileReader {
+      readAsDataURL() {
+        if (this.onload) {
+          this.onload({ target: { result: 'data:image/png;base64,mock' } });
+        }
+      }
+    }
+
+    global.FileReader = MockFileReader;
+    try {
+      global.fetch.mockImplementation(async (url, options = {}) => {
+        if (url === '/api/v1/s3/file/' && options.method === 'POST') {
+          return jsonResponse({
+            message: 'uploaded',
+            filename: 'photo.png',
+            file_url: 'https://selstorage.ru/files/photo.png',
+            content_type: 'image/png',
+            size: 4
+          });
+        }
+
+        if (url === '/api/v1/wishlists/' && options.method === 'POST') {
+          return jsonResponse({ id: 'wl-11' });
+        }
+
+        throw new Error(`Unexpected fetch call: ${url} (${options.method || 'GET'})`);
+      });
+
+      const onGoBack = jest.fn();
+
+      const { container } = render(WishlistsScreenCreate, {
+        token: 'token-123',
+        onGoBack
+      });
+
+      await fireEvent.input(container.querySelector('input[type="text"]'), {
+        target: { value: 'Wishlist with image' }
+      });
+
+      const fileInput = container.querySelector('.photo-upload-input');
+      const file = new File(['test'], 'photo.png', { type: 'image/png' });
+      await fireEvent.change(fileInput, { target: { files: [file] } });
+
+      const saveButton = container.querySelectorAll('.form-actions .ui-button')[1];
+      await fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(onGoBack).toHaveBeenCalledTimes(1);
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/s3/file/',
+        expect.objectContaining({ method: 'POST' })
+      );
+
+      const createCall = global.fetch.mock.calls.find(
+        ([url, options]) => url === '/api/v1/wishlists/' && options.method === 'POST'
+      );
+      const payload = JSON.parse(createCall[1].body);
+      expect(payload.photo).toBe('https://selstorage.ru/files/photo.png');
+    } finally {
+      global.FileReader = originalFileReader;
+    }
+  });
 });
