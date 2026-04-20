@@ -2,26 +2,18 @@
 
 echo "🚀 Starting SSL certificates initialization..."
 
-# Создаём папки
+# Создаём папки в проекте (для временного nginx)
+mkdir -p certbot/conf certbot/www
 mkdir -p /home/runner/ssl/certbot/{conf,www}
 
-echo "🛑 Stopping all services (особенно nginx)..."
+echo "🛑 Stopping all services..."
 docker-compose down --remove-orphans 2>/dev/null || true
 docker stop nginx-temp 2>/dev/null || true
 docker rm nginx-temp 2>/dev/null || true
 
-# Проверяем, что порт 80 свободен
-if docker ps | grep -q ":80->"; then
-    echo "⚠️ Port 80 is still busy. Stopping remaining containers..."
-    docker stop $(docker ps | grep ":80->" | awk '{print $1}') 2>/dev/null || true
-fi
-
-echo "🔄 Starting temporary nginx with correct config..."
-docker run -d \
-  --name nginx-temp \
-  -p 80:80 \
-  -v /home/runner/ssl/certbot/www:/var/www/certbot \
-  nginx:alpine
+echo "🔄 Starting temporary nginx with your config..."
+# Используем docker-compose для запуска временного nginx с правильным конфигом
+docker-compose -f docker-compose.ssl-init.yml up -d
 
 sleep 5
 
@@ -33,6 +25,7 @@ if ! curl -sSf http://localhost/ > /dev/null; then
 fi
 
 echo "🔐 Obtaining SSL certificates..."
+# Сначала пробуем получить в /home/runner/ssl
 docker run --rm \
   -v /home/runner/ssl/certbot/conf:/etc/letsencrypt \
   -v /home/runner/ssl/certbot/www:/var/www/certbot \
@@ -50,19 +43,20 @@ docker run --rm \
 CERTBOT_EXIT=$?
 
 echo "🛑 Stopping temporary nginx..."
-docker stop nginx-temp && docker rm nginx-temp
+docker-compose -f docker-compose.ssl-init.yml down
 
 if [ $CERTBOT_EXIT -eq 0 ]; then
     echo "✅ Certificates saved in /home/runner/ssl/certbot/conf/"
     
-    # Проверяем, что сертификаты созданы
+    # Копируем сертификаты в проект (для резервной копии)
+    cp -r /home/runner/ssl/certbot/conf/* certbot/conf/ 2>/dev/null || true
+    
+    # Проверяем
     if [ -f /home/runner/ssl/certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
         echo "✅ Certificate files verified"
         ls -la /home/runner/ssl/certbot/conf/live/wishlistprice.ru/
     fi
 else
     echo "❌ Failed to obtain certificates!"
-    echo "Check that your domain DNS resolves to this server"
-    echo "And that port 80 is accessible from internet"
     exit 1
 fi
