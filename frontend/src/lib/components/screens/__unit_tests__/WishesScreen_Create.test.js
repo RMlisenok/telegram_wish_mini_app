@@ -23,4 +23,22 @@ describe('WishesScreen_Create', () => {
     cleanup();
     jest.restoreAllMocks();
   });
+
+  test('shows validation error and does not save when title is empty', async () => {
+    const onGoBack = jest.fn();
+
+    const { container } = render(WishesScreenCreate, {
+      token: '',
+      onGoBack
+    });
+
+    const actionButtons = container.querySelectorAll('.form-actions .ui-button');
+    const saveButton = actionButtons[1];
+
+    await fireEvent.click(saveButton);
+
+    expect(container.querySelector('.field-error')).toBeTruthy();
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(onGoBack).not.toHaveBeenCalled();
+  });
 });
