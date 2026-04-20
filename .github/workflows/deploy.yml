@@ -55,10 +55,10 @@ jobs:
         run: |
           if [ -f certbot/conf/live/wishlistprice.ru/fullchain.pem ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Certificates found"
+            echo "Certificates found"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No certificates found"
+            echo "No certificates found"
           fi
 
       - name: Stop services
@@ -84,9 +84,9 @@ jobs:
       - name: Health check
         run: |
           if curl -f http://localhost/health 2>/dev/null; then
-            echo "✅ Health check passed"
+            echo "Health check passed"
           else
-            echo "❌ Health check failed"
+            echo "Health check failed"
             docker-compose logs --tail=50
             exit 1
           fi

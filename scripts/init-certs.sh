@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # НЕ используем sudo
-echo "🚀 Starting SSL certificates initialization..."
+echo "Starting SSL certificates initialization..."
 
 mkdir -p certbot/{conf,www}
 mkdir -p nginx
@@ -9,10 +9,10 @@ mkdir -p nginx
 # Убеждаемся что права правильные
 chmod -R 755 certbot
 
-echo "🛑 Stopping services..."
+echo "Stopping services..."
 docker-compose down --remove-orphans 2>/dev/null || true
 
-echo "🔄 Starting temporary nginx..."
+echo "Starting temporary nginx..."
 docker run -d \
   --name nginx-temp \
   -p 80:80 \
@@ -22,7 +22,7 @@ docker run -d \
 
 sleep 5
 
-echo "🔐 Obtaining SSL certificates..."
+echo "Obtaining SSL certificates..."
 docker run --rm \
   -v $(pwd)/certbot/conf:/etc/letsencrypt \
   -v $(pwd)/certbot/www:/var/www/certbot \
@@ -37,11 +37,11 @@ docker run --rm \
   -d wishlistprice.ru \
   -d www.wishlistprice.ru
 
-echo "🛑 Stopping temporary nginx..."
+echo "Stopping temporary nginx..."
 docker stop nginx-temp
 docker rm nginx-temp
 
 # Меняем владельца на runner (если файлы создались от root)
 chown -R runner:runner certbot/conf 2>/dev/null || true
 
-echo "✅ Done!"
+echo "Done!"

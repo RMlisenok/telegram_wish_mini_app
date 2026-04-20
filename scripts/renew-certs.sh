@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔄 Manually renewing SSL certificates..."
+echo "Manually renewing SSL certificates..."
 
 sudo docker run --rm \
   -v $(pwd)/certbot/conf:/etc/letsencrypt \
@@ -9,7 +9,7 @@ sudo docker run --rm \
   --webroot -w /var/www/certbot \
   --quiet
 
-echo "🔄 Reloading nginx..."
+echo "Reloading nginx..."
 sudo docker-compose exec nginx nginx -s reload
 
-echo "✅ Certificate renewal completed"
+echo "Certificate renewal completed"
