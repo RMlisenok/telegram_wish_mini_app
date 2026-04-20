@@ -33,10 +33,10 @@ class WishCreate(BaseModel):
     price: Optional[float] = None
     currency: Optional[CurrencyEnum] = None
     description: Optional[str] = None
-    
+
     @validator('price')
     def price_positive(cls, v):
-        if v <= 0:
+        if v is not None and v <= 0:
             raise ValueError('Price must be positive')
         return v
 
