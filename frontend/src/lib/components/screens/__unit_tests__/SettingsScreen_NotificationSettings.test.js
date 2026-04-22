@@ -137,4 +137,30 @@ describe('NotificationSettings Component', () => {
         expect(onGoBack).toHaveBeenCalled();
     });
 
+    //Тест №7 - обработка отсутствия токена
+    test('should not fetch or save if token is missing', async () => {
+        render(NotificationSettings, { token: null });
+        
+        expect(global.fetch).not.toHaveBeenCalled();
+
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    //Тест №8 - ошибка при загрузке данных
+    test('should log error to console on mount failure', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        
+        global.fetch.mockResolvedValueOnce({ ok: false });
+
+        render(NotificationSettings, { token });
+
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalled();
+        });
+        
+        consoleSpy.mockRestore();
+    });
 });
