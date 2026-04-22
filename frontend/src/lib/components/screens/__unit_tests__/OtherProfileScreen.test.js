@@ -308,4 +308,20 @@ describe('OtherProfileScreen', () => {
     expect(container.querySelector('.sub-row')).toBeTruthy();
     expect(container.querySelector('.empty-note')).toBeTruthy();
   });
+
+  test('skips subscribe request when token is missing but profile id exists', async () => {
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: '',
+      profile: {
+        ...baseProfile,
+        id: 55,
+        isSubscribed: false
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalled();
+  });
 });
