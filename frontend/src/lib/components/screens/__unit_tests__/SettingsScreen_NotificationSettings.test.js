@@ -48,4 +48,32 @@ describe('NotificationSettings Component', () => {
         });
     });
 
+    //Тест №2 - переключает состояние настройки при клике
+    test('should toggle setting state on click', async () => {
+        global.fetch.mockResolvedValueOnce({ ok: true, json: async () => mockSettings });
+        render(NotificationSettings, { token });
+
+        const button = await screen.findByRole('button', { name: /Новые подписчики/i });
+        await fireEvent.click(button);
+
+        //проверяем состояние вложенного инпута по его ID
+        const checkbox = document.querySelector('#newFollowers');
+        expect(checkbox.checked).toBe(false);
+    });
+
+    //Тест №3 - поддерживает управление с клавиатуры (Enter/Space)
+    test('should toggle setting on Enter key press', async () => {
+        global.fetch.mockResolvedValueOnce({ ok: true, json: async () => mockSettings });
+        render(NotificationSettings, { token });
+
+        const button = await screen.findByRole('button', { name: /Новые подписчики/i });
+        const checkbox = document.querySelector('#newFollowers');
+
+        await waitFor(() => expect(checkbox.checked).toBe(true));
+
+        await fireEvent.keyDown(button, { key: 'Enter' });
+        
+        expect(checkbox.checked).toBe(false);
+    });
+
 });
