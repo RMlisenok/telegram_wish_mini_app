@@ -71,4 +71,40 @@ describe('OtherProfileScreen', () => {
     cleanup();
     jest.restoreAllMocks();
   });
+
+  test('renders profile and dispatches navigation events', async () => {
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: baseProfile
+    });
+
+    const linkButtons = container.querySelectorAll('.link-btn');
+    expect(linkButtons).toHaveLength(2);
+
+    await fireEvent.click(linkButtons[0]);
+    await fireEvent.click(linkButtons[1]);
+
+    await fireEvent.click(container.querySelector('.wishlist-row'));
+    await fireEvent.click(container.querySelector('.sub-row'));
+
+    const actionButtons = container.querySelectorAll('.profile-actions .ui-button');
+    await fireEvent.click(actionButtons[1]);
+    await fireEvent.click(container.querySelector('.footer-actions .ui-button'));
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual([
+      'show-all-wishlists:{"profileId":55,"isExternalProfile":true}',
+      'show-all-subscriptions:{"profileId":55}',
+      'open-wishlist:{"wishlistId":"wl-1","profileId":55}',
+      'open-profile:{"profileId":77}',
+      'share-profile:{"profileId":55}',
+      'back'
+    ]);
+
+    expect(container.textContent).toContain('Books');
+    expect(container.textContent).toContain('Socks');
+  });
 });
