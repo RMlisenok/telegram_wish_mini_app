@@ -225,4 +225,37 @@ describe('OtherProfileScreen', () => {
     expect(global.fetch).not.toHaveBeenCalled();
     expect(container.querySelector('.empty-note')).toBeTruthy();
   });
+
+  test('shows loading state while subscribe request is pending', async () => {
+    let resolveRequest;
+    global.fetch.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = () => resolve(okJson({ message: 'ok' }));
+        })
+    );
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: {
+        ...baseProfile,
+        isSubscribed: false
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.profile-actions .ui-button')[0]).toBeDisabled();
+    });
+
+    resolveRequest();
+
+    await waitFor(() => {
+      const eventNames = Array.from(
+        container.querySelectorAll('[data-testid="events-log"] li')
+      ).map((node) => node.textContent);
+      expect(eventNames).toContain('toggle-subscribe:{"profileId":55,"value":true}');
+    });
+  });
 });
