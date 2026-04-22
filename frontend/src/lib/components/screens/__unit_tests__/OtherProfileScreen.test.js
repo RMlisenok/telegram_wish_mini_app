@@ -282,4 +282,30 @@ describe('OtherProfileScreen', () => {
       expect(global.alert).toHaveBeenCalled();
     });
   });
+
+  test('renders restricted wishlist visibility and questionnaire fallback', async () => {
+    const { container } = renderScreen({
+      profile: {
+        ...baseProfile,
+        publicWishlists: [
+          {
+            id: 'wl-2',
+            title: 'Restricted Wishlist',
+            visibility: 'restricted',
+            wishesCount: undefined,
+            iconUrl: '../../../../static/icons/gift-check.png'
+          }
+        ],
+        subscriptions: [{ id: 101, fullName: 'Sub No Title', birthDate: '02.02.2000' }],
+        questionnaire: {
+          interests: [],
+          noGifts: []
+        }
+      }
+    });
+
+    expect(container.querySelector('.wishlist-row')).toBeTruthy();
+    expect(container.querySelector('.sub-row')).toBeTruthy();
+    expect(container.querySelector('.empty-note')).toBeTruthy();
+  });
 });
