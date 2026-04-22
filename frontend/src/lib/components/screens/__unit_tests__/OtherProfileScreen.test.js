@@ -107,4 +107,26 @@ describe('OtherProfileScreen', () => {
     expect(container.textContent).toContain('Books');
     expect(container.textContent).toContain('Socks');
   });
+
+  test('does not dispatch subscriptions event when subscriptions are private', async () => {
+    const profile = {
+      ...baseProfile,
+      subscriptionsArePrivate: true,
+      subscriptions: [{ id: 1, fullName: 'Private User', birthDate: null, avatarUrl: '' }]
+    };
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile
+    });
+
+    await fireEvent.click(container.querySelectorAll('.link-btn')[1]);
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual([]);
+    expect(container.querySelectorAll('.empty-note').length).toBeGreaterThan(0);
+  });
 });
