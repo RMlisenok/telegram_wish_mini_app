@@ -183,4 +183,24 @@ describe('OtherProfileScreen', () => {
       expect.objectContaining({ method: 'DELETE' })
     );
   });
+
+  test('shows alert when subscribe request fails', async () => {
+    global.fetch.mockResolvedValue(failJson(400, { detail: 'Subscribe failed' }));
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: {
+        ...baseProfile,
+        isSubscribed: false
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalledWith('Subscribe failed');
+    });
+
+    expect(container.querySelectorAll('[data-testid="events-log"] li')).toHaveLength(0);
+  });
 });
