@@ -156,4 +156,31 @@ describe('OtherProfileScreen', () => {
       expect.objectContaining({ method: 'POST' })
     );
   });
+
+  test('unsubscribes from profile and dispatches toggle-subscribe=false', async () => {
+    global.fetch.mockResolvedValue(okJson({ message: 'ok' }));
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: {
+        ...baseProfile,
+        isSubscribed: true
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    await waitFor(() => {
+      const eventNames = Array.from(
+        container.querySelectorAll('[data-testid="events-log"] li')
+      ).map((node) => node.textContent);
+
+      expect(eventNames).toContain('toggle-subscribe:{"profileId":55,"value":false}');
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/v1/subscriptions/users/55',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+  });
 });
