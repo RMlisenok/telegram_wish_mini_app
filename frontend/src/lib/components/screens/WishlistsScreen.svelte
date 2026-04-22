@@ -176,13 +176,6 @@
         }
     };
 
-    // Получить количество желаний в вишлисте
-    // const getWishlistCount = (wishlistId) => {
-    //     return $wishesStore.filter((wish) => 
-    //     (wish.wishlistIds || []).includes(wishlistId)
-    // ).length;
-    // };
-
     // Получить текст и иконку для статуса приватности
     const getPrivacyInfo = (wishlist) => {
         if (!wishlist || typeof wishlist !== 'object') {
