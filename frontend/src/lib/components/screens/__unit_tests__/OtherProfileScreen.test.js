@@ -258,4 +258,28 @@ describe('OtherProfileScreen', () => {
       expect(eventNames).toContain('toggle-subscribe:{"profileId":55,"value":true}');
     });
   });
+
+  test('shows fallback alert text when subscribe response has no json body', async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => {
+        throw new Error('broken json');
+      }
+    });
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: {
+        ...baseProfile,
+        isSubscribed: false
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalled();
+    });
+  });
 });
