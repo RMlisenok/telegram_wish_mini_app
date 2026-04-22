@@ -76,4 +76,65 @@ describe('NotificationSettings Component', () => {
         expect(checkbox.checked).toBe(false);
     });
 
+    //Тест №4 - успешно сохраняет настройки и вызывает навигацию назад
+    test('should save settings and call onGoBack on success', async () => {
+        const onGoBack = jest.fn();
+        
+        //мок для GET (загрузка)
+        global.fetch.mockResolvedValueOnce({ ok: true, json: async () => mockSettings });
+        //мок для PATCH (сохранение)
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ status: 'success', update_data: mockSettings })
+        });
+
+        render(NotificationSettings, { token, onGoBack });
+
+        const saveBtn = screen.getByText(/Сохранить изменения/i);
+        await fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/settings/notifications', expect.objectContaining({
+                method: 'PATCH'
+            }));
+            expect(onGoBack).toHaveBeenCalled();
+        });
+    });
+
+    //Тест №5 - проверяет корректность маппинга данных при сохранении
+    test('should send correct field names to API on save', async () => {
+        global.fetch.mockResolvedValueOnce({ ok: true, json: async () => mockSettings });
+        render(NotificationSettings, { token });
+
+        const toggle = await screen.findByLabelText(/Заявки на доступ к вишлистам/i);
+        await fireEvent.click(toggle);
+
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ update_data: mockSettings })
+        });
+
+        await fireEvent.click(screen.getByText(/Сохранить изменения/i));
+
+        await waitFor(() => {
+            const lastCall = global.fetch.mock.calls.find(call => call[1].method === 'PATCH');
+            const body = JSON.parse(lastCall[1].body);
+            
+            // Проверяем, что в API ушло access_requests, а не wishlistAccessRequests
+            expect(body).toHaveProperty('access_requests', true);
+            expect(body).toHaveProperty('new_followers', true);
+        });
+    });
+
+    //Тест №6 - корректно работает кнопка "Назад"
+    test('should call onGoBack when back button is clicked', async () => {
+        const onGoBack = jest.fn();
+        global.fetch.mockResolvedValueOnce({ ok: true, json: async () => mockSettings });
+        
+        render(NotificationSettings, { onGoBack, token });
+
+        await fireEvent.click(screen.getByText('←'));
+        expect(onGoBack).toHaveBeenCalled();
+    });
+
 });
