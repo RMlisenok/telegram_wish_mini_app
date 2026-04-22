@@ -129,4 +129,31 @@ describe('OtherProfileScreen', () => {
     expect(eventNames).toEqual([]);
     expect(container.querySelectorAll('.empty-note').length).toBeGreaterThan(0);
   });
+
+  test('subscribes to profile and dispatches toggle-subscribe=true', async () => {
+    global.fetch.mockResolvedValue(okJson({ message: 'ok' }));
+
+    const { container } = render(OtherProfileScreenEventHarness, {
+      token: 'token-123',
+      profile: {
+        ...baseProfile,
+        isSubscribed: false
+      }
+    });
+
+    await fireEvent.click(container.querySelectorAll('.profile-actions .ui-button')[0]);
+
+    await waitFor(() => {
+      const eventNames = Array.from(
+        container.querySelectorAll('[data-testid="events-log"] li')
+      ).map((node) => node.textContent);
+
+      expect(eventNames).toContain('toggle-subscribe:{"profileId":55,"value":true}');
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/v1/subscriptions/users',
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
 });
