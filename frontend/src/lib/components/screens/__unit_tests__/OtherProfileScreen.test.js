@@ -203,4 +203,26 @@ describe('OtherProfileScreen', () => {
 
     expect(container.querySelectorAll('[data-testid="events-log"] li')).toHaveLength(0);
   });
+
+  test('does not call API when token or profile id is missing', async () => {
+    const { container } = renderScreen({
+      token: '',
+      profile: {
+        ...baseProfile,
+        id: null,
+        questionnaire: null,
+        publicWishlists: [],
+        subscriptions: []
+      }
+    });
+
+    const subscribeButton = container.querySelectorAll('.profile-actions .ui-button')[0];
+
+    expect(subscribeButton).toBeDisabled();
+
+    await fireEvent.click(subscribeButton);
+
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(container.querySelector('.empty-note')).toBeTruthy();
+  });
 });
