@@ -105,7 +105,7 @@ describe('PrivacySettings Component', () => {
         });
     });
 
-    //Тест №5 - обработка ошибки сервера
+    //Тест №5 - обработка ошибки сервера 
     test('should handle server error on save', async () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         global.fetch.mockResolvedValueOnce({ ok: false });
