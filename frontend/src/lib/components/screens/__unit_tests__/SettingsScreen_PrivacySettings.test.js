@@ -36,4 +36,41 @@ describe('PrivacySettings Component', () => {
         expect(checkbox.checked).toBe(true);
     });
 
+    //Тест №2- переключение состояния по клику
+    test('should toggle privacy setting on click', async () => {
+        render(PrivacySettings, { 
+            token, 
+            userStore: mockUserStore, 
+            onUpdateUser, 
+            onGoBack 
+        });
+
+        const button = screen.getByRole('button', { name: /Показывать мои подписки/i });
+        await fireEvent.click(button);
+
+        const checkbox = document.querySelector('#showSubscriptions');
+        expect(checkbox.checked).toBe(false);
+    });
+
+    //Тест №3 - управление клавиатурой (Enter/Space)
+    test('should toggle setting on Space and Enter keys', async () => {
+        render(PrivacySettings, { 
+            token, 
+            userStore: mockUserStore, 
+            onUpdateUser, 
+            onGoBack 
+        });
+
+        const button = screen.getByRole('button', { name: /Показывать мои подписки/i });
+        const checkbox = document.querySelector('#showSubscriptions');
+
+        // Тестируем Space
+        await fireEvent.keyDown(button, { key: ' ' });
+        expect(checkbox.checked).toBe(false);
+
+        // Тестируем Enter
+        await fireEvent.keyDown(button, { key: 'Enter' });
+        expect(checkbox.checked).toBe(true);
+    });
+
 });
