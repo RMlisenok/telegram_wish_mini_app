@@ -89,6 +89,7 @@ class BlockRepository:
         if not block:
             return False
         await self.session.delete(block)
+        await self.session.commit()
         return True
 
     async def is_user_blocked(
