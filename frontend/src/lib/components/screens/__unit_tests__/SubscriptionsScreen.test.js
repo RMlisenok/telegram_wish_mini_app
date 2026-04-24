@@ -402,4 +402,38 @@ describe('SubscriptionsScreen', () => {
     expect(container.textContent).toContain('2');
     expect(container.textContent).toContain('1');
   });
+
+  test('opens item from keyboard only for Enter key', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscriptions: [
+          {
+            type: 'user',
+            sub_id: 1,
+            user_id: 64,
+            name: 'Keyboard User',
+            birth_date: '1991-01-01',
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = render(SubscriptionsScreenEventHarness, {
+      token: 'token-123'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscription-card')).toBeTruthy();
+    });
+
+    const card = container.querySelector('.subscription-card');
+    await fireEvent.keyDown(card, { key: 'Space' });
+    await fireEvent.keyDown(card, { key: 'Enter' });
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+    expect(eventNames).toEqual(['open-profile:{"profileId":64}']);
+  });
 });
