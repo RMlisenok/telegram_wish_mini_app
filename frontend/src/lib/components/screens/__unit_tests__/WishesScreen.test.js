@@ -1195,4 +1195,85 @@ describe('WishesScreen', () => {
       );
     });
   });
+
+  test('shows notification when reservation request fails', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/30/wishes?limit=50' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'External Reservable',
+            photo: '',
+            url_gift: '',
+            price: 5,
+            currency: 'USD',
+            description: '',
+            is_booked: false,
+            status_is_finished: false,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+            connection_id: 700,
+            is_pinned: false,
+            order_position: 0,
+            added_at: '2026-01-01T00:00:00.000Z'
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/subscriptions/check/wishlist/30' && method === 'GET') {
+        return okJson({ is_subscribed: false });
+      }
+
+      if (url === '/api/v1/wishlists/30' && method === 'GET') {
+        return okJson({
+          id: 30,
+          owner_id: 2,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'External WL',
+          photo: '',
+          description: '',
+          typeprivacy: 'public',
+          wishes_count: 1
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/reservations/' && method === 'POST') {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({}),
+          text: async () => 'reservation error'
+        };
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '30',
+      isExternalWishlist: true
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.reservation-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.reservation-button'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.notification-overlay')).toBeTruthy();
+    });
+  });
 });
