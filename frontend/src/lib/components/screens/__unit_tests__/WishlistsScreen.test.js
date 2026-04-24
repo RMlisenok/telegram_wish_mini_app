@@ -394,4 +394,26 @@ describe('WishlistsScreen', () => {
 
     expect(eventNames).toEqual(['openOwnerProfile:{"profileId":"500"}']);
   });
+
+  test('renders wishlist count branch for 11 wishes', async () => {
+    const { container } = renderScreen({
+      token: '',
+      isExternalUser: true,
+      externalProfileId: '1',
+      externalUserWishlists: [
+        {
+          id: '11',
+          title: 'Eleven Wishes',
+          typeprivacy: 'public',
+          count: 11,
+          ownerId: '1',
+          ownerName: 'Owner',
+          photo: ''
+        }
+      ]
+    });
+
+    expect(container.querySelector('.wishlist-card')).toBeTruthy();
+    expect(container.textContent).toContain('11');
+  });
 });
