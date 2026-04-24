@@ -304,4 +304,17 @@ describe('WishlistsScreen', () => {
     expect(external.container.querySelector('.empty-note')).toBeTruthy();
     expect(external.container.querySelector('.ui-button.full')).toBeNull();
   });
+
+  test('keeps empty state when own wishlists loading fails', async () => {
+    global.fetch.mockRejectedValue(new Error('network down'));
+
+    const { container } = renderScreen({ token: 'token-123' });
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    expect(container.querySelector('.empty-note')).toBeTruthy();
+    expect(container.querySelector('.ui-button.full')).toBeTruthy();
+  });
 });
