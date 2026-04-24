@@ -247,4 +247,26 @@ describe('SubscribersScreen', () => {
       expect(container.querySelector('.empty-note')).toBeTruthy();
     });
   });
+
+  test('handles subscriber without name by still rendering card', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscribers: [
+          {
+            sub_id: 1,
+            user_id: 77,
+            name: '',
+            birth_date: null,
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = renderScreen({ token: 'token-123' });
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscriber-card')).toBeTruthy();
+    });
+  });
 });
