@@ -317,4 +317,52 @@ describe('WishlistsScreen', () => {
     expect(container.querySelector('.empty-note')).toBeTruthy();
     expect(container.querySelector('.ui-button.full')).toBeTruthy();
   });
+
+  test('continues wishlist deletion when S3 photo deletion fails', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Delete With Broken S3',
+            description: '',
+            photo: 'https://selstorage.ru/files/wl-1.png',
+            typeprivacy: 'public',
+            wishes_count: 1
+          }
+        ]);
+      }
+
+      if (url.startsWith('/api/v1/s3/file/delete?file_url=') && method === 'DELETE') {
+        return failJson(500, { detail: 's3 failed' });
+      }
+
+      if (url === '/api/v1/wishlists/1' && method === 'DELETE') {
+        return okJson({ message: 'ok' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.delete-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.delete-button'));
+    await fireEvent.click(container.querySelectorAll('.confirm-actions .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishlists/1',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+
+    expect(console.warn).toHaveBeenCalled();
+    expect(global.alert).not.toHaveBeenCalled();
+  });
 });
