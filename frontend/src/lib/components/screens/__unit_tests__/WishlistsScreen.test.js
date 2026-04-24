@@ -247,4 +247,44 @@ describe('WishlistsScreen', () => {
     const wishesAfterDelete = getStoreValue(wishesStore);
     expect(wishesAfterDelete[0].wishlistIds).toEqual(['2']);
   });
+
+  test('shows alert and resets modal state when wishlist deletion fails', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Broken Delete',
+            description: '',
+            photo: '',
+            typeprivacy: 'private',
+            wishes_count: 0
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishlists/1' && method === 'DELETE') {
+        return failJson(500, { detail: 'cannot delete' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.delete-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.delete-button'));
+    await fireEvent.click(container.querySelectorAll('.confirm-actions .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalled();
+    });
+
+    expect(container.querySelector('.confirm-modal')).toBeNull();
+  });
 });
