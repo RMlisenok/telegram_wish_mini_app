@@ -298,4 +298,13 @@ describe('SubscriptionsScreen', () => {
       );
     });
   });
+
+  test('shows error message when loading fails', async () => {
+    global.fetch.mockResolvedValue(failJson(500));
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.error-message')).toBeTruthy();
+    });
+  });
 });
