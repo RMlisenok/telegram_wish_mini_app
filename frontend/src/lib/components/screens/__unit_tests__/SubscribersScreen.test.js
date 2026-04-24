@@ -51,4 +51,48 @@ describe('SubscribersScreen', () => {
 
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  test('loads subscribers and supports search filtering', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscribers: [
+          {
+            sub_id: 1,
+            user_id: 10,
+            name: 'Alice Cooper',
+            birth_date: '1999-02-01',
+            photo: ''
+          },
+          {
+            sub_id: 2,
+            user_id: 20,
+            name: 'Bob Marley',
+            birth_date: '03.04.2001',
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.subscriber-card')).toHaveLength(2);
+    });
+
+    expect(container.textContent).toContain('01.02.1999');
+
+    const searchInput = container.querySelector('input[type="text"]');
+
+    await fireEvent.input(searchInput, { target: { value: 'bob' } });
+    await waitFor(() => {
+      expect(container.querySelectorAll('.subscriber-card')).toHaveLength(1);
+      expect(container.textContent).toContain('Bob Marley');
+    });
+
+    await fireEvent.input(searchInput, { target: { value: 'unknown' } });
+    await waitFor(() => {
+      expect(container.querySelector('.empty-note')).toBeTruthy();
+    });
+  });
 });
