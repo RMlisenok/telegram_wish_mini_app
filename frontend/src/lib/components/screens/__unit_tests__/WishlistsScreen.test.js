@@ -365,4 +365,33 @@ describe('WishlistsScreen', () => {
     expect(console.warn).toHaveBeenCalled();
     expect(global.alert).not.toHaveBeenCalled();
   });
+
+  test('opens owner profile from keyboard only on Enter for external rows', async () => {
+    const { container } = render(WishlistsScreenEventHarness, {
+      token: '',
+      isExternalUser: true,
+      externalProfileId: '42',
+      externalUserWishlists: [
+        {
+          id: '5',
+          title: 'Protected WL',
+          typeprivacy: 'protected',
+          count: 3,
+          ownerId: '500',
+          ownerName: 'Owner Keyboard',
+          photo: ''
+        }
+      ]
+    });
+
+    const owner = container.querySelector('.wishlist-owner');
+    await fireEvent.keyDown(owner, { key: 'Space' });
+    await fireEvent.keyDown(owner, { key: 'Enter' });
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual(['openOwnerProfile:{"profileId":"500"}']);
+  });
 });
