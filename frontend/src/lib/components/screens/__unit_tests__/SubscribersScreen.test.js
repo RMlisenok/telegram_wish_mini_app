@@ -180,4 +180,27 @@ describe('SubscribersScreen', () => {
       expect(console.error).toHaveBeenCalled();
     });
   });
+
+  test('shows auth alert on subscribe action when token is missing but list exists', async () => {
+    subscribersStore.set([
+      {
+        sub_id: 9,
+        user_id: 909,
+        name: 'No Token Subscriber',
+        birth_date: '1990-01-01',
+        photo: ''
+      }
+    ]);
+
+    const { container } = renderScreen({ token: '' });
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscriber-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.subscribe-btn'));
+
+    expect(global.alert).toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
 });
