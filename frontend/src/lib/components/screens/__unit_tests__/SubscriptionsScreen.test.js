@@ -222,4 +222,80 @@ describe('SubscriptionsScreen', () => {
       'openWishlistDetail:{"wishlistId":91}'
     ]);
   });
+
+  test('handles unsubscribe actions for user and wishlist', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/subscriptions/my?limit=100' && method === 'GET') {
+        return okJson({
+          subscriptions: [
+            {
+              type: 'user',
+              sub_id: 1,
+              user_id: 11,
+              name: 'User For Delete',
+              birth_date: '1990-01-01',
+              photo: ''
+            },
+            {
+              type: 'wishlist',
+              sub_id: 2,
+              wishlist_id: 22,
+              name: 'Wishlist For Delete',
+              owner_name: 'Owner',
+              total_wishes: 3,
+              photo: ''
+            }
+          ]
+        });
+      }
+
+      if (url === '/api/v1/subscriptions/users/11' && method === 'DELETE') {
+        return okJson({ message: 'ok' });
+      }
+
+      if (url === '/api/v1/subscriptions/wishlists/22' && method === 'DELETE') {
+        return okJson({ message: 'ok' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.unsubscribe-button')).toHaveLength(2);
+    });
+
+    const [userUnsubscribe, wishlistUnsubscribe] = container.querySelectorAll('.unsubscribe-button');
+
+    global.confirm.mockReturnValueOnce(false);
+    await fireEvent.click(userUnsubscribe);
+
+    expect(global.fetch).not.toHaveBeenCalledWith(
+      '/api/v1/subscriptions/users/11',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+
+    global.confirm.mockReturnValueOnce(true);
+    await fireEvent.click(userUnsubscribe);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/subscriptions/users/11',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+
+    global.confirm.mockReturnValueOnce(true);
+    await fireEvent.click(wishlistUnsubscribe);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/subscriptions/wishlists/22',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
 });
