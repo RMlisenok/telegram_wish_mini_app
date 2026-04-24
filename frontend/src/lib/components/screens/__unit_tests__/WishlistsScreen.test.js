@@ -111,4 +111,57 @@ describe('WishlistsScreen', () => {
       'openWishlistDetail:{"wishlistId":"1","isExternal":true}'
     ]);
   });
+
+  test('loads own wishlists and dispatches create/edit/open events', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'My Wishlist',
+            description: 'Main',
+            photo: '',
+            typeprivacy: 'public',
+            wishes_count: 2
+          },
+          {
+            id: 2,
+            name: 'Second Wishlist',
+            description: 'Alt',
+            photo: '',
+            typeprivacy: 'protected',
+            wishes_count: 4
+          }
+        ]);
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = render(WishlistsScreenEventHarness, {
+      token: 'token-123'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.wishlist-card')).toHaveLength(2);
+    });
+
+    await fireEvent.click(container.querySelector('.ui-button.full'));
+    await fireEvent.click(container.querySelector('.edit-button'));
+    await fireEvent.click(container.querySelector('.wishlist-owner'));
+    await fireEvent.click(container.querySelector('.arrow-button'));
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual([
+      'openCreateWishlists',
+      'openEditWishlists:{"id":"1","token":"token-123"}',
+      'openMainScreen',
+      'openWishlistDetail:{"wishlistId":"1","isExternal":false}'
+    ]);
+  });
 });
