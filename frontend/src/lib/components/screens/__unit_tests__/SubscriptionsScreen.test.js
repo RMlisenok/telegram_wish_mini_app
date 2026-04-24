@@ -52,4 +52,42 @@ describe('SubscriptionsScreen', () => {
 
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  test('loads and renders user and wishlist subscriptions', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscriptions: [
+          {
+            type: 'user',
+            sub_id: 1,
+            user_id: 11,
+            name: 'Alice Wonder',
+            birth_date: '1990-03-05',
+            photo: ''
+          },
+          {
+            type: 'wishlist',
+            sub_id: 2,
+            wishlist_id: 77,
+            name: 'Travel Wishlist',
+            owner_name: 'Max Owner',
+            total_wishes: 1,
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.subscription-card')).toHaveLength(2);
+    });
+
+    expect(container.textContent).toContain('Alice Wonder');
+    expect(container.textContent).toContain('Travel Wishlist');
+    expect(container.textContent).toContain('05.03.1990');
+
+    expect(container.querySelector('.cover-placeholder')).toBeTruthy();
+  });
 });
