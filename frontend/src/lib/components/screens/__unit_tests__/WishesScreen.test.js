@@ -567,4 +567,133 @@ describe('WishesScreen', () => {
       );
     });
   });
+
+  test('handles external wishlist actions: share, reserve, subscribe and unsubscribe', async () => {
+    let subscriptionState = false;
+    wishlistsStore.set([
+      {
+        id: '20',
+        title: 'External Public',
+        privacy: 'public',
+        count: 1,
+        photo: '',
+        description: ''
+      }
+    ]);
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/20/wishes?limit=50' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'External Wish',
+            photo: '',
+            url_gift: '',
+            price: 30,
+            currency: 'USD',
+            description: '',
+            is_booked: false,
+            status_is_finished: false,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+            connection_id: 555,
+            is_pinned: false,
+            order_position: 0,
+            added_at: '2026-01-01T00:00:00.000Z'
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/subscriptions/check/wishlist/20' && method === 'GET') {
+        return okJson({ is_subscribed: subscriptionState });
+      }
+
+      if (url === '/api/v1/wishlists/20' && method === 'GET') {
+        return okJson({
+          id: 20,
+          owner_id: 2,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'External Public',
+          photo: '',
+          description: 'desc',
+          typeprivacy: 'public',
+          wishes_count: 1
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/reservations/' && method === 'POST') {
+        return okJson({
+          wish_wishlist_id: 555,
+          reserved_by_id: 99,
+          created_at: '2026-01-01T00:00:00.000Z'
+        });
+      }
+
+      if (url === '/api/v1/subscriptions/wishlists' && method === 'POST') {
+        subscriptionState = true;
+        return okJson({ message: 'subscribed' });
+      }
+
+      if (url === '/api/v1/subscriptions/wishlists/20' && method === 'DELETE') {
+        subscriptionState = false;
+        return okJson({ message: 'unsubscribed' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = render(WishesScreenEventHarness, {
+      token: 'token-123',
+      wishlistId: '20',
+      isExternalWishlist: true,
+      currentUserId: '1',
+      onNavigateToCreateWishes: jest.fn()
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.reservation-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.share-button'));
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+    expect(eventNames[0]).toContain('shareWishlist:');
+    expect(eventNames[0]).toContain('"id":20');
+
+    await fireEvent.click(container.querySelector('.reservation-button'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.reservation-button.reserved')).toBeTruthy();
+    });
+
+    const subscribeButton = container.querySelector('.ui-button.full');
+
+    await fireEvent.click(subscribeButton);
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/subscriptions/wishlists',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    await fireEvent.click(subscribeButton);
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/subscriptions/wishlists/20',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
 });
