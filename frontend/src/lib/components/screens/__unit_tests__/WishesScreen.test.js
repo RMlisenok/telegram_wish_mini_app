@@ -1354,4 +1354,147 @@ describe('WishesScreen', () => {
 
     expect(container.querySelector('.modal-content')).toBeTruthy();
   });
+
+  test('copies wish to another wishlist without deleting from source', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/10/wishes?limit=50' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Copy Me',
+            photo: '',
+            url_gift: '',
+            price: 12,
+            currency: 'USD',
+            description: '',
+            is_booked: false,
+            status_is_finished: false,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+            connection_id: 333,
+            is_pinned: false,
+            order_position: 0,
+            added_at: '2026-01-01T00:00:00.000Z'
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishlists/10' && method === 'GET') {
+        return okJson({
+          id: 10,
+          owner_id: 1,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'Wishlist 10',
+          photo: '',
+          description: '',
+          typeprivacy: 'public',
+          wishes_count: 1
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'GET') {
+        return okJson({
+          id: 1,
+          name: 'Copy Me',
+          photo: '',
+          description: '',
+          price: 12,
+          currency: 'USD',
+          url_gift: '',
+          wishlists: [{ id: 10, name: 'Wishlist 10' }],
+          is_booked: false,
+          status_is_finished: false,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          user_id: 1
+        });
+      }
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return okJson([
+          {
+            id: 10,
+            name: 'Wishlist 10',
+            description: '',
+            photo: '',
+            typeprivacy: 'public',
+            wishes_count: 1
+          },
+          {
+            id: 11,
+            name: 'Wishlist 11',
+            description: '',
+            photo: '',
+            typeprivacy: 'public',
+            wishes_count: 0
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishlists/11/wishes' && method === 'POST') {
+        return okJson({
+          id: 992,
+          wish_id: 1,
+          wishlist_id: 11,
+          is_pinned: false,
+          order_position: 0,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z'
+        });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '10',
+      isExternalWishlist: false,
+      currentUserId: '1'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.wish-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-card'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.detail-panel')).toBeTruthy();
+    });
+
+    const actionButtons = container.querySelectorAll('.panel-actions .ui-button');
+    await fireEvent.click(actionButtons[0]);
+
+    await waitFor(() => {
+      expect(container.querySelector('.copy-move-modal')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wishlist-selection-item'));
+    await fireEvent.click(container.querySelectorAll('.copy-move-modal .modal-footer .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishlists/11/wishes',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    const removeCalls = global.fetch.mock.calls.filter(
+      ([url, requestOptions = {}]) =>
+        url === '/api/v1/wishlists/10/wishes/1' && (requestOptions.method || 'GET') === 'DELETE'
+    );
+    expect(removeCalls).toHaveLength(0);
+  });
 });
