@@ -95,4 +95,42 @@ describe('SubscribersScreen', () => {
       expect(container.querySelector('.empty-note')).toBeTruthy();
     });
   });
+
+  test('dispatches open-profile event from card click and arrow click', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscribers: [
+          {
+            sub_id: 1,
+            user_id: 55,
+            name: 'Event Subscriber',
+            birth_date: '1990-01-01',
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = render(SubscribersScreenEventHarness, {
+      token: 'token-123'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscriber-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.subscriber-card'));
+    await fireEvent.click(container.querySelector('.arrow-button'));
+    await fireEvent.keyDown(container.querySelector('.subscriber-card'), { key: 'Enter' });
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual([
+      'open-profile:{"profileId":55}',
+      'open-profile:{"profileId":55}',
+      'open-profile:{"profileId":55}'
+    ]);
+  });
 });
