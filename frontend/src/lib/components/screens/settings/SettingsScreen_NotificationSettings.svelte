@@ -54,7 +54,7 @@
             });
             
         } catch (err) {
-            error = err.message;
+            //error = err.message;
             console.error('Ошибка загрузки настроек:', err);
         }
     }
@@ -96,7 +96,7 @@
             goBack();
             
         } catch (err) {
-            error = err.message;
+            //error = err.message;
             console.error('Ошибка сохранения настроек:', err);
         }
     }

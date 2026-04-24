@@ -1,5 +1,6 @@
 /** @type {import('jest').Config} */
 export default {
+  coverageProvider: 'v8',
   testEnvironment: 'jsdom',
   clearMocks: true,
   restoreMocks: true,
