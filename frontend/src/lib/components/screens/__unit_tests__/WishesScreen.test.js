@@ -1017,4 +1017,31 @@ describe('WishesScreen', () => {
     );
     expect(updateCalls).toHaveLength(0);
   });
+
+  test('does not open add-existing modal without token in wishlist mode', async () => {
+    wishlistsStore.set([
+      {
+        id: '10',
+        title: 'Wishlist 10',
+        privacy: 'public',
+        count: 0,
+        photo: ''
+      }
+    ]);
+
+    const { container } = renderScreen({
+      token: '',
+      wishlistId: '10',
+      isExternalWishlist: false
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.ui-button.full')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.ui-button.full'));
+
+    expect(console.error).toHaveBeenCalled();
+    expect(container.querySelector('.modal-content')).toBeNull();
+  });
 });
