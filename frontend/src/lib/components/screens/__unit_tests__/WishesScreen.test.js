@@ -1276,4 +1276,82 @@ describe('WishesScreen', () => {
       expect(container.querySelector('.notification-overlay')).toBeTruthy();
     });
   });
+
+  test('keeps add-existing modal open when adding selected wishes fails', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([
+          {
+            id: 100,
+            name: 'Available Wish',
+            photo: '',
+            url_gift: '',
+            price: 77,
+            currency: 'USD',
+            is_booked: false
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishlists/10/wishes?limit=50' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/10' && method === 'GET') {
+        return okJson({
+          id: 10,
+          owner_id: 1,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'Wishlist 10',
+          photo: '',
+          description: '',
+          typeprivacy: 'public',
+          wishes_count: 0
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/wishlists/10/wishes' && method === 'POST') {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({}),
+          text: async () => 'add failed'
+        };
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '10',
+      isExternalWishlist: false
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.ui-button.full')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.ui-button.full'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.modal-content')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-selection-item'));
+    await fireEvent.click(container.querySelectorAll('.modal-footer .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    expect(container.querySelector('.modal-content')).toBeTruthy();
+  });
 });
