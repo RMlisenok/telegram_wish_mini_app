@@ -132,4 +132,88 @@ describe('WishesScreen', () => {
     );
     expect(eventNames).toContain('openEditWishes:{"id":1}');
   });
+
+  test('marks wish as finished and removes it from all wishlists', async () => {
+    let wishesLoadCount = 0;
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        wishesLoadCount += 1;
+        if (wishesLoadCount === 1) {
+          return okJson([
+            {
+              id: 1,
+              name: 'To Finish',
+              photo: '',
+              url_gift: '',
+              price: 10,
+              currency: 'USD',
+              is_booked: false
+            }
+          ]);
+        }
+
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'GET') {
+        return okJson({
+          id: 1,
+          name: 'To Finish',
+          photo: '',
+          description: 'desc',
+          price: 10,
+          currency: 'USD',
+          url_gift: '',
+          wishlists: [{ id: 10, name: 'A' }],
+          is_booked: false,
+          status_is_finished: false,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          user_id: 1
+        });
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'PUT') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/wishes/wishlists/1' && method === 'DELETE') {
+        return okJson({ success: true });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      currentUserId: '1'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.wish-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-card'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.detail-panel')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.detail-section .ui-button.full'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishes/1',
+        expect.objectContaining({ method: 'PUT' })
+      );
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/v1/wishes/wishlists/1',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+  });
 });
