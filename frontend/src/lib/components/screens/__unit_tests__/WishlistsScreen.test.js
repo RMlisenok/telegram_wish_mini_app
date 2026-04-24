@@ -164,4 +164,87 @@ describe('WishlistsScreen', () => {
       'openWishlistDetail:{"wishlistId":"1","isExternal":false}'
     ]);
   });
+
+  test('opens delete modal, supports cancel, and confirms successful deletion', async () => {
+    wishesStore.set([
+      {
+        id: 'wish-1',
+        title: 'Wish A',
+        wishlistIds: ['1', '2']
+      }
+    ]);
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishlists/' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Delete Me',
+            description: 'Will be removed',
+            photo: 'https://selstorage.ru/files/wl-1.png',
+            typeprivacy: 'public',
+            wishes_count: 3
+          }
+        ]);
+      }
+
+      if (url.startsWith('/api/v1/s3/file/delete?file_url=') && method === 'DELETE') {
+        return okJson({ message: 'deleted' });
+      }
+
+      if (url === '/api/v1/wishlists/1' && method === 'DELETE') {
+        return okJson({ message: 'ok' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.delete-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.delete-button'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.confirm-modal')).toBeTruthy();
+    });
+
+    const modalButtons = container.querySelectorAll('.confirm-actions .ui-button');
+    await fireEvent.click(modalButtons[0]);
+
+    await waitFor(() => {
+      expect(container.querySelector('.confirm-modal')).toBeNull();
+    });
+
+    await fireEvent.click(container.querySelector('.delete-button'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.confirm-modal')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelectorAll('.confirm-actions .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishlists/1',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+
+    const s3DeleteCall = global.fetch.mock.calls.find(
+      ([url, opts]) =>
+        typeof url === 'string' &&
+        url.startsWith('/api/v1/s3/file/delete?file_url=') &&
+        opts.method === 'DELETE'
+    );
+
+    expect(s3DeleteCall).toBeTruthy();
+
+    const wishesAfterDelete = getStoreValue(wishesStore);
+    expect(wishesAfterDelete[0].wishlistIds).toEqual(['2']);
+  });
 });
