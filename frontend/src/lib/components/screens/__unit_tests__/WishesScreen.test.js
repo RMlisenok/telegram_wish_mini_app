@@ -297,4 +297,168 @@ describe('WishesScreen', () => {
       );
     });
   });
+
+  test('blocks pinning when pinned wishes limit is reached', async () => {
+    const wishlistWishes = [
+      {
+        id: 1,
+        name: 'Pinned 1',
+        photo: '',
+        url_gift: '',
+        price: 1,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 101,
+        is_pinned: true,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        id: 2,
+        name: 'Pinned 2',
+        photo: '',
+        url_gift: '',
+        price: 2,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 102,
+        is_pinned: true,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        id: 3,
+        name: 'Pinned 3',
+        photo: '',
+        url_gift: '',
+        price: 3,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 103,
+        is_pinned: true,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        id: 4,
+        name: 'Pinned 4',
+        photo: '',
+        url_gift: '',
+        price: 4,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 104,
+        is_pinned: true,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        id: 5,
+        name: 'Pinned 5',
+        photo: '',
+        url_gift: '',
+        price: 5,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 105,
+        is_pinned: true,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      },
+      {
+        id: 6,
+        name: 'Not Pinned',
+        photo: '',
+        url_gift: '',
+        price: 6,
+        currency: 'USD',
+        description: '',
+        is_booked: false,
+        status_is_finished: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        connection_id: 106,
+        is_pinned: false,
+        order_position: 0,
+        added_at: '2026-01-01T00:00:00.000Z'
+      }
+    ];
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/10/wishes?limit=50' && method === 'GET') {
+        return okJson(wishlistWishes);
+      }
+
+      if (url === '/api/v1/wishlists/10' && method === 'GET') {
+        return okJson({
+          id: 10,
+          owner_id: 1,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'Wishlist 10',
+          photo: '',
+          description: '',
+          typeprivacy: 'public',
+          wishes_count: 6
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '10',
+      isExternalWishlist: false
+    });
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.wish-card')).toHaveLength(6);
+    });
+
+    const unpinnedButton = Array.from(container.querySelectorAll('.pin-button')).find(
+      (button) => !button.classList.contains('pinned')
+    );
+
+    await fireEvent.click(unpinnedButton);
+
+    await waitFor(() => {
+      expect(container.querySelector('.notification-overlay')).toBeTruthy();
+    });
+
+    const pinUpdateCall = global.fetch.mock.calls.find(
+      ([url]) => typeof url === 'string' && url.includes('/api/v1/wishlists/connections/')
+    );
+    expect(pinUpdateCall).toBeUndefined();
+  });
 });
