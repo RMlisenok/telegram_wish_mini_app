@@ -216,4 +216,85 @@ describe('WishesScreen', () => {
       expect.objectContaining({ method: 'DELETE' })
     );
   });
+
+  test('opens and confirms full wish deletion', async () => {
+    let wishesLoadCount = 0;
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        wishesLoadCount += 1;
+        if (wishesLoadCount === 1) {
+          return okJson([
+            {
+              id: 1,
+              name: 'Delete Me',
+              photo: '',
+              url_gift: '',
+              price: 5,
+              currency: 'USD',
+              is_booked: false
+            }
+          ]);
+        }
+
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'GET') {
+        return okJson({
+          id: 1,
+          name: 'Delete Me',
+          photo: '',
+          description: 'desc',
+          price: 5,
+          currency: 'USD',
+          url_gift: '',
+          wishlists: [],
+          is_booked: false,
+          status_is_finished: false,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          user_id: 1
+        });
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'DELETE') {
+        return okJson({ success: true });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      currentUserId: '1'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.wish-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-card'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.detail-panel')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelectorAll('.panel-actions .ui-button')[1]);
+
+    await waitFor(() => {
+      expect(container.querySelector('.confirm-delete-modal')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.confirm-delete-modal .ui-button.danger'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishes/1',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
 });
