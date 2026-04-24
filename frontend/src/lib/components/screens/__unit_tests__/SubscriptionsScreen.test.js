@@ -307,4 +307,45 @@ describe('SubscriptionsScreen', () => {
       expect(container.querySelector('.error-message')).toBeTruthy();
     });
   });
+
+  test('shows unsubscribe alert when api returns an error', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/subscriptions/my?limit=100' && method === 'GET') {
+        return okJson({
+          subscriptions: [
+            {
+              type: 'user',
+              sub_id: 1,
+              user_id: 11,
+              name: 'Broken Delete User',
+              birth_date: '1990-01-01',
+              photo: ''
+            }
+          ]
+        });
+      }
+
+      if (url === '/api/v1/subscriptions/users/11' && method === 'DELETE') {
+        return failJson(500, { detail: 'unsubscribe failed' });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.unsubscribe-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.unsubscribe-button'));
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalled();
+    });
+
+    expect(console.error).toHaveBeenCalled();
+  });
 });
