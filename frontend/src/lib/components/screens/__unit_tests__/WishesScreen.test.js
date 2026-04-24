@@ -888,4 +888,67 @@ describe('WishesScreen', () => {
       );
     });
   });
+
+  test('shows notification when external wishlist subscription request fails', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/20/wishes?limit=50' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/subscriptions/check/wishlist/20' && method === 'GET') {
+        return okJson({ is_subscribed: false });
+      }
+
+      if (url === '/api/v1/wishlists/20' && method === 'GET') {
+        return okJson({
+          id: 20,
+          owner_id: 2,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'External Public',
+          photo: '',
+          description: 'desc',
+          typeprivacy: 'public',
+          wishes_count: 0
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/subscriptions/wishlists' && method === 'POST') {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({}),
+          text: async () => 'server error'
+        };
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '20',
+      isExternalWishlist: true
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.ui-button.full')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.ui-button.full'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.notification-overlay')).toBeTruthy();
+    });
+  });
 });
