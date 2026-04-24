@@ -348,4 +348,58 @@ describe('SubscriptionsScreen', () => {
 
     expect(console.error).toHaveBeenCalled();
   });
+
+  test('renders fallback values and runs wishlist pluralization branches', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscriptions: [
+          {
+            type: 'user',
+            sub_id: 1,
+            user_id: 11,
+            name: '',
+            birth_date: null,
+            photo: ''
+          },
+          {
+            type: 'wishlist',
+            sub_id: 2,
+            wishlist_id: 21,
+            name: '',
+            owner_name: '',
+            total_wishes: 1,
+            photo: ''
+          },
+          {
+            type: 'wishlist',
+            sub_id: 3,
+            wishlist_id: 22,
+            name: 'Two wishes',
+            owner_name: 'Owner',
+            total_wishes: 2,
+            photo: ''
+          },
+          {
+            type: 'wishlist',
+            sub_id: 4,
+            wishlist_id: 23,
+            name: 'Eleven wishes',
+            owner_name: 'Owner',
+            total_wishes: 11,
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.subscription-card')).toHaveLength(4);
+    });
+
+    expect(container.textContent).toContain('11');
+    expect(container.textContent).toContain('2');
+    expect(container.textContent).toContain('1');
+  });
 });
