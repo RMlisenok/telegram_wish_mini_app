@@ -93,28 +93,6 @@
         return isNaN(date.getTime()) ? null : date;
     };
 
-    // const getFilteredAndSortedSubscriptions = (subscriptions) => {
-    //     let result = [...subscriptions];
-    //     const query = searchQuery.trim().toLowerCase();
-        
-    //     // Фильтрация по поиску
-    //     if (query) {
-    //         result = result.filter(item => {
-    //             if (item.type === 'user') {
-    //                 const userName = item.name.toLowerCase();
-    //                 return userName.includes(query);
-    //             } else {
-    //                 const wishlistName = item.name.toLowerCase();
-    //                 const wishlistOwner = item.owner_name.toLowerCase();
-    //                 return wishlistName.includes(query) || wishlistOwner.includes(query);
-    //             }
-    //         });
-    //     }
-        
-    //     // Сортировка
-    //     return sortSubscriptions(result, sortBy);
-    // };
-
     // Функция сортировки
     const sortSubscriptions = (subscriptions, sortType) => {
         let result = [...subscriptions];
@@ -619,20 +597,6 @@
         color: #374151;
     }
 
-    /* .subscriptions-counts {
-        display: flex;
-        gap: 8px;
-    }
-
-    .count-badge {
-        font-size: 12px;
-        padding: 4px 8px;
-        background: #e0e7ff;
-        color: #4f46e5;
-        border-radius: 12px;
-        font-weight: 500;
-    } */
-
     .sort-options {
         display: flex;
         flex-direction: column;
@@ -715,3 +679,4 @@
         }
     }
 </style>
+

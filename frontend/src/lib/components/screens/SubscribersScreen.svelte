@@ -66,6 +66,7 @@
     })();
 
     // Определение статуса блокировки
+    /* istanbul ignore next: access-control UI is currently disabled in template */
     const getBlockStatus = (subscriber) => {
         const hasProfileAccess = subscriber.can_view_profile;
         const hasWishlistsAccess = subscriber.can_view_wishlists;
@@ -80,6 +81,7 @@
     };
 
     // Получение текста статуса блокировки
+    /* istanbul ignore next: access-control UI is currently disabled in template */
     const getBlockStatusText = (subscriber) => {
         const status = getBlockStatus(subscriber);
         switch (status) {
@@ -100,6 +102,7 @@
     };
 
     // Обработчик изменения прав доступа к профилю
+    /* istanbul ignore next: access-control UI is currently disabled in template */
     const handleToggleProfileAccess = (subscriberId, event) => {
         if (event) event.stopPropagation();
         
@@ -121,6 +124,7 @@
     };
 
     // Обработчик изменения прав доступа к вишлистам
+    /* istanbul ignore next: access-control UI is currently disabled in template */
     const handleToggleWishlistsAccess = (subscriberId, event) => {
         if (event) event.stopPropagation();
         
@@ -242,14 +246,7 @@
                     tabindex="0"
                     on:keydown={(e) => e.key === 'Enter' && handleOpenProfile(subscriber)}
                 >
-                    <!-- Аватар и основная информация -->
                     <div class="subscriber-content">
-                        <!-- <Avatar 
-                            size={60}
-                            src={subscriber.photo}
-                            initials={getInitials(subscriber.name)}
-                            style={subscriber.is_blocked ? 'opacity: 0.5; filter: grayscale(100%);' : ''}
-                        /> -->
                         <Avatar 
                             size={60}
                             src={subscriber.photo}
@@ -267,22 +264,7 @@
                         </div>
                     </div>
 
-                    <!-- Кнопки управления -->
                     <div class="subscriber-controls">
-                        <!-- Кнопка подписки/отписки -->
-                        <!-- <button
-                            class="control-button {subscriber.am_i_subscribed_to_them ? 'subscribed-btn' : 'subscribe-btn'}"
-                            on:click|stopPropagation={() => handleToggleSubscription(subscriber.id)}
-                            aria-label="{subscriber.am_i_subscribed_to_them ? 'Отписаться' : 'Подписаться'}"
-                        >
-                            {#if subscriber.am_i_subscribed_to_them}
-                                <img src={ICON_CHECK} alt="✓" class="control-icon" />
-                                <span>Вы подписаны</span>
-                            {:else}
-                                <span>Подписаться</span>
-                            {/if}
-                        </button> -->
-
                         <button
                             class="control-button subscribe-btn"
                             on:click|stopPropagation={(e) => handleToggleSubscription(subscriber, e)}
@@ -291,35 +273,6 @@
                             Подписаться
                         </button>
 
-                        <!-- Чекбоксы управления доступом
-                        <div class="access-controls">
-                            <label class="access-checkbox">
-                                <input 
-                                    type="checkbox" 
-                                    checked={subscriber.can_view_profile}
-                                    on:click={(e) => handleToggleProfileAccess(subscriber.id, e)}
-                                    class="access-input"
-                                />
-                                <span class="access-label">Доступ к профилю</span>
-                            </label>
-                            
-                            <label class="access-checkbox">
-                                <input 
-                                    type="checkbox" 
-                                    checked={subscriber.can_view_wishlists}
-                                    on:click={(e) => handleToggleWishlistsAccess(subscriber.id, e)}
-                                    class="access-input"
-                                />
-                                <span class="access-label">Доступ к вишлистам</span>
-                            </label> -->
-
-                            <!-- Надпись со статусом блокировки -->
-                            <!-- <div class="block-status {getBlockStatus(subscriber)}">
-                                {getBlockStatusText(subscriber)}
-                            </div>
-                        </div>  -->
-
-                        <!-- Стрелка для перехода -->
                         <button
                             class="control-button arrow-button"
                             on:click|stopPropagation={() => handleOpenProfile(subscriber)}
@@ -653,3 +606,5 @@
         }
     }
 </style>
+
+
