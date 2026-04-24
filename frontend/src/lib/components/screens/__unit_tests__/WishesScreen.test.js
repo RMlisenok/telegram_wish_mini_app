@@ -67,4 +67,69 @@ describe('WishesScreen', () => {
     expect(eventNames).toEqual(['openFinishedWishes']);
     expect(onNavigateToCreateWishes).toHaveBeenCalledTimes(1);
   });
+
+  test('loads wish details and dispatches edit event in default mode', async () => {
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Lamp',
+            photo: '',
+            url_gift: 'https://shop/lamp',
+            price: 99,
+            currency: 'USD',
+            is_booked: false
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'GET') {
+        return okJson({
+          id: 1,
+          name: 'Lamp',
+          photo: '',
+          description: 'Warm light',
+          price: 99,
+          currency: 'USD',
+          url_gift: 'https://shop/lamp',
+          wishlists: [{ id: 10, name: 'Home' }],
+          is_booked: false,
+          status_is_finished: false,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          user_id: 100
+        });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = render(WishesScreenEventHarness, {
+      token: 'token-123',
+      wishlistId: null,
+      isExternalWishlist: false,
+      currentUserId: '100',
+      onNavigateToCreateWishes: jest.fn()
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.wish-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-card'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.detail-panel')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelectorAll('.panel-actions .ui-button')[0]);
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+    expect(eventNames).toContain('openEditWishes:{"id":1}');
+  });
 });
