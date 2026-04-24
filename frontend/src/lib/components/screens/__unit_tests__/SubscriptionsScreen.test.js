@@ -173,4 +173,53 @@ describe('SubscriptionsScreen', () => {
       expect(names.slice(0, 3)).toEqual(['Young User', 'Old User', 'No Date User']);
     });
   });
+
+  test('dispatches open-profile and openWishlistDetail events', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscriptions: [
+          {
+            type: 'user',
+            sub_id: 1,
+            user_id: 31,
+            name: 'Event User',
+            birth_date: '1991-01-01',
+            photo: ''
+          },
+          {
+            type: 'wishlist',
+            sub_id: 2,
+            wishlist_id: 91,
+            name: 'Event Wishlist',
+            owner_name: 'Owner',
+            total_wishes: 5,
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = render(SubscriptionsScreenEventHarness, {
+      token: 'token-123'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.subscription-card')).toHaveLength(2);
+    });
+
+    const cards = container.querySelectorAll('.subscription-card');
+    const arrows = container.querySelectorAll('.arrow-button');
+
+    await fireEvent.click(cards[0]);
+    await fireEvent.click(arrows[1]);
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual([
+      'open-profile:{"profileId":31}',
+      'openWishlistDetail:{"wishlistId":91}'
+    ]);
+  });
 });
