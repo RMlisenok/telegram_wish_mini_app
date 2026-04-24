@@ -203,4 +203,38 @@ describe('SubscribersScreen', () => {
     expect(global.alert).toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  test('opens profile only on Enter key and ignores other keys', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscribers: [
+          {
+            sub_id: 1,
+            user_id: 88,
+            name: 'Keyboard Subscriber',
+            birth_date: '1990-01-01',
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = render(SubscribersScreenEventHarness, {
+      token: 'token-123'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscriber-card')).toBeTruthy();
+    });
+
+    const card = container.querySelector('.subscriber-card');
+    await fireEvent.keyDown(card, { key: 'Space' });
+    await fireEvent.keyDown(card, { key: 'Enter' });
+
+    const eventNames = Array.from(container.querySelectorAll('[data-testid="events-log"] li')).map(
+      (node) => node.textContent
+    );
+
+    expect(eventNames).toEqual(['open-profile:{"profileId":88}']);
+  });
 });
