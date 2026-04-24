@@ -951,4 +951,70 @@ describe('WishesScreen', () => {
       expect(container.querySelector('.notification-overlay')).toBeTruthy();
     });
   });
+
+  test('does not mark wish as finished when confirmation is cancelled', async () => {
+    global.confirm.mockReturnValue(false);
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([
+          {
+            id: 1,
+            name: 'Cancelable Finish',
+            photo: '',
+            url_gift: '',
+            price: 10,
+            currency: 'USD',
+            is_booked: false
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishes/1' && method === 'GET') {
+        return okJson({
+          id: 1,
+          name: 'Cancelable Finish',
+          photo: '',
+          description: '',
+          price: 10,
+          currency: 'USD',
+          url_gift: '',
+          wishlists: [],
+          is_booked: false,
+          status_is_finished: false,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          user_id: 1
+        });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      currentUserId: '1'
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.wish-card')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.wish-card'));
+
+    await waitFor(() => {
+      expect(container.querySelector('.detail-panel')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.detail-section .ui-button.full'));
+
+    expect(global.confirm).toHaveBeenCalled();
+
+    const updateCalls = global.fetch.mock.calls.filter(
+      ([url, options = {}]) => url === '/api/v1/wishes/1' && (options.method || 'GET') === 'PUT'
+    );
+    expect(updateCalls).toHaveLength(0);
+  });
 });
