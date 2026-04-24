@@ -287,4 +287,21 @@ describe('WishlistsScreen', () => {
 
     expect(container.querySelector('.confirm-modal')).toBeNull();
   });
+
+  test('shows own and external empty states', async () => {
+    const own = renderScreen({ token: '' });
+    expect(own.container.querySelector('.empty-note')).toBeTruthy();
+    expect(own.container.querySelector('.ui-button.full')).toBeTruthy();
+    cleanup();
+
+    const external = renderScreen({
+      token: '',
+      isExternalUser: true,
+      externalProfileId: '13',
+      externalUserWishlists: []
+    });
+
+    expect(external.container.querySelector('.empty-note')).toBeTruthy();
+    expect(external.container.querySelector('.ui-button.full')).toBeNull();
+  });
 });
