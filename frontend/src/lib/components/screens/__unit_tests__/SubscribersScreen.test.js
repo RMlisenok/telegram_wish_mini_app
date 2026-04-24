@@ -170,4 +170,14 @@ describe('SubscribersScreen', () => {
 
     expect(console.error).toHaveBeenCalled();
   });
+
+  test('logs error when subscribers loading request fails', async () => {
+    global.fetch.mockResolvedValue(failJson(500));
+
+    renderScreen();
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
 });
