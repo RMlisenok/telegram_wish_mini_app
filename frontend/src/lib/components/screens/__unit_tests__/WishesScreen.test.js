@@ -802,4 +802,90 @@ describe('WishesScreen', () => {
       );
     });
   });
+
+  test('toggles pin state in wishlist mode when pin limit is not exceeded', async () => {
+    let wishlistFetchCount = 0;
+
+    global.fetch.mockImplementation(async (url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (url === '/api/v1/wishes/finish?is_finish=false' && method === 'GET') {
+        return okJson([]);
+      }
+
+      if (url === '/api/v1/wishlists/10/wishes?limit=50' && method === 'GET') {
+        wishlistFetchCount += 1;
+        return okJson([
+          {
+            id: 1,
+            name: 'Pin Candidate',
+            photo: '',
+            url_gift: '',
+            price: 20,
+            currency: 'USD',
+            description: '',
+            is_booked: false,
+            status_is_finished: false,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+            connection_id: 321,
+            is_pinned: wishlistFetchCount > 1,
+            order_position: 0,
+            added_at: '2026-01-01T00:00:00.000Z'
+          }
+        ]);
+      }
+
+      if (url === '/api/v1/wishlists/10' && method === 'GET') {
+        return okJson({
+          id: 10,
+          owner_id: 1,
+          owner_name: 'Owner',
+          owner_photo: '',
+          name: 'Wishlist 10',
+          photo: '',
+          description: '',
+          typeprivacy: 'public',
+          wishes_count: 1
+        });
+      }
+
+      if (url === '/api/v1/users/me' && method === 'GET') {
+        return okJson({ id: 1 });
+      }
+
+      if (url === '/api/v1/wishlists/connections/321' && method === 'PUT') {
+        return okJson({
+          id: 321,
+          wish_id: 1,
+          wishlist_id: 10,
+          is_pinned: true,
+          order_position: 0,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z'
+        });
+      }
+
+      throw new Error(`Unexpected fetch call: ${url} (${method})`);
+    });
+
+    const { container } = renderScreen({
+      token: 'token-123',
+      wishlistId: '10',
+      isExternalWishlist: false
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('.pin-button')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.pin-button'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/wishlists/connections/321',
+        expect.objectContaining({ method: 'PUT' })
+      );
+    });
+  });
 });
