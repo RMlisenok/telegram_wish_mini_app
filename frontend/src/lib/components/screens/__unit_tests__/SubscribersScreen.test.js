@@ -237,4 +237,14 @@ describe('SubscribersScreen', () => {
 
     expect(eventNames).toEqual(['open-profile:{"profileId":88}']);
   });
+
+  test('renders explicit empty state for authorized user with no subscribers', async () => {
+    global.fetch.mockResolvedValue(okJson({ subscribers: [] }));
+
+    const { container } = renderScreen({ token: 'token-123' });
+
+    await waitFor(() => {
+      expect(container.querySelector('.empty-note')).toBeTruthy();
+    });
+  });
 });
