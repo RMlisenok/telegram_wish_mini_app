@@ -133,4 +133,41 @@ describe('SubscribersScreen', () => {
       'open-profile:{"profileId":55}'
     ]);
   });
+
+  test('shows placeholder subscription alert and handles action error branch', async () => {
+    global.fetch.mockResolvedValue(
+      okJson({
+        subscribers: [
+          {
+            sub_id: 1,
+            user_id: 101,
+            name: 'Toggle Subscriber',
+            birth_date: '1990-01-01',
+            photo: ''
+          }
+        ]
+      })
+    );
+
+    const { container } = renderScreen();
+
+    await waitFor(() => {
+      expect(container.querySelector('.subscribe-btn')).toBeTruthy();
+    });
+
+    await fireEvent.click(container.querySelector('.subscribe-btn'));
+    expect(global.alert).toHaveBeenCalled();
+
+    global.alert.mockImplementationOnce(() => {
+      throw new Error('alert failed');
+    });
+
+    await fireEvent.click(container.querySelector('.subscribe-btn'));
+
+    await waitFor(() => {
+      expect(global.alert.mock.calls.length).toBeGreaterThanOrEqual(3);
+    });
+
+    expect(console.error).toHaveBeenCalled();
+  });
 });
