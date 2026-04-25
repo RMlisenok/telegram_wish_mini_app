@@ -1,13 +1,14 @@
 /** @type {import('jest').Config} */
 export default {
+  coverageProvider: 'v8',
   testEnvironment: 'jsdom',
   clearMocks: true,
   restoreMocks: true,
   roots: ['<rootDir>/src'],
   testPathIgnorePatterns: ['/node_modules/', '/coverage/'],
   transform: {
-    '^.+\\.svelte\\.(js|ts)$': ['svelte-jester', { preprocess: false }],
-    '^.+\\.svelte$': ['svelte-jester', { preprocess: false }],
+    '^.+\\.svelte\\.(js|ts)$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'injected' } }],
+    '^.+\\.svelte$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'injected' } }],
     '^.+\\.ts$': ['ts-jest', { useESM: true }],
     '^.+\\.js$': 'babel-jest'
   },
@@ -21,6 +22,7 @@ export default {
     'node_modules/(?!(svelte|@testing-library/svelte|@testing-library/svelte-core|svelte-jester)/)'
   ],
   collectCoverage: false,
+  coverageProvider: 'v8',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.{js,ts,svelte}',

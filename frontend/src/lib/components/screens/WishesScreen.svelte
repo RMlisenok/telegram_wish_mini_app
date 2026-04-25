@@ -1,7 +1,6 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte';
     import Button from '../ui/Button.svelte';
-    //import { wishlistsStore } from '../../stores/data.js';
     import { wishesStore, loadWishes, deleteWish, updateWishStatus, removeWishFromAllWishlists } from '../../../types/wishes.ts';
     import { wishlistsStore, loadWishlists } from '../../../types/wishlists.ts';
     import { 
@@ -463,24 +462,6 @@
         }
     };
     const addSelectedWishesToWishlist = async () => {
-        // if (!wishlistId) return;
-        
-        // $wishesStore = $wishesStore.map(wish => {
-        //     if (selectedWishesForAdding.has(wish.id)) {
-        //         const existingWishlistIds = wish.wishlistIds || [];
-        //         if (!existingWishlistIds.includes(wishlistId)) {
-        //             return {
-        //                 ...wish,
-        //                 wishlistIds: [...existingWishlistIds, wishlistId]
-        //             };
-        //         }
-        //     }
-        //     return wish;
-        // });
-            
-        // // Закрываем модальное окно
-        // showAddExistingModal = false;
-        // selectedWishesForAdding.clear();
         if (!wishlistId || !token) return;
         
         try {
@@ -873,23 +854,6 @@
             
             // Удаляем желание из всех вишлистов
             await removeWishFromAllWishlists(token, wishId);
-            
-            // Обновляем локальные stores
-            /*wishesStore.update(wishes => 
-                wishes.map(w => 
-                    w.id === wishId 
-                        ? { ...w, status_is_finished: true, is_booked: false }
-                        : w
-                )
-            );*/
-            
-            // // Если в режиме вишлиста, удаляем из текущего вишлиста
-            // if (wishlistId) {
-            //     wishWishlistsStore.update(items => 
-            //         items.filter(item => item.id !== wishId.toString())
-            //     );
-            // }
-            
             showNotification('Желание отмечено как исполненное');
             await loadWishes(token);
             
@@ -2367,4 +2331,5 @@
 
 
 </style>
+
 
