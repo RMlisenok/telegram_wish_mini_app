@@ -1,0 +1,48 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: ["unit_tests_frontend"]
+  pull_request:
+    branches: [main, frontend]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.1'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Generate SvelteKit types
+        run: |
+          cd frontend
+          npx svelte-kit sync || true
+      
+      - name: Run tests
+        run: |
+          cd frontend
+          npm run test:ci
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+          CI: true
+      
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: frontend/coverage/
