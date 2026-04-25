@@ -4,7 +4,7 @@ on:
   push:
     branches: ["unit_tests_frontend"]
   pull_request:
-    branches: ["app_integration_into_tg", "unit_tests_frontend"]
+    branches: ["app_integration_into_tg", "unit_tests_frontend", "tests_frontend"]
   workflow_dispatch:
 
 jobs:
