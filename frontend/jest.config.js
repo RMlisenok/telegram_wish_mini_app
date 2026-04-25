@@ -7,8 +7,8 @@ export default {
   roots: ['<rootDir>/src'],
   testPathIgnorePatterns: ['/node_modules/', '/coverage/'],
   transform: {
-    '^.+\\.svelte\\.(js|ts)$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'external' } }],
-    '^.+\\.svelte$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'external' } }],
+    '^.+\\.svelte\\.(js|ts)$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'injected' } }],
+    '^.+\\.svelte$': ['svelte-jester', { preprocess: false, compilerOptions: { css: 'injected' } }],
     '^.+\\.ts$': ['ts-jest', { useESM: true }],
     '^.+\\.js$': 'babel-jest'
   },
