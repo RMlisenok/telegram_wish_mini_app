@@ -1,4 +1,3 @@
-# tests/integration/conftest.py
 import pytest
 from typing import AsyncGenerator
 from unittest.mock import patch
@@ -14,7 +13,6 @@ from app.services.wishlist_service import WishlistService
 from app.schemas.wishlist import WishlistCreate
 from app.services.user_service import UserService
 from app.schemas.user import UserCreate
-from fastapi import HTTPException, UploadFile
 
 
 TEST_DATABASE_URL = os.getenv(
@@ -99,15 +97,14 @@ def mock_telegram_bot():
     bot.clear()
 
 
-# ==================== Mock S3 Client ====================
+# ==================== Mock S3 Client (ОДИН КЛАСС) ====================
 
 class MockS3Client:
-    """Мок S3 клиента - хранит файлы в памяти"""
-    
-    def __init__(self):
+
+    def __init__(self, *args, **kwargs):
         self.files = {}
         self.base_url = "https://mock-s3.example.com/"
-    
+
     async def upload_fastapi_file(self, upload_file, object_name=None):
         """Загрузка файла"""
         content = await upload_file.read()
@@ -116,79 +113,44 @@ class MockS3Client:
         object_name = object_name or f"{uuid.uuid4()}.{ext}"
         self.files[object_name] = content
         return f"{self.base_url}{object_name}"
-    
-    async def update_file(self, old_url_file, new_file):
-        """Обновление файла"""
-        object_name = old_url_file.split("/")[-1]
-        if object_name in self.files:
-            del self.files[object_name]
-        return await self.upload_fastapi_file(new_file, object_name)
-    
-    async def delete_file(self, object_name_url):
-        """Удаление файла"""
-        object_name = object_name_url.split("/")[-1]
-        if object_name in self.files:
-            del self.files[object_name]
-            return True
-        return False
-    
-    def clear(self):
-        """Очистка всех файлов"""
-        count = len(self.files)
-        self.files.clear()
-        return count
 
-
-# ==================== Мок S3 клиент с monkeypatch (принудительная подмена) ====================
-
-class MockS3Client:
-    """Мок S3 клиента"""
-    
-    def __init__(self, *args, **kwargs):
-        """Принимает любые аргументы (игнорирует их)"""
-        self.files = {}
-        self.base_url = "https://mock-s3.example.com/"
-    
-    async def upload_fastapi_file(self, upload_file, object_name=None):
-        content = await upload_file.read()
-        filename = upload_file.filename
-        ext = filename.split(".")[-1] if "." in filename else ""
-        object_name = object_name or f"{uuid.uuid4()}.{ext}"
-        self.files[object_name] = content
-        return f"{self.base_url}{object_name}"
-    
     async def update_file(self, old_url_file, new_file):
         object_name = old_url_file.split("/")[-1]
         if object_name in self.files:
             del self.files[object_name]
         return await self.upload_fastapi_file(new_file, object_name)
-    
+
     async def delete_file(self, object_name_url):
         object_name = object_name_url.split("/")[-1]
         if object_name in self.files:
             del self.files[object_name]
             return True
         return False
-    
+
     def clear(self):
         count = len(self.files)
         self.files.clear()
         return count
 
-
-# Удалите фикстуру mock_s3 с monkeypatch, оставьте только эту:
 
 @pytest.fixture(scope="function")
 def mock_s3_client():
-    """Фикстура с моком S3Client"""
     mock_instance = MockS3Client()
-    
-    # Патчим функцию, которая создает S3 клиент
-    with patch("app.core.s3_client.create_s3_client", return_value=mock_instance):
-        with patch("app.core.dependencies.get_client_s3", return_value=mock_instance):
-            with patch("app.api.routers.s3_client.get_client_s3", return_value=mock_instance):
+
+    with patch(
+        "app.core.s3_client.create_s3_client",
+        return_value=mock_instance
+    ):
+        with patch(
+            "app.core.dependencies.get_client_s3",
+            return_value=mock_instance
+        ):
+            with patch(
+                "app.api.routers.s3_client.get_client_s3",
+                return_value=mock_instance
+            ):
                 yield mock_instance
-    
+
     mock_instance.clear()
 
 
@@ -235,7 +197,10 @@ def auth_headers(test_users):
 @pytest.fixture(scope="function")
 async def client(override_dependencies):
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://test"
+    ) as client:
         yield client
 
 
@@ -245,17 +210,29 @@ async def test_wishlists(db_session, test_users):
 
     wishlist_a_public = await service.create_wishlist(
         test_users["user_a"].id,
-        WishlistCreate(name="Мои желания", description="Публичный список", typeprivacy="public")
+        WishlistCreate(
+            name="Мои желания",
+            description="Публичный список",
+            typeprivacy="public"
+        )
     )
 
     wishlist_a_private = await service.create_wishlist(
         test_users["user_a"].id,
-        WishlistCreate(name="Секретные желания", description="Приватный список", typeprivacy="private")
+        WishlistCreate(
+            name="Секретные желания",
+            description="Приватный список",
+            typeprivacy="private"
+        )
     )
 
     wishlist_b = await service.create_wishlist(
         test_users["user_b"].id,
-        WishlistCreate(name="Подарки для меня", description="Список желаний Бориса", typeprivacy="public")
+        WishlistCreate(
+            name="Подарки для меня",
+            description="Список желаний Бориса",
+            typeprivacy="public"
+        )
     )
 
     return {

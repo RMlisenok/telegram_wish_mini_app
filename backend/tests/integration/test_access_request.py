@@ -7,13 +7,9 @@ class TestScenario5AccessRequest:
     async def test_positive_create_access_request(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Позитивный сценарий: Пользователь B создает заявку на доступ к приватному вишлисту A
-        POST /v1/access-requests/
-        """
         private_wishlist_id = test_wishlists["wishlist_a_private"].id
         request_data = {"wishlist_id": private_wishlist_id}
-    
+
         response = await client.post(
             "/v1/access-requests/",
             json=request_data,
@@ -29,10 +25,6 @@ class TestScenario5AccessRequest:
     async def test_positive_approve_access_request(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Позитивный сценарий: Владелец одобряет заявку на доступ
-        POST /v1/access-requests/ → PATCH /v1/access-requests/{request_id}
-        """
         private_wishlist_id = test_wishlists["wishlist_a_private"].id
         request_data = {"wishlist_id": private_wishlist_id}
 
@@ -66,16 +58,16 @@ class TestScenario5AccessRequest:
                 headers=auth_headers["user_a"]
             )
 
-        assert approve_response.status_code == 200, f"Expected 200, got {approve_response.status_code}: {approve_response.text}"
+        assert approve_response.status_code == 200, (
+            f"Expected 200, got {approve_response.status_code}: "
+            f"{approve_response.text}"
+        )
         assert approve_response.json()["status"].lower() == "approved"
 
     @pytest.mark.asyncio
     async def test_positive_reject_access_request(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Позитивный сценарий: Владелец отклоняет заявку на доступ
-        """
         private_wishlist_id = test_wishlists["wishlist_a_private"].id
         request_data = {"wishlist_id": private_wishlist_id}
 
@@ -103,17 +95,15 @@ class TestScenario5AccessRequest:
                 headers=auth_headers["user_a"]
             )
 
-        assert reject_response.status_code == 200, f"Expected 200, got {reject_response.status_code}"
+        assert reject_response.status_code == 200, (
+            f"Expected 200, got {reject_response.status_code}"
+        )
         assert reject_response.json()["status"].lower() == "rejected"
 
     @pytest.mark.asyncio
     async def test_get_my_access_requests(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Позитивный сценарий: Получение своих заявок на доступ
-        GET /v1/access-requests/my/requests
-        """
         private_wishlist_id = test_wishlists["wishlist_a_private"].id
         request_data = {"wishlist_id": private_wishlist_id}
 
