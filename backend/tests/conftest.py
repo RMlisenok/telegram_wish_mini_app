@@ -7,6 +7,21 @@ from datetime import date, datetime
 from typing import Generator, Dict, Any
 import asyncio
 
+# Создаем мок бота
+mock_bot = AsyncMock()
+mock_bot.send_message = AsyncMock()
+mock_bot.send_photo = AsyncMock()
+mock_bot.send_poll = AsyncMock()
+mock_bot.edit_message_reply_markup = AsyncMock()
+
+# Создаем мок модуля bot_setup
+mock_bot_setup = MagicMock()
+mock_bot_setup.bot = mock_bot
+mock_bot_setup.dp = MagicMock()
+
+# Подменяем модуль bot_setup ДО импорта
+sys.modules['app.core.bot_setup'] = mock_bot_setup
+
 # Добавляем корневую директорию в PYTHONPATH
 root_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(root_dir))
@@ -41,11 +56,7 @@ def mock_db_session() -> AsyncMock:
 @pytest.fixture
 def mock_bot() -> AsyncMock:
     """Mock Telegram bot fixture."""
-    bot = AsyncMock()
-    bot.send_message = AsyncMock()
-    bot.send_photo = AsyncMock()
-    bot.edit_message_reply_markup = AsyncMock()
-    return bot
+    return mock_bot
 
 
 # Базовые фикстуры для обратной совместимости
