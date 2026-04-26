@@ -216,4 +216,4 @@ class TestScenario11WishlistManagement:
             headers=auth_headers["user_a"]
         )
 
-        assert response.status_code in 404
+        assert response.status_code == 404

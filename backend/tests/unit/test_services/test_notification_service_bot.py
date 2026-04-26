@@ -186,4 +186,5 @@ class TestNotificationServiceBot:
     def test_get_link(self, service):
         link = service._get_link(1, "<b>Name</b>")
         assert "&lt;b&gt;Name&lt;/b&gt;" in link
-        assert "user_id=1" in link
+        assert "profile_1" in link
+        assert "startapp=profile_1" in link
