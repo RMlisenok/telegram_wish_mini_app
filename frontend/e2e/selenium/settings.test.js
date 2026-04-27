@@ -16,4 +16,21 @@ defineScenarioSuite('Settings E2E scenarios', [
       await expectText(driver, By, until, ['Сохранено', 'Изменения успешно сохранены']);
     },
   },
+  {
+    number: 10,
+    title: 'Настройка интерфейса: размер текста и тема',
+    requirements: ['FS-3.3'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, ['Настройки']);
+      await clickByAnyText(driver, By, until, ['Настройки интерфейса']);
+      await clickByAnyText(driver, By, until, ['Средний', 'Малый', 'Большой']);
+      await clickByAnyText(driver, By, until, ['Большой']);
+      await clickByAnyText(driver, By, until, ['Светлая', 'Темная', 'Тёмная', 'Как в системе']);
+      await clickByAnyText(driver, By, until, ['Темная', 'Тёмная']);
+      await driver.navigate().refresh();
+      await expectText(driver, By, until, ['Большой', 'Темная', 'Тёмная']);
+    },
+  },
 ]);
