@@ -15,4 +15,14 @@ defineScenarioSuite('Sharing E2E scenarios', [
       await expectText(driver, By, until, ['Ссылка скопирована', 'Ссылка на профиль скопирована']);
     },
   },
+  {
+    number: 12,
+    title: 'Открытие публичного профиля по ссылке',
+    requirements: ['FS-4.3', 'FS-3.2'],
+    requires: ['multiUser'],
+    run: async ({ driver, By, until, env }) => {
+      await openApp(driver, env.E2E_PUBLIC_PROFILE_URL);
+      await expectText(driver, By, until, ['Профиль', 'Анкета', 'Вишлисты']);
+    },
+  },
 ]);
