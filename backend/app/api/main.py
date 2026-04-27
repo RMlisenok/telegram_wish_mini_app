@@ -18,6 +18,7 @@ import asyncio
 from app.core.init_gifts import init_gifts
 from app.api.routers.notification_bot import router as notification_router
 from app.api.routers.bot_router import router as bot_tg_router
+import os
 
 
 from app.services.notification_service_bot import NotificationService
@@ -38,31 +39,40 @@ async def scheduled_birthday_check():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Инициализация данных
-    await init_tags()
-    await init_gifts()
+    e2e_mode = os.getenv("E2E_MODE") == "1"
+    polling_task = None
+    scheduler = None
 
-    # Настройка планировщика
-    scheduler = AsyncIOScheduler()
-    # --- НАСТРОЙКА ВРЕМЕНИ ЗДЕСЬ ---
-    # Вариант 1 (Для теста): запускать каждую минуту
-    # scheduler.add_job(scheduled_birthday_check, "interval", minutes=1)
+    if not e2e_mode:
+        # Инициализация данных
+        await init_tags()
+        await init_gifts()
 
-    # Вариант 2 (Для продакшена): запускать каждый день в 09:00 утра
-    scheduler.add_job(scheduled_birthday_check, "cron", hour=23, minute=0)
+        # Настройка планировщика
+        scheduler = AsyncIOScheduler()
+        # --- НАСТРОЙКА ВРЕМЕНИ ЗДЕСЬ ---
+        # Вариант 1 (Для теста): запускать каждую минуту
+        # scheduler.add_job(scheduled_birthday_check, "interval", minutes=1)
 
-    scheduler.start()
+        # Вариант 2 (Для продакшена): запускать каждый день в 09:00 утра
+        scheduler.add_job(scheduled_birthday_check, "cron", hour=23, minute=0)
 
-    # Настройка бота
-    dp.include_router(bot_tg_router)
-    polling_task = asyncio.create_task(dp.start_polling(bot))
-    print("✅ Backend и Бот запущены")
+        scheduler.start()
+
+        # Настройка бота
+        dp.include_router(bot_tg_router)
+        polling_task = asyncio.create_task(dp.start_polling(bot))
+        print("✅ Backend и Бот запущены")
+    else:
+        print("✅ Backend запущен в E2E_MODE без Telegram polling и внешних инициализаторов")
 
     yield
 
     # Завершение работы
-    scheduler.shutdown()  # Останавливаем планировщик
-    polling_task.cancel()
+    if scheduler:
+        scheduler.shutdown()  # Останавливаем планировщик
+    if polling_task:
+        polling_task.cancel()
     await bot.session.close()
     print('Stop work and clean completed')
 
@@ -82,6 +92,10 @@ app.include_router(access_router, prefix="/v1")
 app.include_router(s3_router, prefix="/v1")
 app.include_router(recommendation_router, prefix='/v1')
 app.include_router(notification_router, prefix='/v1')
+
+if os.getenv("E2E_MODE") == "1":
+    from app.api.routers.e2e import router as e2e_router
+    app.include_router(e2e_router, prefix="/v1")
 
 
 @app.get('/')
