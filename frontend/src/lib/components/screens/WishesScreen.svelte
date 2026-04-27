@@ -136,7 +136,7 @@
             
             if (response.ok) {
                 const data = await response.json();
-                wishlistOwnerId = data.owner_id;
+                wishlistOwnerId = data.owner_id ?? data.user_id;
                 wishlistOwnerName = data.owner_name || '';
                 wishlistOwnerAvatar = data.owner_photo || '';
                 console.log('loadWishlistOwnerInfo - wishlistOwnerId:', wishlistOwnerId);
