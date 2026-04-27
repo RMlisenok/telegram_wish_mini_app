@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_wish_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
@@ -38,7 +37,6 @@ class TestWishService:
         mock.name = name
         return mock
 
-    # ==================== get_wish ====================
     @pytest.mark.asyncio
     async def test_get_wish_success(self, wish_service):
         mock_wish = self.create_mock_wish(1, 1, "Test Wish")
@@ -58,7 +56,6 @@ class TestWishService:
 
         assert result is None
 
-    # ==================== get_wish_with_wishlists_info ====================
     @pytest.mark.asyncio
     async def test_get_wish_with_wishlists_info(self, wish_service):
         mock_wish = self.create_mock_wish(1, 1, "Test Wish")
@@ -85,7 +82,6 @@ class TestWishService:
 
         assert result is None
 
-    # ==================== create_wish ====================
     @pytest.mark.asyncio
     async def test_create_wish_success(self, wish_service):
         wish_create = WishCreate(
@@ -142,7 +138,6 @@ class TestWishService:
         assert result is not None
         assert result.photo == "https://example.com/custom.jpg"
 
-    # ==================== update_wish ====================
     @pytest.mark.asyncio
     async def test_update_wish_success(self, wish_service):
         wish_update = WishUpdate(name="Updated Wish")
@@ -180,7 +175,6 @@ class TestWishService:
 
         assert result is None
 
-    # ==================== delete_wish ====================
     @pytest.mark.asyncio
     async def test_delete_wish_success(self, wish_service):
         wish_service.rep_wish.delete = AsyncMock(return_value=True)
@@ -199,7 +193,6 @@ class TestWishService:
         assert result is False
         wish_service.session.commit.assert_not_called()
 
-    # ==================== delete_wish_in_wishlists ====================
     @pytest.mark.asyncio
     async def test_delete_wish_in_wishlists_success(self, wish_service):
         mock_wish = self.create_mock_wish(1, 1, "Test Wish")
@@ -228,7 +221,6 @@ class TestWishService:
 
         assert result is False
 
-    # ==================== get_user_wish ====================
     @pytest.mark.asyncio
     async def test_get_user_wish_success(self, wish_service):
         mock_wish = self.create_mock_wish(1, 1, "Test Wish")
@@ -257,7 +249,6 @@ class TestWishService:
         wish_service.rep_wish.get_user_wish.assert_called_with(1, True, 20)
         assert len(result) == 1
 
-    # ==================== get_user_wish_sorted ====================
     @pytest.mark.asyncio
     async def test_get_user_wish_sorted_success(self, wish_service):
         mock_wish = self.create_mock_wish(1, 1, "Test Wish")

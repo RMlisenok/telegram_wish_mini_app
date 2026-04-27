@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_notification_settings_service.py
 import pytest
 from unittest.mock import AsyncMock
 from app.services.notification_settings_service import NotificationSettingsService
@@ -19,14 +18,11 @@ class TestNotificationSettingsService:
     @pytest.mark.asyncio
     async def test_get_user_notification_existing(self, settings_service, sample_notification_settings_data):
         """Test getting existing notification settings."""
-        # Arrange
         settings = NotificationSettings(**sample_notification_settings_data)
         settings_service.rep_settings.get_user_settings = AsyncMock(return_value=settings)
         
-        # Act
         result = await settings_service.get_user_notification(1)
         
-        # Assert
         assert result is not None
         assert result.user_id == 1
         assert result.new_followers is True
@@ -36,15 +32,12 @@ class TestNotificationSettingsService:
     @pytest.mark.asyncio
     async def test_get_user_notification_create_new(self, settings_service, sample_notification_settings_data):
         """Test creating new notification settings when not exists."""
-        # Arrange
         settings_service.rep_settings.get_user_settings = AsyncMock(return_value=None)
         created_settings = NotificationSettings(**sample_notification_settings_data)
         settings_service.rep_settings.create_notification_settings = AsyncMock(return_value=created_settings)
         
-        # Act
         result = await settings_service.get_user_notification(1)
         
-        # Assert
         assert result is not None
         assert result.user_id == 1
         settings_service.rep_settings.create_notification_settings.assert_called_once_with(1)
@@ -52,7 +45,6 @@ class TestNotificationSettingsService:
     @pytest.mark.asyncio
     async def test_update_notification_success(self, settings_service, sample_notification_settings_data):
         """Test successfully updating notification settings."""
-        # Arrange
         update_data = NotificationSettingsUpdate(new_followers=False, birt_before=False)
         updated_settings = NotificationSettings(**sample_notification_settings_data)
         updated_settings.new_followers = False
@@ -60,10 +52,8 @@ class TestNotificationSettingsService:
         
         settings_service.rep_settings.update_settings = AsyncMock(return_value=updated_settings)
         
-        # Act
         result = await settings_service.update_notification(update_data, 1)
         
-        # Assert
         assert result is not None
         assert result.new_followers is False
         assert result.birt_before is False
@@ -72,12 +62,9 @@ class TestNotificationSettingsService:
     @pytest.mark.asyncio
     async def test_update_notification_no_changes(self, settings_service):
         """Test update with no changes."""
-        # Arrange
         update_data = NotificationSettingsUpdate()
         settings_service.rep_settings.update_settings = AsyncMock(return_value=None)
         
-        # Act
         result = await settings_service.update_notification(update_data, 1)
         
-        # Assert
         assert result is None

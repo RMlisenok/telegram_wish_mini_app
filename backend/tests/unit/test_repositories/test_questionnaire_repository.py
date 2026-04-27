@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_questionnaire_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -30,7 +29,6 @@ class TestQuestionnaireRepository:
         mock.type_tags = type_tags
         return mock
 
-    # ==================== get_user_questinnaire ====================
     @pytest.mark.asyncio
     async def test_get_user_questionnaire_success(self, repo, mock_db_session):
         mock_forms = [self.create_mock_user_form(1), self.create_mock_user_form(2)]
@@ -53,7 +51,6 @@ class TestQuestionnaireRepository:
 
         assert result == []
 
-    # ==================== get_standart_tags ====================
     @pytest.mark.asyncio
     async def test_get_standart_tags_success(self, repo, mock_db_session):
         mock_tags = [self.create_mock_tag_form(1, "Sport"), self.create_mock_tag_form(2, "Music")]
@@ -75,7 +72,6 @@ class TestQuestionnaireRepository:
 
         assert result == []
 
-    # ==================== delete_user_questionnaire ====================
     @pytest.mark.asyncio
     async def test_delete_user_questionnaire_success(self, repo, mock_db_session):
         mock_db_session.execute = AsyncMock()
@@ -85,7 +81,6 @@ class TestQuestionnaireRepository:
 
         mock_db_session.execute.assert_called_once()
 
-    # ==================== create_questionnaire ====================
     @pytest.mark.asyncio
     async def test_create_questionnaire_with_interests_only(self, repo, mock_db_session):
         interests = [{"tag": "Sport", "details": "Football"}, {"tag": "Music", "details": "Rock"}]
@@ -135,7 +130,6 @@ class TestQuestionnaireRepository:
         assert result == []
         mock_db_session.add_all.assert_not_called()
 
-    # ==================== get_tag ====================
     @pytest.mark.asyncio
     async def test_get_tag_success(self, repo, mock_db_session):
         mock_tag = self.create_mock_tag_form(1, "Sport")
@@ -157,7 +151,6 @@ class TestQuestionnaireRepository:
 
         assert result is None
 
-    # ==================== get_tag_user ====================
     @pytest.mark.asyncio
     async def test_get_tag_user_success(self, repo, mock_db_session):
         mock_form = self.create_mock_user_form(1, 1, "Sport")
@@ -179,7 +172,6 @@ class TestQuestionnaireRepository:
 
         assert result is None
 
-    # ==================== create_tag ====================
     @pytest.mark.asyncio
     async def test_create_tag_success(self, repo, mock_db_session):
         mock_form = self.create_mock_user_form(1, 1, "NewTag", "Detail", True)

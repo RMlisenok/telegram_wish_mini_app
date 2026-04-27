@@ -1,4 +1,3 @@
-# tests/unit/test_core/test_security_missing.py
 import pytest
 from unittest.mock import patch, MagicMock
 from app.core.security import verify_tg_init_data

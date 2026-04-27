@@ -35,7 +35,6 @@ class TestNotificationServiceBot:
         mock_db_session.execute.return_value = mock_res
         return mock_res
 
-    # ==================== ТЕСТЫ _can_notify (Исправлено) ====================
     
     @pytest.mark.asyncio
     async def test_can_notify_no_settings(self, service, mock_db_session):
@@ -62,7 +61,6 @@ class TestNotificationServiceBot:
         result = await service._can_notify(mock_db_session, 1, "new_followers")
         assert result is False
 
-    # ==================== ТЕСТЫ notify_birthday ====================
 
     @pytest.mark.asyncio
     async def test_notify_birthday_success(self, service, mock_db_session):
@@ -90,7 +88,6 @@ class TestNotificationServiceBot:
         await service.notify_birthday(mock_db_session, 1, 2, "Friend", "next_week")
         service.bot.send_message.assert_not_called()
 
-    # ==================== ТЕСТЫ notify_new_subscriber ====================
 
     @pytest.mark.asyncio
     async def test_notify_new_subscriber_success(self, service, mock_db_session):
@@ -104,7 +101,6 @@ class TestNotificationServiceBot:
         # Проверка HTML экранирования (теги <b> внутри имени должны быть экранированы)
         assert "&lt;b&gt;New Friend&lt;/b&gt;" in service.bot.send_message.call_args[0][1]
 
-    # ==================== ТЕСТЫ notify_post_birthday ====================
 
     @pytest.mark.asyncio
     async def test_notify_post_birthday_success(self, service, mock_db_session):
@@ -116,7 +112,6 @@ class TestNotificationServiceBot:
         service.bot.send_message.assert_called_once()
         assert "исполненные" in service.bot.send_message.call_args[0][1]
 
-    # ==================== ТЕСТЫ send_access_request ====================
 
     @pytest.mark.asyncio
     async def test_send_access_request_structure(self, service, mock_db_session):
@@ -134,19 +129,11 @@ class TestNotificationServiceBot:
         assert "approve_777" in buttons_data
         assert "reject_777" in buttons_data
 
-    # ==================== ТЕСТ check_birthdays_and_notify (Критический для покрытия) ====================
 
     @pytest.mark.asyncio
     async def test_check_birthdays_and_notify_full_cycle(self, service, mock_db_session):
-        """Тестируем полный цикл рассылки: сегодня, завтра и через неделю."""
         b_user = self.mock_user(10, name="Birthday User")
         sub = MagicMock(subscriber_id=5)
-        
-        # Настраиваем последовательность ответов базы:
-        # 1. Список именинников сегодня
-        # 2. Подписчики для именинника сегодня
-        # 3. Список именинников завтра
-        # 4. Список именинников через 7 дней
         
         res_b_day = MagicMock()
         res_b_day.scalars.return_value.all.return_value = [b_user]
@@ -175,8 +162,6 @@ class TestNotificationServiceBot:
             msg_type="today"
         )
 
-    # ==================== ТЕСТЫ ВСПОМОГАТЕЛЬНЫХ МЕТОДОВ ====================
-
     @pytest.mark.asyncio
     async def test_get_user_info_none(self, service, mock_db_session):
         self.setup_mock_execute(mock_db_session, None)
@@ -186,4 +171,5 @@ class TestNotificationServiceBot:
     def test_get_link(self, service):
         link = service._get_link(1, "<b>Name</b>")
         assert "&lt;b&gt;Name&lt;/b&gt;" in link
-        assert "user_id=1" in link
+        assert "profile_1" in link
+        assert "startapp=profile_1" in link

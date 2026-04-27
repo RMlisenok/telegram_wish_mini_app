@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_subscription_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -25,7 +24,6 @@ class TestSubscriptionRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_subscription_success(self, repo, mock_db_session):
         subscription_data = {"subscriber_id": 2, "type_sub": True, "target_user_id": 1}
@@ -52,7 +50,6 @@ class TestSubscriptionRepository:
         assert result is None
         mock_db_session.rollback.assert_called_once()
 
-    # ==================== get_subscription ====================
     @pytest.mark.asyncio
     async def test_get_subscription_user_type_success(self, repo, mock_db_session):
         mock_subscription = self.create_mock_subscription(1, 2, 1, True)
@@ -98,7 +95,6 @@ class TestSubscriptionRepository:
 
         assert result is None
 
-    # ==================== delete_by_target ====================
     @pytest.mark.asyncio
     async def test_delete_by_target_success(self, repo, mock_db_session):
         mock_subscription = self.create_mock_subscription(1, 2, 1, True)
@@ -128,7 +124,6 @@ class TestSubscriptionRepository:
 
         assert result is False
 
-    # ==================== get_user_subscription ====================
     @pytest.mark.asyncio
     async def test_get_user_subscription_all(self, repo, mock_db_session):
         mock_subscriptions = [self.create_mock_subscription(1), self.create_mock_subscription(2)]
@@ -174,7 +169,6 @@ class TestSubscriptionRepository:
 
         assert len(result) == 2
 
-    # ==================== get_user_subscribers ====================
     @pytest.mark.asyncio
     async def test_get_user_subscribers_success(self, repo, mock_db_session):
         mock_subscriptions = [self.create_mock_subscription(1, 2, 1, True)]
@@ -196,7 +190,6 @@ class TestSubscriptionRepository:
 
         assert result == []
 
-    # ==================== update ====================
     @pytest.mark.asyncio
     async def test_update_success(self, repo, mock_db_session):
         updated_time = datetime.now()
@@ -222,7 +215,6 @@ class TestSubscriptionRepository:
 
         assert result is None
 
-    # ==================== count_user_subscribers ====================
     @pytest.mark.asyncio
     async def test_count_user_subscribers_success(self, repo, mock_db_session):
         mock_result = MagicMock()
@@ -233,7 +225,6 @@ class TestSubscriptionRepository:
 
         assert result == 5
 
-    # ==================== count_user_subscriptions ====================
     @pytest.mark.asyncio
     async def test_count_user_subscriptions_all(self, repo, mock_db_session):
         mock_result = MagicMock()

@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_wishlist_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
@@ -56,7 +55,6 @@ class TestWishlistService:
         mock.wishlist = self.create_mock_wishlist(wishlist_id)
         return mock
 
-    # ==================== get_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_wishlist_success(self, wishlist_service):
         mock_wishlist = self.create_mock_wishlist(1)
@@ -78,7 +76,6 @@ class TestWishlistService:
 
         assert result is None
 
-    # ==================== create_wishlist ====================
     @pytest.mark.asyncio
     async def test_create_wishlist_success(self, wishlist_service):
         wishlist_create = WishlistCreate(
@@ -130,7 +127,6 @@ class TestWishlistService:
         assert result is not None
         assert result.photo == "https://example.com/custom.jpg"
 
-    # ==================== update_wishlist ====================
     @pytest.mark.asyncio
     async def test_update_wishlist_success(self, wishlist_service):
         wishlist_update = WishlistUpdate(
@@ -189,7 +185,6 @@ class TestWishlistService:
 
         assert result is None
 
-    # ==================== delete ====================
     @pytest.mark.asyncio
     async def test_delete_wishlist_success(self, wishlist_service):
         wishlist_service.rep_wishlist.delete = AsyncMock(return_value=True)
@@ -208,10 +203,11 @@ class TestWishlistService:
         assert result is False
         wishlist_service.session.commit.assert_not_called()
 
-    # ==================== get_user_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_user_wishlist_empty(self, wishlist_service):
-        wishlist_service.rep_wishlist.get_user_wishlist = AsyncMock(return_value=[])
+        wishlist_service.rep_wishlist.get_user_wishlist = AsyncMock(
+            return_value=[]
+        )
 
         result = await wishlist_service.get_user_wishlist(1)
 
@@ -239,7 +235,6 @@ class TestWishlistService:
         wishlist_service.rep_wishlist.get_user_wishlist.assert_called_with(1, True, 5)
         assert len(result) == 1
 
-    # ==================== get_wishes_from_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_wishes_from_wishlist_with_data(self, wishlist_service):
         connection = self.create_mock_connection(1, 1, 1)
@@ -278,7 +273,6 @@ class TestWishlistService:
 
         assert result[0].price is None
 
-    # ==================== add_wish_to_wishlist ====================
     @pytest.mark.asyncio
     async def test_add_wish_to_wishlist_success(self, wishlist_service):
         connection = self.create_mock_connection(1, 1, 1)
@@ -314,7 +308,6 @@ class TestWishlistService:
         assert result is not None
         assert result.is_pinned is True
 
-    # ==================== update_wihs_in_wishlits ====================
     @pytest.mark.asyncio
     async def test_update_wish_in_wishlist_success(self, wishlist_service):
         connection = self.create_mock_connection(1, 1, 1)
@@ -350,7 +343,6 @@ class TestWishlistService:
         assert result is not None
         assert result.is_pinned is True
 
-    # ==================== remove_wish_from_wishlist ====================
     @pytest.mark.asyncio
     async def test_remove_wish_from_wishlist_success(self, wishlist_service):
         wishlist_service.rep_wish_wishlist.remove_wish_from_wishlist = AsyncMock(return_value=True)
@@ -367,7 +359,6 @@ class TestWishlistService:
 
         assert result is False
 
-    # ==================== get_wishlist_connection ====================
     @pytest.mark.asyncio
     async def test_get_wishlist_connection_success(self, wishlist_service):
         connection = self.create_mock_connection(1, 1, 1)
