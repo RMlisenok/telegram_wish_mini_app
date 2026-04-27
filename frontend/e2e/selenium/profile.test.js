@@ -21,4 +21,19 @@ defineScenarioSuite('Profile E2E scenarios', [
       await expectText(driver, By, until, ['E2E Test User', 'Настройки']);
     },
   },
+  {
+    number: 7,
+    title: 'Валидация обязательных полей профиля',
+    requirements: ['FS-3.1'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, settings);
+      await clickByAnyText(driver, By, until, editProfile);
+      await fillFirstMatchingInput(driver, By, '', ['input[aria-label*="Имя"]', 'input']);
+      await fillFirstMatchingInput(driver, By, '', ['input[placeholder="ДД.ММ.ГГГГ"]', 'input[maxlength="10"]']);
+      await clickByAnyText(driver, By, until, save);
+      await expectText(driver, By, until, ['обязательна', 'должно содержать']);
+    },
+  },
 ]);
