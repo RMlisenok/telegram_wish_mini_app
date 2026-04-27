@@ -64,4 +64,16 @@ defineScenarioSuite('Questionnaire E2E scenarios', [
       await expectText(driver, By, until, ['Можно добавить не более 10 тегов', 'Можно указать не более 10 вариантов']);
     },
   },
+  {
+    number: 16,
+    title: 'Валидация кастомных тегов и уточнений анкеты',
+    requirements: ['NFS-5.2'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openQuestionnaire(driver, By, until, baseUrl);
+      await fillFirstMatchingInput(driver, By, 'invalid_tag_value_more_than_20_symbols!', ['input']);
+      await clickByAnyText(driver, By, until, ['Добавить свой тег']);
+      await expectText(driver, By, until, ['invalid_tag_value_mo', '20 символов', 'Допустимые символы', '100 символов']);
+    },
+  },
 ]);
