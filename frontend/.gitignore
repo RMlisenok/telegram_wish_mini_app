@@ -3,4 +3,6 @@ node_modules
 .vite
 playwright/.env.playwright
 .DS_Store
+.log
 dist
+coverage/

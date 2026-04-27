@@ -52,7 +52,7 @@
     //let userStore = null;
     let currentWishlistForShare = null;
     
-    onMount(() => {
+    onMount(async () => {
         tg = initializeTelegram();
         
         if (!tg) {
@@ -69,6 +69,19 @@
             // Парсим параметр
             startParamData = parseStartParam(startParam);
             console.log('Распарсенные данные:', startParamData);
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('e2e') === '1' && params.get('e2eScreen')) {
+            showStartScreen = false;
+            await authenticateE2EUser();
+
+            if (params.get('e2eScreen') === 'publicProfile') {
+                viewedProfile = await loadUserProfileById(2);
+                currentScreen = 'otherProfile';
+            } else {
+                currentScreen = params.get('e2eScreen');
+            }
         }
     });
     
@@ -380,6 +393,31 @@
     });
 
     let currentUserId: string | null = null;
+
+    async function authenticateE2EUser() {
+        const response = await fetch('/api/v1/auth/telegram', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData: tg.initData, user: tg.initDataUnsafe.user })
+        });
+        const data = await response.json();
+        token = data.token;
+        const user = data.user;
+        currentUserId = user.id.toString();
+        userStore.set({
+            id: token || 'e2e-user',
+            user_id: user.id.toString(),
+            fullName: user.name || 'Гость',
+            birthDate: formatDateToDDMMYYYY(user.birth_date),
+            avatarUrl: user.photo || '',
+            showSubscriptions: user.show_sub ?? true,
+            ui: {
+                textSize: (user.text_size as 'small' | 'medium' | 'large') || 'medium',
+                theme: (user.theme as 'light' | 'dark' | 'system') || 'system'
+            }
+        });
+        return user;
+    }
 
     // Обработчик начала работы
     const handleStart = async () => {
