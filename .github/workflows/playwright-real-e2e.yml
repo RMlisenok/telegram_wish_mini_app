@@ -1,6 +1,8 @@
 name: Playwright Real E2E
 
 on:
+  push:
+    branches: ["end_to_end_frontend"]
   workflow_dispatch:
 
 permissions:
