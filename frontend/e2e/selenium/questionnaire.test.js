@@ -34,4 +34,16 @@ defineScenarioSuite('Questionnaire E2E scenarios', [
       await expectText(driver, By, until, 'Анкета успешно сохранена');
     },
   },
+  {
+    number: 14,
+    title: 'Валидация минимального количества тегов анкеты',
+    requirements: ['FS-5.3', 'FS-5.5', 'FS-5.6'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openQuestionnaire(driver, By, until, baseUrl);
+      await clickByAnyText(driver, By, until, ['кино']);
+      await clickByAnyText(driver, By, until, ['Сохранить анкету']);
+      await expectText(driver, By, until, ['минимум 3 интереса', 'минимум 1 тег']);
+    },
+  },
 ]);
