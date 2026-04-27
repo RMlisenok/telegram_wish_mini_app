@@ -17,4 +17,15 @@ defineScenarioSuite('Registration E2E scenarios', [
       await expectText(driver, By, until, main);
     },
   },
+  {
+      number: 2,
+      title: 'Авторизация уже зарегистрированного пользователя',
+      requirements: ['FS-1.5'],
+      requires: ['telegram'],
+      run: async ({ driver, By, until, baseUrl }) => {
+        await openApp(driver, baseUrl);
+        await clickByAnyText(driver, By, until, start);
+        await expectText(driver, By, until, main);
+      },
+    },
 ]);
