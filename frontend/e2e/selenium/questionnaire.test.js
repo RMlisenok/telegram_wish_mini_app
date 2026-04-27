@@ -46,4 +46,22 @@ defineScenarioSuite('Questionnaire E2E scenarios', [
       await expectText(driver, By, until, ['минимум 3 интереса', 'минимум 1 тег']);
     },
   },
+  {
+    number: 15,
+    title: 'Валидация максимального количества тегов анкеты',
+    requirements: ['FS-5.4'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openQuestionnaire(driver, By, until, baseUrl);
+      for (const tag of maxInterestTags) {
+        await clickByAnyText(driver, By, until, [tag]);
+      }
+      await expectText(driver, By, until, ['Можно добавить не более 20 тегов', 'Можно добавить не более 20 интересов']);
+
+      for (const tag of maxNoGiftTags) {
+        await clickByAnyText(driver, By, until, [tag]);
+      }
+      await expectText(driver, By, until, ['Можно добавить не более 10 тегов', 'Можно указать не более 10 вариантов']);
+    },
+  },
 ]);
