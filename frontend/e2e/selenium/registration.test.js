@@ -39,4 +39,14 @@ defineScenarioSuite('Registration E2E scenarios', [
       await expectText(driver, By, until, env.E2E_TELEGRAM_FIRST_NAME || 'Test');
     },
   },
+  {
+    number: 4,
+    title: 'Регистрация с некорректным именем из Telegram',
+    requirements: ['FS-1.3'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await expectText(driver, By, until, ['Подари мне']);
+    },
+  },
 ]);
