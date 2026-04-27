@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:e2e": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config e2e/jest.e2e.config.js --runInBand"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.2",
@@ -19,9 +20,11 @@
     "@types/dom-view-transitions": "^1.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.2",
+    "chromedriver": "^147.0.4",
     "cross-env": "^10.1.0",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
+    "selenium-webdriver": "^4.43.0",
     "svelte": "^5.43.8",
     "svelte-jester": "^5.0.0",
     "ts-jest": "^29.4.9",
