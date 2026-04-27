@@ -34,6 +34,7 @@
         error = ''; 
     }
     let error = '';
+    let linkError = '';
     let title = '';
     let photoFile = null;
     let photoPreview = null;
@@ -78,8 +79,14 @@
             error = 'Пожалуйста, заполните название желания';
             return;
         }
+
+        if (link.trim() && !/^https?:\/\//i.test(link.trim())) {
+            linkError = 'Ссылка должна начинаться с http:// или https://';
+            return;
+        }
         
         error = '';   
+        linkError = '';
 
         
 
@@ -222,6 +229,7 @@
                 type="url"
                 bind:value={link}
                 placeholder="https://example.com/product"
+                error={linkError}
             />
         </div>
 
