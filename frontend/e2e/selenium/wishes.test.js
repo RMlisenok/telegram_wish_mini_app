@@ -22,4 +22,17 @@ defineScenarioSuite('Wishes E2E scenarios', [
       await expectText(driver, By, until, 'E2E wish');
     },
   },
+  {
+    number: 18,
+    title: 'Создание желания с дополнительными полями и валидацией',
+    requirements: ['FS-6.1', 'NFS-6.3', 'NFS-6.4', 'NFS-6.5'],
+    requires: ['authenticated'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openCreateWish(driver, By, until, baseUrl);
+      await fillFirstMatchingInput(driver, By, 'E2E validated wish', ['input']);
+      await fillFirstMatchingInput(driver, By, 'invalid-url', ['input[type="url"]', 'input[name="link"]']);
+      await clickByAnyText(driver, By, until, ['Сохранить']);
+      await expectText(driver, By, until, ['http://', 'https://', 'URL']);
+    },
+  },
 ]);
