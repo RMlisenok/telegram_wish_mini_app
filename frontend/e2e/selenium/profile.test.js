@@ -36,4 +36,21 @@ defineScenarioSuite('Profile E2E scenarios', [
       await expectText(driver, By, until, ['обязательна', 'должно содержать']);
     },
   },
+  {
+    number: 8,
+    title: 'Загрузка и удаление фотографии профиля',
+    requirements: ['FS-3.1', 'FS-1.3'],
+    requires: ['authenticated', 'fileUpload'],
+    run: async ({ driver, By, until, baseUrl, env }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, settings);
+      await clickByAnyText(driver, By, until, editProfile);
+      await clickByAnyText(driver, By, until, ['Загрузить фото']);
+      const input = await driver.findElement(By.css('input[type="file"]'));
+      await input.sendKeys(env.E2E_UPLOAD_IMAGE_PATH);
+      await clickByAnyText(driver, By, until, ['Удалить']);
+      await clickByAnyText(driver, By, until, save);
+      await expectText(driver, By, until, ['Настройки', 'Изменения успешно сохранены']);
+    },
+  },
 ]);
