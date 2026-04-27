@@ -49,4 +49,17 @@ defineScenarioSuite('Registration E2E scenarios', [
       await expectText(driver, By, until, ['Подари мне']);
     },
   },
+  {
+    number: 5,
+    title: 'Запрос даты рождения при первом запуске',
+    requirements: ['FS-1.3', 'FS-1.4'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, start);
+      await fillFirstMatchingInput(driver, By, '01.01.1990', ['input[placeholder="ДД.ММ.ГГГГ"]', 'input']);
+      await clickByAnyText(driver, By, until, save);
+      await expectText(driver, By, until, main);
+    },
+  },
 ]);
