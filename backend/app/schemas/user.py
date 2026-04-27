@@ -88,6 +88,7 @@ class Usershort(BaseModel):
 
 
 class UserResponesForMainScreen(BaseModel):
+    id: int
     telegram_id: int
     name: str
     birth_date: Optional[date] = None

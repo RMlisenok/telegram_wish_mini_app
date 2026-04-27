@@ -62,6 +62,7 @@ class UserService:
         subscription = await self.serv_subs.get_my_subscription(user_id, True, 2)
         subscr = {"subscription": subscription.model_dump()}
         return UserResponesForMainScreen(
+            id=user.id,
             telegram_id=user.telegram_id,
             name=user.name,
             birth_date=user.birth_date,
