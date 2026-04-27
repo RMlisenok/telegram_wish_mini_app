@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_wish_wishlist_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -33,7 +32,6 @@ class TestWishWishlistRepository:
         mock.id = id
         return mock
 
-    # ==================== get ====================
     @pytest.mark.asyncio
     async def test_get_connection_success(self, repo, mock_db_session):
         mock_connection = self.create_mock_connection(1, 1, 1)
@@ -55,7 +53,6 @@ class TestWishWishlistRepository:
 
         assert result is None
 
-    # ==================== get_by_id ====================
     @pytest.mark.asyncio
     async def test_get_by_id_success(self, repo, mock_db_session):
         mock_connection = self.create_mock_connection(1)
@@ -67,7 +64,6 @@ class TestWishWishlistRepository:
 
         assert result == mock_connection
 
-    # ==================== get_wishes_from_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_wishes_from_wishlist_success(self, repo, mock_db_session):
         mock_connections = [self.create_mock_connection(1), self.create_mock_connection(2)]
@@ -92,7 +88,6 @@ class TestWishWishlistRepository:
 
             assert result == []
 
-    # ==================== create_wish_to_wishlist ====================
     @pytest.mark.asyncio
     async def test_create_wish_to_wishlist_success(self, repo, mock_db_session):
         repo.get = AsyncMock(return_value=None)
@@ -138,7 +133,6 @@ class TestWishWishlistRepository:
 
         assert result is None
 
-    # ==================== update_connection ====================
     @pytest.mark.asyncio
     async def test_update_connection_success(self, repo, mock_db_session):
         mock_connection = self.create_mock_connection(1)
@@ -158,7 +152,6 @@ class TestWishWishlistRepository:
 
         assert result is None
 
-    # ==================== remove_wish_from_wishlist ====================
     @pytest.mark.asyncio
     async def test_remove_wish_from_wishlist_success(self, repo, mock_db_session):
         mock_connection = self.create_mock_connection(1)
@@ -179,7 +172,6 @@ class TestWishWishlistRepository:
 
         assert result is False
 
-    # ==================== get_wish_from_all_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_wish_from_all_wishlist_success(self, repo, mock_db_session):
         mock_connections = [self.create_mock_connection(1), self.create_mock_connection(2)]
@@ -192,7 +184,6 @@ class TestWishWishlistRepository:
 
             assert len(result) == 2
 
-    # ==================== get_wishlist_from_all_wishes ====================
     @pytest.mark.asyncio
     async def test_get_wishlist_from_all_wishes_success(self, repo, mock_db_session):
         mock_connections = [self.create_mock_connection(1), self.create_mock_connection(2)]
@@ -204,7 +195,6 @@ class TestWishWishlistRepository:
 
         assert len(result) == 2
 
-    # ==================== count_wishes_in_wishlist ====================
     @pytest.mark.asyncio
     async def test_count_wishes_in_wishlist_success(self, repo, mock_db_session):
         mock_result = MagicMock()
@@ -225,7 +215,6 @@ class TestWishWishlistRepository:
 
         assert result == 0
 
-    # ==================== delete_wish_in_wishlists ====================
     @pytest.mark.asyncio
     async def test_delete_wish_in_wishlists_success(self, repo, mock_db_session):
         mock_connections = [self.create_mock_connection(1), self.create_mock_connection(2)]

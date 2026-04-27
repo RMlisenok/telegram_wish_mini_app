@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_subscription_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
@@ -42,7 +41,6 @@ class TestSubscriptionService:
         wishlist.typeprivacy = TypePrivacyEnum.public
         return wishlist
     
-    # --- Тесты для подписки на пользователя ---
     
     @pytest.mark.asyncio
     async def test_subscribe_to_user_success(self, subscription_service, sample_user):
@@ -83,7 +81,6 @@ class TestSubscriptionService:
         
         assert result is False
     
-    # --- Тесты для подписки на вишлист ---
     
     @pytest.mark.asyncio
     async def test_subscribe_to_wishlist_success(self, subscription_service, sample_wishlist):
@@ -125,7 +122,6 @@ class TestSubscriptionService:
         
         assert result is False
     
-    # --- Тесты для отписки ---
     
     @pytest.mark.asyncio
     async def test_unsubscribe_from_user_success(self, subscription_service):
@@ -148,7 +144,6 @@ class TestSubscriptionService:
         
         assert result is True
     
-    # --- Тесты для получения подписок ---
     
     @pytest.mark.asyncio
     async def test_get_my_subscription_with_users_and_wishlists(self, subscription_service, sample_user, sample_wishlist):
@@ -220,7 +215,6 @@ class TestSubscriptionService:
         assert result.total == 1
         assert result.subscriptions[0]["type"] == "wishlist"
     
-    # --- Тесты для получения подписчиков ---
     
     @pytest.mark.asyncio
     async def test_get_user_subscribers_success(self, subscription_service, sample_user):
@@ -247,7 +241,6 @@ class TestSubscriptionService:
         assert result.total == 0
         assert len(result.subscribers) == 0
     
-    # --- Тесты для проверки подписки ---
     
     @pytest.mark.asyncio
     async def test_check_user_subscription_true(self, subscription_service):
@@ -285,7 +278,6 @@ class TestSubscriptionService:
         
         assert result is False
     
-    # --- Тесты для update_visit ---
     
     @pytest.mark.asyncio
     async def test_update_visit_success(self, subscription_service):
@@ -293,7 +285,6 @@ class TestSubscriptionService:
         from app.schemas.subscription import SubscribersVisitUpdate
         from datetime import datetime
         
-        # Создаем правильный объект для возврата
         mock_update = SubscribersVisitUpdate(
             status=True,
             updated_at=datetime.now()
@@ -305,7 +296,6 @@ class TestSubscriptionService:
         assert result is not None
         assert result.status is True
     
-    # --- Тесты для get_user_subscriptions с приватностью ---
     
     @pytest.mark.asyncio
     async def test_get_user_subscriptions_private(self, subscription_service, sample_user):

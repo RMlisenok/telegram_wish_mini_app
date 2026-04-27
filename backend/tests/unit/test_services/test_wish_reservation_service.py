@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_wish_reservation_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
@@ -34,7 +33,6 @@ class TestWishReservationService:
         mock.wish_id = wish_id
         return mock
 
-    # ==================== get_reservation ====================
     @pytest.mark.asyncio
     async def test_get_reservation_success(self, reservation_service):
         """Test successfully getting a reservation."""
@@ -56,7 +54,6 @@ class TestWishReservationService:
         
         assert result is None
 
-    # ==================== create_reservation ====================
     @pytest.mark.asyncio
     async def test_create_reservation_success(self, reservation_service):
         """Test successfully creating a reservation."""
@@ -98,7 +95,6 @@ class TestWishReservationService:
         
         assert result is None
 
-    # ==================== remove_reservation ====================
     @pytest.mark.asyncio
     async def test_remove_reservation_success(self, reservation_service):
         """Test successfully removing a reservation."""
@@ -143,7 +139,6 @@ class TestWishReservationService:
         assert result is False
         reservation_service.session.rollback.assert_called_once()
 
-    # ==================== get_user_reservation ====================
     @pytest.mark.asyncio
     async def test_get_user_reservation_success(self, reservation_service):
         """Test getting user's reservations."""
@@ -175,7 +170,6 @@ class TestWishReservationService:
         reservation_service.rep_reservation.get_user_reservations.assert_called_with(user_id=2, limit=20)
         assert len(result) == 1
 
-    # ==================== get_wish_reservation ====================
     @pytest.mark.asyncio
     async def test_get_wish_reservation_success(self, reservation_service):
         """Test getting reservations for a wish."""

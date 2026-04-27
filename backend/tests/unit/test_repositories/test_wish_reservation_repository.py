@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_wish_reservation_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -20,7 +19,6 @@ class TestWishReservationRepository:
         mock.created_at = datetime.now()
         return mock
 
-    # ==================== get ====================
     @pytest.mark.asyncio
     async def test_get_reservation_success(self, repo, mock_db_session):
         mock_reservation = self.create_mock_reservation(1, 1, 2)
@@ -42,7 +40,6 @@ class TestWishReservationRepository:
 
         assert result is None
 
-    # ==================== get_reservations_by_wish_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_reservations_by_wish_wishlist_success(self, repo, mock_db_session):
         mock_reservations = [self.create_mock_reservation(1), self.create_mock_reservation(2)]
@@ -75,7 +72,6 @@ class TestWishReservationRepository:
 
         assert len(result) == 1
 
-    # ==================== get_user_reservations ====================
     @pytest.mark.asyncio
     async def test_get_user_reservations_success(self, repo, mock_db_session):
         mock_reservations = [self.create_mock_reservation(1, 1, 2), self.create_mock_reservation(2, 2, 2)]
@@ -108,7 +104,6 @@ class TestWishReservationRepository:
 
         assert len(result) == 1
 
-    # ==================== check_wish_reservation ====================
     @pytest.mark.asyncio
     async def test_check_wish_reservation_true(self, repo, mock_db_session):
         mock_reservation = self.create_mock_reservation(1, 1, 2)
@@ -130,7 +125,6 @@ class TestWishReservationRepository:
 
         assert result is False
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_reservation_success(self, repo, mock_db_session):
         repo.check_wish_reservation = AsyncMock(return_value=False)
@@ -166,7 +160,6 @@ class TestWishReservationRepository:
             assert result is None
             mock_db_session.rollback.assert_called_once()
 
-    # ==================== delete_reservation_idx ====================
     @pytest.mark.asyncio
     async def test_delete_reservation_idx_success(self, repo, mock_db_session):
         mock_reservation = self.create_mock_reservation(1, 1, 2)

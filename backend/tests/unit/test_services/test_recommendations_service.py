@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_recommendations_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.recommendations_service import RecommendationService
@@ -20,10 +19,8 @@ class TestRecommendationsService:
             "category": "Sports"
         }
         
-        # 1. Прогоняем через Pydantic (для покрытия схемы)
         GiftResponse(**gift_data)
         
-        # 2. Создаем мок (для работы остального теста)
         mock = MagicMock()
         mock.id = id
         for key, value in gift_data.items():
@@ -41,7 +38,6 @@ class TestRecommendationsService:
     
     def create_mock_user(self, id=1, telegram_id=123456789, name="User"):
         """Create a mock User."""
-        # Убрали spec=User, что решает ошибку "BlockedUser is not defined"
         mock = MagicMock()
         mock.id = id
         mock.telegram_id = telegram_id
@@ -71,7 +67,6 @@ class TestRecommendationsService:
         async def __aexit__(self, *args):
             pass
     
-    # ==================== ТЕСТЫ ДЛЯ get_recommendations ====================
     
     @pytest.mark.asyncio
     async def test_get_recommendations_returns_empty_when_no_questionnaire(self, mock_db_session):
@@ -182,13 +177,12 @@ class TestRecommendationsService:
         result = await RecommendationService.get_recommendations(mock_db_session, 1)
         assert len(result) >= 1
     
-    # ==================== ТЕСТЫ ДЛЯ generate_and_send_via_bot ====================
     @pytest.mark.asyncio
     async def test_generate_and_send_success_without_questionnaire(self, mock_db_session):
         """Test successful generation without questionnaire (only avoid tags)."""
         requester = self.create_mock_user(1, 123456789, "Requester")
         target_user = self.create_mock_user(2, 987654321, "Target")
-        user_form_avoid = self.create_mock_user_form("Sweets", False) # type_tag is False, so has_questionnaire=False
+        user_form_avoid = self.create_mock_user_form("Sweets", False)
         mock_gift = self.create_mock_gift()
         
         def session_factory():
@@ -196,12 +190,12 @@ class TestRecommendationsService:
         
         mock_db_session.execute = AsyncMock()
         mock_db_session.execute.side_effect = [
-            self.create_mock_result([requester, target_user]),  # 1. users
-            self.create_mock_count_result(0),                   # 2. count
-            self.create_mock_result([user_form_avoid]),         # 3. outer user_forms
-            self.create_mock_result([user_form_avoid]),         # 4. inner user_forms
-            self.create_mock_result([]),                        # 5. interests gifts (пусто, т.к. нет интересов)
-            self.create_mock_result([mock_gift] * 5),           # 6. fallback gifts
+            self.create_mock_result([requester, target_user]),
+            self.create_mock_count_result(0),
+            self.create_mock_result([user_form_avoid]),
+            self.create_mock_result([user_form_avoid]),
+            self.create_mock_result([]),
+            self.create_mock_result([mock_gift] * 5),
         ]
         
         mock_bot = AsyncMock()
@@ -279,12 +273,12 @@ class TestRecommendationsService:
         
         mock_db_session.execute = AsyncMock()
         mock_db_session.execute.side_effect = [
-            self.create_mock_result([requester, target_user]),  # 1
-            self.create_mock_count_result(0),                   # 2
-            self.create_mock_result([user_form]),               # 3
-            self.create_mock_result([user_form]),               # 4 (inner forms)
-            self.create_mock_result([]),                        # 5 (interests query empty)
-            self.create_mock_result([]),                        # 6 (fallback query empty)
+            self.create_mock_result([requester, target_user]),
+            self.create_mock_count_result(0),
+            self.create_mock_result([user_form]),
+            self.create_mock_result([user_form]),
+            self.create_mock_result([]),
+            self.create_mock_result([]),
         ]
         
         mock_bot = AsyncMock()
@@ -304,14 +298,13 @@ class TestRecommendationsService:
         
         mock_db_session.execute = AsyncMock()
         mock_db_session.execute.side_effect = [
-            self.create_mock_result([requester, target_user]),  # 1. Users passed successfully
-            Exception("Simulated Database Error")               # 2. Fails here
+            self.create_mock_result([requester, target_user]),
+            Exception("Simulated Database Error")
         ]
         
         mock_bot = AsyncMock()
         await RecommendationService.generate_and_send_via_bot(session_factory, 1, 2, mock_bot)
         
-        # We expect the error handler to send a fallback message
         mock_bot.send_message.assert_called_once()
         assert "Произошла ошибка при создании подборки" in mock_bot.send_message.call_args[0][1]
 
@@ -323,9 +316,7 @@ class TestRecommendationsService:
         
         mock_bot = AsyncMock()
         
-        # Перехватываем исключение, потому что оно падает до входа в try..except в самом сервисе
         with pytest.raises(Exception, match="Total Connection Failure"):
             await RecommendationService.generate_and_send_via_bot(session_factory, 1, 2, mock_bot)
         
-        # It hits `except Exception`, but `requester` is unbound/None, so the inner `try` passes silently
         mock_bot.send_message.assert_not_called()

@@ -1,4 +1,3 @@
-# tests/unit/test_core/test_init_gifts.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.core.init_gifts import init_gifts, GIFT_DATA

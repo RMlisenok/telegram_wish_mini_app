@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_user_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import date, datetime
@@ -19,7 +18,6 @@ class TestUserService:
         """Create UserService instance with mocked dependencies."""
         service = UserService(mock_db_session)
         
-        # Mock all repositories
         service.rep_user = AsyncMock()
         service.rep_block = AsyncMock()
         service.rep_wishlist = AsyncMock()
@@ -34,14 +32,11 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_get_user_success(self, user_service, sample_user_data):
         """Test successfully getting a user by ID."""
-        # Arrange
         expected_user = User(**sample_user_data)
         user_service.rep_user.get_user_by_id = AsyncMock(return_value=expected_user)
         
-        # Act
         result = await user_service.get_user(1)
         
-        # Assert
         assert result is not None
         assert result.id == expected_user.id
         assert result.name == expected_user.name
@@ -51,27 +46,21 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_get_user_not_found(self, user_service):
         """Test getting a non-existent user."""
-        # Arrange
         user_service.rep_user.get_user_by_id = AsyncMock(return_value=None)
         
-        # Act
         result = await user_service.get_user(999)
         
-        # Assert
         assert result is None
         user_service.rep_user.get_user_by_id.assert_called_once_with(999)
     
     @pytest.mark.asyncio
     async def test_get_user_by_telegram_id_success(self, user_service, sample_user_data):
         """Test successfully getting a user by Telegram ID."""
-        # Arrange
         expected_user = User(**sample_user_data)
         user_service.rep_user.get_user_by_tg_id = AsyncMock(return_value=expected_user)
         
-        # Act
         result = await user_service.get_user_by_telegram_id(123456789)
         
-        # Assert
         assert result is not None
         assert result.telegram_id == 123456789
         assert result.name == expected_user.name
@@ -80,14 +69,11 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_get_all_users(self, user_service, sample_user_data):
         """Test getting all users."""
-        # Arrange
         users = [User(**sample_user_data)]
         user_service.rep_user.get_all_users = AsyncMock(return_value=users)
         
-        # Act
         result = await user_service.get_all_users(limit=10)
         
-        # Assert
         assert len(result) == 1
         assert result[0].name == sample_user_data["name"]
         user_service.rep_user.get_all_users.assert_called_once_with(10)
@@ -95,7 +81,6 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_create_user_success(self, user_service, sample_user_data):
         """Test successfully creating a user."""
-        # Arrange
         user_create = UserCreate(
             telegram_id=123456789,
             name="New User",
@@ -104,10 +89,8 @@ class TestUserService:
         expected_user = User(**sample_user_data)
         user_service.rep_user.create = AsyncMock(return_value=expected_user)
         
-        # Act
         result = await user_service.create_user(user_create)
         
-        # Assert
         assert result is not None
         assert result.name == expected_user.name
         user_service.rep_user.create.assert_called_once_with(user_create)
@@ -115,16 +98,13 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_update_user_success(self, user_service, sample_user_data):
         """Test successfully updating a user."""
-        # Arrange
         user_update = UserUpdate(name="Updated Name")
         updated_user = User(**sample_user_data)
         updated_user.name = "Updated Name"
         user_service.rep_user.update = AsyncMock(return_value=updated_user)
         
-        # Act
         result = await user_service.update_user(1, user_update)
         
-        # Assert
         assert result is not None
         assert result.name == "Updated Name"
         user_service.rep_user.update.assert_called_once_with(1, user_update)
@@ -132,7 +112,6 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_block_user_success(self, user_service):
         """Test successfully blocking a user."""
-        # Arrange
         block_data = BlockCreate(
             blocked_id=2,
             block_profile=True,
@@ -141,43 +120,34 @@ class TestUserService:
         block = MagicMock()
         user_service.rep_block.block_user = AsyncMock(return_value=block)
         
-        # Act
         result = await user_service.block_user(1, block_data)
         
-        # Assert
         assert result is not None
         user_service.rep_block.block_user.assert_called_once_with(1, block_data)
     
     @pytest.mark.asyncio
     async def test_unblock_user_success(self, user_service):
         """Test successfully unblocking a user."""
-        # Arrange
         user_service.rep_block.unblock_user = AsyncMock(return_value=True)
         
-        # Act
         result = await user_service.unblock_user(1, 2)
         
-        # Assert
         assert result is True
         user_service.rep_block.unblock_user.assert_called_once_with(1, 2)
 
     @pytest.mark.asyncio
     async def test_check_block_status(self, user_service):
         """Test checking if user is blocked."""
-        # Arrange
         user_service.rep_block.is_user_blocked = AsyncMock(return_value=True)
         
-        # Act
         result = await user_service.check_block_status(1, 2)
         
-        # Assert
         assert result is True
         user_service.rep_block.is_user_blocked.assert_called_once_with(1, 2)
     
     @pytest.mark.asyncio
     async def test_get_user_block_list(self, user_service, sample_user_data):
         """Test getting user's block list."""
-        # Arrange
         blocked_user = User(**sample_user_data)
         blocked_user.id = 2
         blocked_user.name = "Blocked User"
@@ -190,10 +160,8 @@ class TestUserService:
         
         user_service.rep_block.get_user_block = AsyncMock(return_value=[blocked_record])
         
-        # Act
         result = await user_service.get_user_block(1)
         
-        # Assert
         assert result.total == 1
         assert len(result.blocked_users) == 1
         user_service.rep_block.get_user_block.assert_called_once_with(1)
@@ -201,7 +169,6 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_update_block_success(self, user_service, sample_block_data):
             """Test successfully updating a block record."""
-            # Arrange
             
             blocker_id = 1
             blocked_id = 2
@@ -222,10 +189,8 @@ class TestUserService:
             # Настраиваем мок репозитория
             user_service.rep_block.update_block = AsyncMock(return_value=mock_updated_block)
             
-            # Act
             result = await user_service.update_block(blocker_id, blocked_id, update_data)
             
-            # Assert
             assert result is not None
             assert isinstance(result, BlockResponse)
             assert result.block_profile is False
@@ -237,16 +202,13 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_update_block_not_found(self, user_service):
         """Test updating a block record that doesn't exist."""
-        # Arrange
         from app.schemas.block import UpdateBlock
         
         update_data = UpdateBlock(block_profile=True)
         user_service.rep_block.update_block = AsyncMock(return_value=None)
         
-        # Act
         result = await user_service.update_block(1, 999, update_data)
         
-        # Assert
         assert result is None
         user_service.rep_block.update_block.assert_called_once_with(
             1, 999, update_data

@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_wishlist_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -25,7 +24,6 @@ class TestWishlistRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_wishlist_success(self, repo, mock_db_session):
         wishlist_data = WishlistCreate(
@@ -46,7 +44,6 @@ class TestWishlistRepository:
             mock_db_session.add.assert_called_once()
             mock_db_session.commit.assert_called_once()
 
-    # ==================== get ====================
     @pytest.mark.asyncio
     async def test_get_wishlist_success(self, repo, mock_db_session):
         mock_wishlist = self.create_mock_wishlist(1)
@@ -68,7 +65,6 @@ class TestWishlistRepository:
 
         assert result is None
 
-    # ==================== get_user_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_user_wishlist_asc(self, repo, mock_db_session):
         mock_wishlists = [self.create_mock_wishlist(1), self.create_mock_wishlist(2)]
@@ -101,7 +97,6 @@ class TestWishlistRepository:
 
         assert result == []
 
-    # ==================== get_count_user_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_count_user_wishlist_success(self, repo, mock_db_session):
         mock_result = MagicMock()
@@ -122,7 +117,6 @@ class TestWishlistRepository:
 
         assert result == 0
 
-    # ==================== update ====================
     @pytest.mark.asyncio
     async def test_update_wishlist_success(self, repo, mock_db_session):
         # Используем словарь вместо объекта WishlistUpdate
@@ -146,7 +140,6 @@ class TestWishlistRepository:
 
             assert result == mock_wishlist
 
-    # ==================== delete ====================
     @pytest.mark.asyncio
     async def test_delete_wishlist_success(self, repo, mock_db_session):
         mock_wishlist = self.create_mock_wishlist(1)

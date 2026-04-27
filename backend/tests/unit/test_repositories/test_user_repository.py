@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_user_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import date, datetime
@@ -28,7 +27,6 @@ class TestUserRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== get_user_by_id ====================
     @pytest.mark.asyncio
     async def test_get_user_by_id_success(self, repo, mock_db_session):
         mock_user = self.create_mock_user(1)
@@ -51,7 +49,6 @@ class TestUserRepository:
 
         assert result is None
 
-    # ==================== get_user_by_tg_id ====================
     @pytest.mark.asyncio
     async def test_get_user_by_tg_id_success(self, repo, mock_db_session):
         mock_user = self.create_mock_user(1, 123456789)
@@ -73,7 +70,6 @@ class TestUserRepository:
 
         assert result is None
 
-    # ==================== get_all_users ====================
     @pytest.mark.asyncio
     async def test_get_all_users_success(self, repo, mock_db_session):
         mock_users = [self.create_mock_user(1), self.create_mock_user(2)]
@@ -96,7 +92,6 @@ class TestUserRepository:
 
         assert result == []
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_user_success(self, repo, mock_db_session):
         user_data = UserCreate(
@@ -117,7 +112,6 @@ class TestUserRepository:
             mock_db_session.add.assert_called_once()
             mock_db_session.commit.assert_called_once()
 
-    # ==================== update ====================
     @pytest.mark.asyncio
     async def test_update_user_success(self, repo, mock_db_session):
         user_update = UserUpdate(name="Updated Name")
