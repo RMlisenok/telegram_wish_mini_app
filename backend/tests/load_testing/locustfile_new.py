@@ -3,9 +3,10 @@ from locust import HttpUser, task, between
 
 
 class WishlistStressTest(HttpUser):
-    wait_time = between(0.5, 1.5)
+    # Уменьшим время ожидания, чтобы быстрее набрать статистику
+    wait_time = between(0.1, 0.5)
 
-    # Список сценариев
+    # 20 сценариев (проверь, чтобы в Host в браузере НЕ БЫЛО слэша в конце)
     endpoints = [
         ("/v1/notifications/settings", "GET"),
         ("/v1/recommendations/check/user/1", "GET"),
@@ -30,27 +31,25 @@ class WishlistStressTest(HttpUser):
     ]
 
     @task
-    def run_scenarios(self):
+    def stress_test(self):
         path, method = random.choice(self.endpoints)
 
-        # Важно: используем catch_response=True
+        # catch_response=True — КЛЮЧЕВОЙ параметр, чтобы подсветить ошибки красным
         with self.client.request(
-                method,
-                path,
+                method=method,
+                url=path,
                 catch_response=True,
                 verify=False
         ) as response:
-            # Если мы получили 401, мы хотим, чтобы в отчете это было ФЕЙЛОМ
+            # Если получили 401 — помечаем как ОШИБКУ (для красоты отчета)
             if response.status_code == 401:
-                response.failure(f"❌ Security Block: {response.status_code}")
-            # Если 404 — тоже фейл
+                response.failure(f"🔒 Auth required (401)")
+            # Если 404
             elif response.status_code == 404:
-                response.failure("🚫 Route Not Found")
-            # Если 500 — критический фейл
+                response.failure("❗ Not Found (404)")
+            # Если 500 и выше
             elif response.status_code >= 500:
-                response.failure("🔥 Server Crash")
-            # Если вдруг пришел 200/201 (без токена это странно, но вдруг)
-            elif response.status_code in [200, 201]:
-                response.success()
+                response.failure(f"💥 Server Error ({response.status_code})")
+            # Все остальное (200, 201) — успех
             else:
-                response.failure(f"Unknown status: {response.status_code}")
+                response.success()
