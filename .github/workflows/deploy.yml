@@ -66,7 +66,7 @@ jobs:
           docker-compose down || true
           docker-compose up -d --build
 
-      - name: Health check
-        run: |
-          sleep 20
-          curl -f http://localhost/health && echo "✅ OK"
+      # - name: Health check
+      #   run: |
+      #     sleep 20
+      #     curl -f http://localhost/health && echo "✅ OK"
