@@ -1,4 +1,3 @@
-# tests/unit/test_services/test_access_request_service.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
@@ -47,7 +46,6 @@ class TestAccessRequestService:
         r.processed_at = None
         return r
 
-    # ==================== create_request ====================
     @pytest.mark.asyncio
     async def test_create_request_success(self, service):
         wishlist = self.mock_wishlist(1, 1, TypePrivacyEnum.protected)
@@ -96,7 +94,6 @@ class TestAccessRequestService:
         with pytest.raises(ValueError, match="You have access for this wishlsit"):
             await service.create_request(2, AccessRequestCreate(wishlist_id=1))
 
-    # ==================== update_request_status ====================
     @pytest.mark.asyncio
     async def test_update_status_approve(self, service):
         request = self.mock_request(1, 1, 2, AccessRequestStatus.PENDING)
@@ -166,7 +163,6 @@ class TestAccessRequestService:
         with pytest.raises(ValueError, match="This request already handled"):
             await service.update_request_status(1, UpdateAccessRequest(status=AccessRequestStatus.REJECTED), 1)
 
-    # ==================== delete_request ====================
     @pytest.mark.asyncio
     async def test_delete_request_as_requester(self, service):
         request = self.mock_request(1, 1, 2, AccessRequestStatus.PENDING)
@@ -202,7 +198,6 @@ class TestAccessRequestService:
         with pytest.raises(ValueError, match="Delete error, this request arleady handler"):
             await service.delete_request(1, 2)
 
-    # ==================== get_my_requests ====================
     @pytest.mark.asyncio
     async def test_get_my_requests(self, service):
         request = self.mock_request()
@@ -218,7 +213,6 @@ class TestAccessRequestService:
         assert result.total == 1
         assert len(result.requests) == 1
 
-    # ==================== get_requests_for_my_wishlists ====================
     @pytest.mark.asyncio
     async def test_get_requests_for_my_wishlists(self, service):
         request = self.mock_request()
@@ -233,7 +227,6 @@ class TestAccessRequestService:
 
         assert result.total == 1
 
-    # ==================== check_access ====================
     @pytest.mark.asyncio
     async def test_check_access_owner(self, service):
         wishlist = self.mock_wishlist(1, 1)
@@ -273,9 +266,6 @@ class TestAccessRequestService:
 
     @pytest.mark.asyncio
     async def test_create_request_private_wishlist(self, service):
-        """Проверка запроса к приватному списку."""
-        # В коде сервиса нет явного запрета на создание заявки к приватному списку.
-        # Ошибка "You have access..." возникала, так как мок по умолчанию возвращал True.
         wishlist = self.mock_wishlist(1, 1, TypePrivacyEnum.private)
         service.rep_wishlist.get = AsyncMock(return_value=wishlist)
         service.rep_access.has_access = AsyncMock(return_value=False)
@@ -287,39 +277,29 @@ class TestAccessRequestService:
 
     @pytest.mark.asyncio
     async def test_delete_request_not_found(self, service):
-        """Ошибка: удаление несуществующего запроса (возвращает False)."""
         service.rep_access.get_request_id = AsyncMock(return_value=None)
         
-        # Согласно коду: if not access_request: return False
         result = await service.delete_request(999, 1)
         assert result is False
 
     @pytest.mark.asyncio
     async def test_delete_request_forbidden(self, service):
-        """Ошибка: попытка удаления чужого запроса (неверный текст в старом тесте)."""
         request = self.mock_request(1, 1, 2)
         wishlist = self.mock_wishlist(1, 10)
         service.rep_access.get_request_id = AsyncMock(return_value=request)
         service.rep_wishlist.get = AsyncMock(return_value=wishlist)
 
-        # Текст ошибки в коде: "Not have permission to delete this request"
         with pytest.raises(ValueError, match="Not have permission to delete this request"):
             await service.delete_request(1, 5)
 
     @pytest.mark.asyncio
     async def test_check_access_wishlist_not_found(self, service):
-        """Проверка доступа к несуществующему вишлисту."""
         service.rep_wishlist.get = AsyncMock(return_value=None)
-        
-        # ВНИМАНИЕ: В вашем сервисе здесь баг (AttributeError). 
-        # Чтобы тест прошел, сервис нужно поправить (см. рекомендации ниже).
         with pytest.raises(AttributeError):
             await service.check_access(999, 1)
 
     @pytest.mark.asyncio
     async def test_get_requests_for_my_wishlists_with_filter(self, service):
-        """Проверка получения запросов (исправлен список аргументов)."""
-        # В методе нет аргумента wishlist_id, только status и limit
         service.rep_access.get_for_wishlist_owner_with_details = AsyncMock(return_value=[])
         
         result = await service.get_requests_for_my_wishlists(1, AccessRequestStatus.PENDING)
@@ -327,7 +307,6 @@ class TestAccessRequestService:
 
     @pytest.mark.asyncio
     async def test_get_request_with_details_not_found(self, service):
-        """Тест внутреннего метода: запрос не найден."""
         service.rep_access.get_with_details = AsyncMock(return_value=None)
         
         result = await service.get_request_with_details(999)
@@ -335,7 +314,6 @@ class TestAccessRequestService:
 
     @pytest.mark.asyncio
     async def test_update_status_db_error(self, service):
-        """Если репозиторий не смог обновить статус (исправлен текст ошибки)."""
         request = self.mock_request(1, 1, 2, AccessRequestStatus.PENDING)
         wishlist = self.mock_wishlist(1, 1)
         

@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_block_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -25,7 +24,6 @@ class TestBlockRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== get_block ====================
     @pytest.mark.asyncio
     async def test_get_block_success(self, repo, mock_db_session):
         mock_block = self.create_mock_block(1, 2)
@@ -47,7 +45,6 @@ class TestBlockRepository:
 
         assert result is None
 
-    # ==================== block_user ====================
     @pytest.mark.asyncio
     async def test_block_user_new(self, repo, mock_db_session):
         block_data = BlockCreate(blocked_id=2, block_profile=True, block_wishlists=False)
@@ -74,7 +71,6 @@ class TestBlockRepository:
 
         assert result == mock_block
 
-    # ==================== update_block ====================
     @pytest.mark.asyncio
     async def test_update_block_success(self, repo, mock_db_session):
         update_data = UpdateBlock(block_profile=False, block_wishlists=True)
@@ -101,7 +97,6 @@ class TestBlockRepository:
 
         assert result is None
 
-    # ==================== unblock_user ====================
     @pytest.mark.asyncio
     async def test_unblock_user_success(self, repo, mock_db_session):
         mock_block = self.create_mock_block(1, 2)
@@ -122,7 +117,6 @@ class TestBlockRepository:
 
         assert result is False
 
-    # ==================== is_user_blocked ====================
     @pytest.mark.asyncio
     async def test_is_user_blocked_true(self, repo, mock_db_session):
         mock_block = self.create_mock_block(1, 2)
@@ -140,7 +134,6 @@ class TestBlockRepository:
 
         assert result is False
 
-    # ==================== get_user_block ====================
     @pytest.mark.asyncio
     async def test_get_user_block_success(self, repo, mock_db_session):
         mock_blocks = [self.create_mock_block(1, 2), self.create_mock_block(1, 3)]

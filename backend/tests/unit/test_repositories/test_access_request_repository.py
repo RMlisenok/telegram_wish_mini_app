@@ -23,7 +23,6 @@ class TestAccessRequestRepository:
         mock.processed_at = None
         return mock
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_request_success(self, repo, mock_db_session):
         repo.get_request = AsyncMock(return_value=None)
@@ -60,7 +59,6 @@ class TestAccessRequestRepository:
             assert result is None
             mock_db_session.rollback.assert_called_once()
 
-    # ==================== get_request_id ====================
     @pytest.mark.asyncio
     async def test_get_request_id_success(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1)
@@ -82,7 +80,6 @@ class TestAccessRequestRepository:
 
         assert result is None
 
-    # ==================== update_status ====================
     @pytest.mark.asyncio
     async def test_update_status_to_approved(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1)
@@ -119,7 +116,6 @@ class TestAccessRequestRepository:
         assert result is False
         mock_db_session.rollback.assert_called_once()
 
-    # ==================== delete ====================
     @pytest.mark.asyncio
     async def test_delete_request_success(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1)
@@ -152,7 +148,6 @@ class TestAccessRequestRepository:
         assert result is False
         mock_db_session.rollback.assert_called_once()
 
-    # ==================== has_access ====================
     @pytest.mark.asyncio
     async def test_has_access_true(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1, 1, 2, AccessRequestStatus.APPROVED)
@@ -174,7 +169,6 @@ class TestAccessRequestRepository:
 
         assert result is False
 
-    # ==================== get_for_wishlist ====================
     @pytest.mark.asyncio
     async def test_get_for_wishlist_all(self, repo, mock_db_session):
         mock_requests = [self.create_mock_request(1), self.create_mock_request(2)]
@@ -207,7 +201,6 @@ class TestAccessRequestRepository:
 
         assert result == []
 
-    # ==================== get_for_requester ====================
     @pytest.mark.asyncio
     async def test_get_for_requester_all(self, repo, mock_db_session):
         mock_requests = [self.create_mock_request(1), self.create_mock_request(2)]
@@ -230,7 +223,6 @@ class TestAccessRequestRepository:
 
         assert len(result) == 1
 
-    # ==================== get_for_wishlist_owner ====================
     @pytest.mark.asyncio
     async def test_get_for_wishlist_owner_all(self, repo, mock_db_session):
         mock_requests = [self.create_mock_request(1), self.create_mock_request(2)]
@@ -253,7 +245,6 @@ class TestAccessRequestRepository:
 
         assert len(result) == 1
 
-    # ==================== get_request ====================
     @pytest.mark.asyncio
     async def test_get_request_success(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1, 1, 2)
@@ -275,7 +266,6 @@ class TestAccessRequestRepository:
 
         assert result is None
 
-    # ==================== get_with_details ====================
     @pytest.mark.asyncio
     async def test_get_with_details_success(self, repo, mock_db_session):
         mock_request = self.create_mock_request(1)
@@ -287,7 +277,6 @@ class TestAccessRequestRepository:
 
         assert result == mock_request
 
-    # ==================== get_for_requester_with_details ====================
     @pytest.mark.asyncio
     async def test_get_for_requester_with_details_success(self, repo, mock_db_session):
         mock_requests = [self.create_mock_request(1), self.create_mock_request(2)]
@@ -299,7 +288,6 @@ class TestAccessRequestRepository:
 
         assert len(result) == 2
 
-    # ==================== get_for_wishlist_owner_with_details ====================
     @pytest.mark.asyncio
     async def test_get_for_wishlist_owner_with_details_success(self, repo, mock_db_session):
         mock_requests = [self.create_mock_request(1), self.create_mock_request(2)]

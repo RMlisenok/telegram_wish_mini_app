@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_notification_settings_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -26,7 +25,6 @@ class TestNotificationSettingsRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== create_notification_settings ====================
     @pytest.mark.asyncio
     async def test_create_notification_settings_success(self, repo, mock_db_session):
         mock_settings = self.create_mock_settings(1)
@@ -41,7 +39,6 @@ class TestNotificationSettingsRepository:
             mock_db_session.add.assert_called_once()
             mock_db_session.commit.assert_called_once()
 
-    # ==================== get_user_settings ====================
     @pytest.mark.asyncio
     async def test_get_user_settings_success(self, repo, mock_db_session):
         mock_settings = self.create_mock_settings(1)
@@ -63,7 +60,6 @@ class TestNotificationSettingsRepository:
 
         assert result is None
 
-    # ==================== update_settings ====================
     @pytest.mark.asyncio
     async def test_update_settings_success(self, repo, mock_db_session):
         update_data = NotificationSettingsUpdate(new_followers=False, birt_before=False)

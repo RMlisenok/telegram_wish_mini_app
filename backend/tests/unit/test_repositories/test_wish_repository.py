@@ -1,4 +1,3 @@
-# tests/unit/test_repositories/test_wish_repository.py
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -30,7 +29,6 @@ class TestWishRepository:
         mock.updated_at = datetime.now()
         return mock
 
-    # ==================== create ====================
     @pytest.mark.asyncio
     async def test_create_wish_success(self, repo, mock_db_session):
         wish_data = WishCreate(
@@ -53,7 +51,6 @@ class TestWishRepository:
             mock_db_session.add.assert_called_once()
             mock_db_session.commit.assert_called_once()
 
-    # ==================== get ====================
     @pytest.mark.asyncio
     async def test_get_wish_success(self, repo, mock_db_session):
         mock_wish = self.create_mock_wish(1)
@@ -75,7 +72,6 @@ class TestWishRepository:
 
         assert result is None
 
-    # ==================== update ====================
     @pytest.mark.asyncio
     async def test_update_wish_success(self, repo, mock_db_session):
         update_data = {"name": "Updated Wish"}
@@ -101,7 +97,6 @@ class TestWishRepository:
 
         assert result == mock_wish
 
-    # ==================== get_user_wish ====================
     @pytest.mark.asyncio
     async def test_get_user_wish_desc(self, repo, mock_db_session):
         mock_wishes = [self.create_mock_wish(1), self.create_mock_wish(2)]
@@ -134,7 +129,6 @@ class TestWishRepository:
 
         assert result == []
 
-    # ==================== get_user_wish_sorted ====================
     @pytest.mark.asyncio
     async def test_get_user_wish_sorted_finished(self, repo, mock_db_session):
         mock_wishes = [self.create_mock_wish(1)]
@@ -157,7 +151,6 @@ class TestWishRepository:
 
         assert len(result) == 1
 
-    # ==================== get_count_user_wish ====================
     @pytest.mark.asyncio
     async def test_get_count_user_wish_success(self, repo, mock_db_session):
         mock_result = MagicMock()
@@ -168,7 +161,6 @@ class TestWishRepository:
 
         assert result == 5
 
-    # ==================== delete ====================
     @pytest.mark.asyncio
     async def test_delete_wish_success(self, repo, mock_db_session):
         mock_wish = self.create_mock_wish(1)

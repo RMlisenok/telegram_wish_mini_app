@@ -8,10 +8,6 @@ class TestScenario3Reservation:
     async def test_positive_reserve_wish(
         self, client, test_users, test_wishlists, auth_headers, db_session
     ):
-        """
-        Позитивный сценарий: Пользователь B бронирует желание пользователя A
-        POST /v1/reservations/
-        """
         wish_data = {
             "name": "Книга для бронирования",
             "description": "Подарочное издание",
@@ -51,14 +47,14 @@ class TestScenario3Reservation:
             json=reservation_data,
             headers=auth_headers["user_b"]
         )
-
+        user_b_id = test_users["user_b"].id
         assert response_reserve.status_code == 201
         assert response_reserve.json()["wish_wishlist_id"] == wishlist_id
-        assert response_reserve.json()["reserved_by_id"] == test_users["user_b"].id
+        assert response_reserve.json()["reserved_by_id"] == user_b_id
 
         wish_service = WishService(db_session)
         updated_wish = await wish_service.get_wish(wish_id)
-        assert updated_wish.is_booked == True, "Wish should be booked"
+        assert updated_wish.is_booked is True, "Wish should be booked"
 
         response_get_reservations = await client.get(
             "/v1/reservations/",
@@ -74,11 +70,6 @@ class TestScenario3Reservation:
     async def test_negative_reserve_own_wish(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Негативный сценарий: Владелец пытается забронировать свое желание
-        По текущей реализации API - это разрешено (возвращает 201)
-        Но по ТЗ должно быть 400
-        """
         wish_data = {
             "name": "Мое желание",
             "price": 1000,
@@ -119,16 +110,13 @@ class TestScenario3Reservation:
         assert response_reserve.status_code in [201, 400]
 
         if response_reserve.status_code == 201:
-            assert response_reserve.json()["reserved_by_id"] == test_users["user_a"].id
+            user_a_id = test_users["user_a"].id
+            assert response_reserve.json()["reserved_by_id"] == user_a_id
 
     @pytest.mark.asyncio
     async def test_negative_reserve_already_reserved_wish(
         self, client, test_users, test_wishlists, auth_headers
     ):
-        """
-        Негативный сценарий: Попытка забронировать уже забронированное желание
-        Ожидаем: 400 Bad Request
-        """
         wish_data = {
             "name": "Популярное желание",
             "price": 2000,

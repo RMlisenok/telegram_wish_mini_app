@@ -7,11 +7,6 @@ class TestScenario2WishCreation:
     async def test_positive_create_wish_and_link_to_wishlist(
         self, client, test_wishlists, auth_headers
     ):
-        """
-        Позитивный сценарий: 
-        1. POST /v1/wishes/ - создание желания
-        2. POST /v1/wishlists/{wishlist_id}/wishes - привязка к вишлисту
-        """
         wish_data = {
             "name": "Новое желание",
             "description": "Описание желания",
@@ -62,9 +57,6 @@ class TestScenario2WishCreation:
     async def test_negative_invalid_wish_data(
         self, client, auth_headers
     ):
-        """
-        Негативный сценарий: Создание желания с некорректными данными
-        """
         invalid_data = {
             "price": 1000,
             "currency": "RUB"
@@ -95,10 +87,10 @@ class TestScenario2WishCreation:
     async def test_negative_nonexistent_wishlist(
         self, client, auth_headers
     ):
-        """
-        Негативный сценарий: Привязка к несуществующему вишлисту
-        """
-        wish_data = {"name": "Тестовое желание", "price": 1000, "currency": "RUB"}
+        wish_data = {
+            "name": "Тестовое желание",
+            "price": 1000, "currency": "RUB"
+        }
 
         response_create = await client.post(
             "/v1/wishes/",
