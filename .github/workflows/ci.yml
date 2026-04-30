@@ -4,7 +4,7 @@ on:
   push:
     branches: ["tests_backend"]
   pull_request:
-    branches: [ main, backend ]
+    branches: [ main, backend, app_integration_into_tg]
   workflow_dispatch:
 
 jobs:
