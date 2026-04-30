@@ -1,0 +1,67 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ "app_integration_into_tg" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted, linux, x64]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Update code
+        run: |
+          git fetch origin
+          git reset --hard origin/app_integration_into_tg
+
+      - name: Create .env
+        run: |
+          mkdir -p backend
+          cat > backend/.env << EOF
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          ALGORITHM=${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASS=${{ secrets.DB_PASS }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
+          ENDPOINT_URL=${{ secrets.ENDPOINT_URL }}
+          BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+          URL_DATA_SAVE=${{ secrets.URL_DATA_SAVE }}
+          EOF
+
+      - name: Check if certificates exist
+        id: check-certs
+        run: |
+          if [ -f "/home/runner/ssl/certbot/conf/live/wishlistprice.ru/fullchain.pem" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get certificates (ONLY FIRST TIME)
+        if: steps.check-certs.outputs.exists == 'false'
+        run: |
+          chmod +x scripts/init-certs.sh
+          ./scripts/init-certs.sh
+
+      - name: Deploy
+        run: |
+          docker-compose down || true
+          docker-compose up -d --build
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://localhost/health && echo "✅ OK"

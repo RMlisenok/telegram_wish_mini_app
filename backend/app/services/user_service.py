@@ -107,9 +107,6 @@ class UserService:
         return None
 
 
-
-
-
     async def block_user(
         self,
         blocker_id: int,

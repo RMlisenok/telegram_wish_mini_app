@@ -1,0 +1,19 @@
+version: '3.5'
+
+services:
+  nginx-temp:
+    image: nginx:alpine
+    container_name: nginx-temp
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx-temp.conf:/etc/nginx/nginx.conf:ro
+      - /home/runner/ssl/certbot/www:/var/www/certbot   # ← абсолютный путь
+    networks:
+      - app-network
+    restart: "no"
+
+networks:
+  app-network:
+    driver: bridge
+    name: telegram_wish_mini_app_app-network
