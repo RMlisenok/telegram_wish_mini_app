@@ -22,13 +22,16 @@ export default {
     'node_modules/(?!(svelte|@testing-library/svelte|@testing-library/svelte-core|svelte-jester)/)'
   ],
   collectCoverage: false,
-  coverageProvider: 'v8',
+  // coverageProvider: 'v8',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.{js,ts,svelte}',
     '!src/**/*.d.ts',
     '!src/main.js',
+    '!src/App.svelte',
     '!src/app.css',
+    '!src/e2e/setup.js',
+    '!src/types/user.ts',
     '!src/**/*.test.{js,ts}',
     '!src/**/*.spec.{js,ts}',
     '!**/node_modules/**',
