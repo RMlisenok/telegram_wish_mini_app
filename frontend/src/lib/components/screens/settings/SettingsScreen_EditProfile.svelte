@@ -38,6 +38,16 @@
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
+        if (window.__E2E__) {
+            input.setAttribute('data-e2e', 'profile-photo-input');
+            input.style.position = 'fixed';
+            input.style.left = '0';
+            input.style.top = '0';
+            input.style.width = '1px';
+            input.style.height = '1px';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+        }
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {

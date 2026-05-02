@@ -5,7 +5,8 @@
     import Button from '../ui/Button.svelte';
     //import {questionnaireStore} from '../../stores/data.js';
     import { createEventDispatcher } from 'svelte';
-    import { loadAvailableTags, loadQuestionnaire, questionnaireStore, TagItem, QuestionnaireData, saveQuestionnaire } from '../../../types/questionnaire.ts';
+    import { loadAvailableTags, loadQuestionnaire, questionnaireStore, saveQuestionnaire } from '../../../types/questionnaire.ts';
+    import type { TagItem, QuestionnaireData } from '../../../types/questionnaire.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -63,8 +64,12 @@
     });
 
     const addInterest = (tag: string) => {
-        interests = addTag(interests, tag, 20, 'interests');
-        errors = { ...errors, interests: '' };
+        const alreadySelected = interests.some(item => item.tag === tag);
+        const nextInterests = addTag(interests, tag, 20, 'interests');
+        if (nextInterests.length > interests.length || alreadySelected) {
+            errors = { ...errors, interests: '' };
+        }
+        interests = nextInterests;
     };
     
     const addTag = (arr: TagItem[], tagValue: string, maxCount: number, errorKey: keyof typeof errors): TagItem[] => {
@@ -95,8 +100,12 @@
     };
 
     const addNoGift = (tag: string) => {
-        noGifts = addTag(noGifts, tag, 10, 'noGifts'); // Переименовано
-        errors = { ...errors, noGifts: '' };
+        const alreadySelected = noGifts.some(item => item.tag === tag);
+        const nextNoGifts = addTag(noGifts, tag, 10, 'noGifts'); // Переименовано
+        if (nextNoGifts.length > noGifts.length || alreadySelected) {
+            errors = { ...errors, noGifts: '' };
+        }
+        noGifts = nextNoGifts;
     };
 
     const addCustomNoGift = () => {

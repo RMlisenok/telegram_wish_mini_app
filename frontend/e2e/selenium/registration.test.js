@@ -1,0 +1,65 @@
+import { clickByAnyText, expectText, fillFirstMatchingInput, openApp } from './helpers.js';
+import { defineScenarioSuite } from './scenarioRunner.js';
+
+const start = ['Мой профиль', 'My Profile', 'Начать'];
+const main = ['Профиль', 'Главная'];
+const save = ['Сохранить', 'Сохранить изменения'];
+
+defineScenarioSuite('Registration E2E scenarios', [
+  {
+    number: 1,
+    title: 'Регистрация нового пользователя через Telegram',
+    requirements: ['FS-1.1', 'FS-1.2', 'FS-1.3', 'FS-1.4'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, start);
+      await expectText(driver, By, until, main);
+    },
+  },
+  {
+    number: 2,
+    title: 'Авторизация уже зарегистрированного пользователя',
+    requirements: ['FS-1.5'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, start);
+      await expectText(driver, By, until, main);
+    },
+  },
+  {
+    number: 3,
+    title: 'Регистрация пользователя без фамилии в Telegram',
+    requirements: ['FS-1.3'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl, env }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, start);
+      await expectText(driver, By, until, env.E2E_TELEGRAM_FIRST_NAME || 'Test');
+    },
+  },
+  {
+    number: 4,
+    title: 'Регистрация с некорректным именем из Telegram',
+    requirements: ['FS-1.3'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await expectText(driver, By, until, ['Подари мне']);
+    },
+  },
+  {
+    number: 5,
+    title: 'Запрос даты рождения при первом запуске',
+    requirements: ['FS-1.3', 'FS-1.4'],
+    requires: ['telegram'],
+    run: async ({ driver, By, until, baseUrl }) => {
+      await openApp(driver, baseUrl);
+      await clickByAnyText(driver, By, until, start);
+      await fillFirstMatchingInput(driver, By, '01.01.1990', ['input[placeholder="ДД.ММ.ГГГГ"]', 'input']);
+      await clickByAnyText(driver, By, until, save);
+      await expectText(driver, By, until, main);
+    },
+  },
+]);

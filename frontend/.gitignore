@@ -1,6 +1,8 @@
 node_modules
 .svelte-kit
 .vite
-.env
+playwright/.env.playwright
 .DS_Store
+.log
 dist
+coverage/
