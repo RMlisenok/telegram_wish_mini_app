@@ -41,15 +41,20 @@ class WishlistStressTest(HttpUser):
                 catch_response=True,
                 verify=False
         ) as response:
-            # Если получили 401 — помечаем как ОШИБКУ (для красоты отчета)
-            if response.status_code == 401:
-                response.failure(f"🔒 Auth required (401)")
-            # Если 404
-            elif response.status_code == 404:
-                response.failure("❗ Not Found (404)")
-            # Если 500 и выше
-            elif response.status_code >= 500:
-                response.failure(f"💥 Server Error ({response.status_code})")
-            # Все остальное (200, 201) — успех
-            else:
+            # Вместо длинного if/elif сделайте так:
+            if response.status_code in [200, 201]:
                 response.success()
+            else:
+                response.failure(f"Error: {response.status_code}")
+            # Если получили 401 — помечаем как ОШИБКУ (для красоты отчета)
+            # if response.status_code == 401:
+            #     response.failure(f"🔒 Auth required (401)")
+            # # Если 404
+            # elif response.status_code == 404:
+            #     response.failure("❗ Not Found (404)")
+            # # Если 500 и выше
+            # elif response.status_code >= 500:
+            #     response.failure(f"💥 Server Error ({response.status_code})")
+            # # Все остальное (200, 201) — успех
+            # else:
+            #     response.success()
